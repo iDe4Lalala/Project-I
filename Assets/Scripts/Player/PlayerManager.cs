@@ -55,7 +55,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
     {
         // ジャンプする
         if (_jumpCount >= _canJumpCount) return;
-        _rigidbody.velocity = new Vector3(0, HumanDataBase.JumpForce, 0);
+        _rigidbody.linearVelocity = new Vector3(0, HumanDataBase.JumpForce, 0);
         _jumpCount++;
     }
 
