@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6db990f19967549068669ad811188b29, type: 3}
+  m_Name: EnemyDataBase
+  m_EditorClassIdentifier: 
+  <HumanObject>k__BackingField: {fileID: 568107998299155171, guid: 499393a0c619e4be1a788c0bee6b440a, type: 3}
+  <HumanType>k__BackingField: 1
+  <HumanHP>k__BackingField: 100
+  <MovementSpeed>k__BackingField: 1
+  <RotateSpeed>k__BackingField: 0.2
+  <TurningMaxAngle>k__BackingField: 90
+  <TurningMinAngle>k__BackingField: -90
+  <JumpForce>k__BackingField: 5
