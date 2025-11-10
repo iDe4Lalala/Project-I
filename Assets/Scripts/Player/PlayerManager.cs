@@ -5,27 +5,32 @@ using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviour, IDamageable
 {
-    [SerializeField] private Camera _camera;
-    [field: SerializeField] public HumanDataBase HumanDataBase { get; private set; }
+    [SerializeField] private Camera _camera;    // プレイヤーカメラ
+    [field: SerializeField] public HumanDataBase HumanDataBase { get; private set; }    // プレイヤーのデータベース
     [SerializeField] private PlayerComponents _playerComponents;
-    [SerializeField] private int _canJumpCount;
-    [SerializeField] private string _groundTagName;
-    //[SerializeField] private AudioSource footstepAudio;
+    [SerializeField] private int _canJumpCount;     // ジャンプ可能回数
+    [SerializeField] private string _groundTagName;     // 地面のタグ名
+    //[SerializeField] private AudioSource footstepAudio;      // 足音用オーディオソース
 
-    public int PlayerHP { get; private set; }
-    private Quaternion _cameraRotation;
-    private Quaternion _characterRotation;
+    public int PlayerHP { get; private set; }       // プレイヤーの体力
+    private Quaternion _cameraRotation;     // カメラの回転保存用
+    private Quaternion _characterRotation;      // キャラクターの回転保存用
     private Rigidbody _rigidbody;
-    private float _footSoundTimer;
-    private int _jumpCount;
-    private Vector3 _joystickVector;
+    private float _footSoundTimer;   // 足音用タイマー
+    private int _jumpCount;   // 現在のジャンプ回数
+    private Vector3 _joystickVector;    // ジョイスティックの入力保存用
 
     public void SetCamera(Camera camera)
     {
+        /// <summary>
+        /// カメラ設定
+        /// </summary>
+        
         _camera = camera;
     }
 
     void Start(){
+        // ステータス・コンポーネントの取得
         _rigidbody = _playerComponents.Rigidbody;
         _cameraRotation = _camera.transform.localRotation;
         _characterRotation = this.gameObject.transform.localRotation;
@@ -34,8 +39,16 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void SetMovementInput(float x, float z)
     {
+        /// <summary>
+        /// 移動処理
+        /// </summary>
+
+        // ジョイスティック入力をベクトルに変換
         _joystickVector = Vector3.right * x + Vector3.up * z;
-        if(_joystickVector == Vector3.zero) return;
+
+        if (_joystickVector == Vector3.zero) return;
+        
+        // カメラの向きに合わせてプレイヤーを移動
         this.gameObject.transform.position += 
             _camera.transform.forward * z * HumanDataBase.MovementSpeed + 
             _camera.transform.right * x * HumanDataBase.MovementSpeed;
@@ -44,35 +57,54 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void SetRotationInput(float x, float y)
     {
+        /// <summary>
+        /// 回転処理
+        /// </summary>
+
+        // カメラとプレイヤーの回転を検出
         _cameraRotation *= Quaternion.Euler(-y * HumanDataBase.RotationSpeed, 0, 0);
         _characterRotation *= Quaternion.Euler(0, x * HumanDataBase.RotationSpeed, 0);
-        _cameraRotation = ClampRotation(_cameraRotation);     //角度制限をつける
+
+        // 角度制限をつけて回転を適用
+        _cameraRotation = ClampRotation(_cameraRotation);
         _camera.transform.localRotation = _cameraRotation;
         this.gameObject.transform.localRotation = _characterRotation;
     }
 
     public void OnJumpButtonDown()
     {
-        // ジャンプする
+        /// <summary>
+        /// ジャンプ処理
+        /// </summary>
+
         if (_jumpCount >= _canJumpCount) return;
         _rigidbody.linearVelocity = new Vector3(0, HumanDataBase.JumpForce, 0);
         _jumpCount++;
     }
 
     private void OnCollisionEnter(Collision col){
-        // 地面についたら再度ジャンプ可能に
-        if(col == null) return;
+        /// <summary>
+        /// 地面についたら再度ジャンプ可能に
+        /// </summary>
+
+        if (col == null) return;
+
+        // プレイヤーが接地しているオブジェクトの親の親まで確認
         if (col.gameObject.transform.parent.tag != _groundTagName
             && col.gameObject.transform.parent.parent.tag != _groundTagName) return;
         _jumpCount = 0;
     }
 
     private Quaternion ClampRotation(Quaternion q){
-        // 角度制限をつける
+        /// <summary>
+        /// 回転の角度制限
+        /// </summary>
+        
         q.x /= q.w;
         q.y /= q.w;
         q.z /= q.w;
         q.w = 1f;
+        
         float angleX = Mathf.Atan(q.x) * Mathf.Rad2Deg * 2f;
         angleX = Mathf.Clamp(angleX, HumanDataBase.TurningMinAngle, HumanDataBase.TurningMaxAngle);
         q.x = Mathf.Tan(angleX * Mathf.Deg2Rad * 0.5f);
@@ -81,16 +113,27 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void TakeDamage(int damage)
     {
+        /// <summary>
+        /// 被ダメージ処理
+        /// </summary>
+        
         PlayerHP -= damage;
         Debug.Log($"Player HP: {PlayerHP}");
-        if (PlayerHP <= 0){
-            // 死亡時処理
+        
+        if (PlayerHP <= 0){    // 死亡時処理
         }
     }
 
-    void respawnPointSetting(){
+    private void respawnPointSetting()
+    {
+        /// <summary>
+        /// リスポーンポイント設定
+        /// </summary>
+
         int rnd = Random.Range(1, 5);
-        switch (rnd){
+
+        switch (rnd)
+        {
             case 1:
                 transform.position = new Vector3(9.8f, 2.0f, 23.1f);
                 break;
