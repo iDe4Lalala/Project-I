@@ -5,23 +5,30 @@ using TMPro;
 
 public class BattleUIManager : MonoBehaviour
 {
-    [SerializeField] private TMP_Text _battleTimerText;
-    [SerializeField] private float _battleTimer;
-    [SerializeField] private TMP_Text _killText;
-    [SerializeField] private float _killTextDisplayTime;
-    [SerializeField] private string _playerKillSentence;
-    [SerializeField] private string _enemyKillSentence;
+    /// <summary>
+    /// 戦闘に関するUIを管理する
+    /// </summary>
+    
+    [SerializeField] private TMP_Text _battleTimerText;     // 残り戦闘時間のテキスト
+    [SerializeField] private float _battleTimer;   // 戦闘時間
+    [SerializeField] private TMP_Text _killText;    // kill時テキスト
+    [SerializeField] private float _killTextDisplayTime;   // killテキスト表示時間
+    [SerializeField] private string _playerKillSentence;   // プレイヤーがキルした時の文章
+    [SerializeField] private string _enemyKillSentence;    // 敵がキルした時の文章
     [SerializeField] private BattleSceneManager _battleSceneManager;
 
     private void OnEnable()
     {
+        // killテキストを非表示
         _killText.gameObject.SetActive(false);
     }
 
     private void Update()
     {
+        // バトル中の時
         if(!_battleSceneManager.IsBeforeBattle)
         {
+            // タイマーを更新
             if (_battleTimer >= 0)
             {
                 _battleTimer -= Time.deltaTime;
@@ -29,6 +36,7 @@ public class BattleUIManager : MonoBehaviour
             }
             else
             {
+                // シーン遷移
                 _battleSceneManager.LoadOtherScene();
             }
         }
@@ -36,6 +44,11 @@ public class BattleUIManager : MonoBehaviour
 
     public void OnKill(bool isPlayerKill)
     {
+        /// <summary>
+        /// kill時のUIを表示する
+        /// </summary>
+        
+        // killテキストを更新
         if (isPlayerKill)
         {
             _killText.text = _playerKillSentence;
@@ -49,6 +62,10 @@ public class BattleUIManager : MonoBehaviour
 
     private IEnumerator ShowKillText()
     {
+        /// <summary>
+        /// killテキストのアニメーション
+        /// </summary>
+        
         _killText.gameObject.SetActive(true);
         yield return new WaitForSeconds(_killTextDisplayTime);
         _killText.gameObject.SetActive(false);

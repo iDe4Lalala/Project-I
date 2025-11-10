@@ -6,63 +6,88 @@ using UnityEngine.Events;
 
 public class OperationUIManager : MonoBehaviour
 {
-    [SerializeField] private FixedJoystick _fixedJoystick;
-    [SerializeField] private FloatingJoystick _floatingJoystick;
-    [SerializeField] private Button _jumpButton;
-    [SerializeField] private Button _shootingButton;
-    [SerializeField] private bool _isUseJoystick;
+    /// <summary>
+    /// 操作に関するUIを管理する
+    /// </summary>
+    
+    [SerializeField] private FixedJoystick _fixedJoystick;      // ジョイスティック(プレイヤー移動用)
+    [SerializeField] private FloatingJoystick _floatingJoystick;    // ジョイスティック(プレイヤー視点操作用)
+    [SerializeField] private Button _jumpButton;    // ジャンプボタン
+    [SerializeField] private Button _shootingButton;    // 射撃ボタン
+    [SerializeField] private bool _isUseJoystick;   // 入力方式がジョイスティックか
     [SerializeField] private PlayerUIManager _playerUIManager;
 
-    private GameObject _player;
+    private GameObject _player; // プレイヤー
     private PlayerComponents _playerComponents;
-    private float _xMovement;
-    private float _zMovement;
-    private float _xRotation;
-    private float _yRotation;
+    private float _xMovement;   // 水平方向の移動入力
+    private float _zMovement;   // 垂直方向の移動入力
+    private float _xRotation;   // 水平方向の視点入力
+    private float _yRotation;   // 垂直方向の視点入力
 
-    private void Start()
+    private void FixCursorAndHide()
     {
-        Cursor.lockState = CursorLockMode.Locked; // カーソルを画面中央に固定
-        Cursor.visible = false;                   // カーソルを非表示
+        // カーソルを画面中央に固定して非表示(キーマウ操作時)
+        Cursor.lockState = CursorLockMode.Locked; 
+        Cursor.visible = false;
     }
 
     private void SetMethods()
     {
+        /// <summary>
+        /// ボタンのメソッドを設定する
+        /// </summary>
+        
         _jumpButton.onClick.AddListener(() => _playerComponents.PlayerManager.OnJumpButtonDown());
         _shootingButton.onClick.AddListener(() => _playerComponents.RifleManager.ShootByRifle());
     }
 
     public void SetPlayer(GameObject player)
     {
+        /// <summary>
+        /// プレイヤーを設定する
+        /// </summary>
+        
         if(player == null) return;
+
         _player = player;
         _playerComponents = player.GetComponent<PlayerComponents>();
         _playerComponents.PlayerManager.SetCamera(Camera.main);
-        if(!_isUseJoystick) return;
-        SetMethods();
         _playerUIManager.SetPlayerHP(_playerComponents.PlayerManager.PlayerHP);
+
+        // 入力方式に応じた初期設定
+        if(_isUseJoystick)
+        {
+            SetMethods();
+        }
+        else
+        {
+            FixCursorAndHide();
+        }
     }
 
     private void Update()
     {
         if (_player == null) return;
-        if(_isUseJoystick)
+        if(_isUseJoystick)      // ジョイスティックによる入力
         {
             _xMovement = _fixedJoystick.Horizontal;
             _zMovement = _fixedJoystick.Vertical;
             _xRotation = _floatingJoystick.Horizontal;
             _yRotation = _floatingJoystick.Vertical;
         }
-        else
+        else    // キーマウによる入力
         {
             _xMovement = Input.GetAxis("Horizontal");
             _zMovement = Input.GetAxis("Vertical");
             _xRotation = Input.GetAxis("Mouse X");
             _yRotation = Input.GetAxis("Mouse Y");
         }
+
+        // プレイヤーの移動と視点操作の入力を反映
         _playerComponents.PlayerManager.SetMovementInput(_xMovement, _zMovement);
         _playerComponents.PlayerManager.SetRotationInput(_xRotation, _yRotation);
 
+        // ジャンプと射撃の入力(キーマウ操作時のみ)
         if(_isUseJoystick) return;
         if (Input.GetKeyDown(KeyCode.Space))
         {

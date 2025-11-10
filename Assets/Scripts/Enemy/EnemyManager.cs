@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class EnemyManager : MonoBehaviour, IDamageable
 {
     /// <summary>
-    ///  敵の管理
+    ///  敵を管理する
     /// </summary>
 
     [SerializeField] private int _enemyHP;      // 敵のHP

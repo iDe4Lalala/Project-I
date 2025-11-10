@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviour, IDamageable
 {
+    /// <summary>
+    /// プレイヤーを管理する
+    /// </summary>
+    
     [SerializeField] private Camera _camera;    // プレイヤーカメラ
     [field: SerializeField] public HumanDataBase HumanDataBase { get; private set; }    // プレイヤーのデータベース
     [SerializeField] private PlayerComponents _playerComponents;

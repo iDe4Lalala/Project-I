@@ -5,10 +5,18 @@ using UnityEngine.SceneManagement;
 
 public class StartSceneManager : MonoBehaviour
 {
-    [SerializeField] private string _nextSceneName;
+    /// <summary>
+    /// スタートシーンを管理する
+    /// </summary>
+    
+    [SerializeField] private string _nextSceneName;     // 次のシーンの名前
 
-    public void moveMapSerect()
+    public void LoadOtherScene()
     {
+        /// <summary>
+        /// マップ選択シーンへ移動する
+        /// </summary>
+        
         SceneManager.LoadScene(_nextSceneName);
     }
 }
