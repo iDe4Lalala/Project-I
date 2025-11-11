@@ -9,8 +9,8 @@ public class BattleSceneManager : MonoBehaviour
     /// <summary>
     /// 戦闘シーンを管理する
     /// </summary>
-    
-    [SerializeField] public List<HumanDataBase> HumanDataBasesList { get; private set; }    // 人のデータベースリスト
+
+    [field: SerializeField] public List<HumanDataBase> HumanDataBasesList { get; private set; }   // 人のデータベースリスト
     [SerializeField] private TMP_Text _beforeBattleTimerText;   // 戦闘前のタイマーのテキスト
     [SerializeField] private TMP_Text _battleStartedText;   // 戦闘開始のテキスト
     [SerializeField] private float _beforeBattleTimer;   // 戦闘前のタイマーの時間

@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviour, IDamageable
 {
@@ -14,7 +11,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
     [SerializeField] private PlayerComponents _playerComponents;
     [SerializeField] private int _canJumpCount;     // ジャンプ可能回数
     [SerializeField] private string _groundTagName;     // 地面のタグ名
-    //[SerializeField] private AudioSource footstepAudio;      // 足音用オーディオソース
 
     public int PlayerHP { get; private set; }       // プレイヤーの体力
     private Quaternion _cameraRotation;     // カメラの回転保存用

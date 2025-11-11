@@ -1,21 +1,21 @@
 using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
-public class AspectRatioManager : MonoBehaviour {
-
+public class AspectRatioManager : MonoBehaviour 
+{
 	/// <summary>
 	/// アスペクト比を管理する
 	/// </summary>
-	
-	private float _xAspect = 1242f;
-	private float _yAspect = 2208f;
+
+	[SerializeField] private float _xAspect = 1242f;
+	[SerializeField] private float _yAspect = 2208f;
+
 	private CanvasScaler[] _canvasScaler = new CanvasScaler[1];
 
-	void Awake()
+	private void Awake()
 	{
 		//Cameraのアスペクト比を設定する
-		var camera = GetComponent<Camera>();
+		var camera = gameObject.GetComponent<Camera>();
 		Rect rect = calcAspect(_xAspect, _yAspect);
 		camera.rect = rect;
 

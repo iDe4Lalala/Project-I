@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum HumanType
@@ -8,6 +6,7 @@ public enum HumanType
     Enemy
 }
 
+[System.Serializable]
 [CreateAssetMenu(fileName = "HumanDataBase", menuName = "ScriptableObjects/HumanDataBase")]
 public class HumanDataBase : ScriptableObject
 {

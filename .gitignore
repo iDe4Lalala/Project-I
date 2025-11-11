@@ -103,3 +103,4 @@ InitTestScene*.unity*
 .DS_Store
 /[Aa]ndoroid[Bb]uild_[Bb]ack[Uu]p[Tt]his[Ff]older_[Bb]ut[Dd]ont[Ss]hip[Ii]t[Ww]ith[Yy]our[Gg]ame/
 /[Aa]ndoroid[Bb]uild_[Bb]urst[Dd]ebug[Ii]nformation_[Dd]o[Nn]ot[Ss]hip/
+.fake

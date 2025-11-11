@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -10,6 +8,7 @@ public class ResultSceneManager : MonoBehaviour
     public GameObject enemy;
     PlayerScript playerscript;
     EnemyScript enemyscript;*/
+    [SerializeField] private string _nextSceneName;     // 次のシーンの名前
     public Text playerKillCountText;
     public Text enemyKillCountText;
     public GameObject WinUI;
@@ -55,7 +54,12 @@ public class ResultSceneManager : MonoBehaviour
     //     DrawUI.SetActive(true);
     // }
 
-    public void moveStartScene(){
-        SceneManager.LoadScene("StartScene");
+    public void LoadOtherScene()
+    {
+        /// <summary>
+        /// スタートシーンへ移動する
+        /// </summary>
+        
+        SceneManager.LoadScene(_nextSceneName);
     }
 }
