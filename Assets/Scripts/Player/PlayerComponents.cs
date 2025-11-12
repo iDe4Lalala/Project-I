@@ -10,4 +10,5 @@ public class PlayerComponents : MonoBehaviour
     [field: SerializeField] public RifleManager RifleManager { get; private set; }
     [field: SerializeField] public CapsuleCollider CapsuleCollider { get; private set; }
     [field: SerializeField] public Rigidbody Rigidbody { get; private set; }
+    [field: SerializeField] public AspectRatioManager AspectRatioManager { get; private set; }
 }

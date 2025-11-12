@@ -7,10 +7,9 @@ public class AspectRatioManager : MonoBehaviour
 	/// アスペクト比を管理する
 	/// </summary>
 
-	[SerializeField] private float _xAspect = 1242f;
-	[SerializeField] private float _yAspect = 2208f;
-
-	private CanvasScaler[] _canvasScaler = new CanvasScaler[1];
+	[SerializeField] private float _xAspect;
+	[SerializeField] private float _yAspect;
+	[SerializeField] private CanvasScaler[] _canvasScaler;
 
 	private void Awake()
 	{
@@ -18,9 +17,18 @@ public class AspectRatioManager : MonoBehaviour
 		var camera = gameObject.GetComponent<Camera>();
 		Rect rect = calcAspect(_xAspect, _yAspect);
 		camera.rect = rect;
+	}
+	
+	public void SetCanvas(Canvas canvas)
+	{
+		/// <summary>
+		/// Canvasを設定する
+		/// </summary>
 
+		_canvasScaler = canvas.GetComponents<CanvasScaler>();
+		
 		//Canvasのアスペクト比を設定する
-		for (int i = 0; i<_canvasScaler.Length; i++)
+		for (int i = 0; i < _canvasScaler.Length; i++)
 		{
 			_canvasScaler[i].matchWidthOrHeight = CheckScreenRatio(i);
 		}

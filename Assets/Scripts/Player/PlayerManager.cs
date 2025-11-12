@@ -33,7 +33,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         // ステータス・コンポーネントの取得
         _rigidbody = _playerComponents.Rigidbody;
         _cameraRotation = _camera.transform.localRotation;
-        _characterRotation = this.gameObject.transform.localRotation;
+        _characterRotation = gameObject.transform.localRotation;
         PlayerHP = HumanDataBase.HumanHP;
     }
 

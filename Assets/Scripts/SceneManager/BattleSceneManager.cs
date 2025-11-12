@@ -17,6 +17,7 @@ public class BattleSceneManager : MonoBehaviour
     [SerializeField] private float _startedTextDisplayTime;   // 戦闘開始テキストの表示時間
     [SerializeField] private string _resultSceneName;   // 結果シーンの名前
     [SerializeField] private OperationUIManager _operationUIManager;
+    [SerializeField] private Canvas _battleCanvas;
     
     public bool IsBeforeBattle { get; private set; }    // 戦闘前かどうか
     private GameObject _player;     // プレイヤー
@@ -41,6 +42,7 @@ public class BattleSceneManager : MonoBehaviour
             if (humanDataBase.HumanType == HumanType.Player)    // プレイヤーを生成
             {
                 _player = Instantiate(humanDataBase.HumanObject, Vector3.zero, Quaternion.identity);
+                _player.GetComponent<PlayerComponents>().AspectRatioManager.SetCanvas(_battleCanvas);
                 _operationUIManager.SetPlayer(_player);
             }
             else if (humanDataBase.HumanType == HumanType.Enemy)    // 敵を生成
