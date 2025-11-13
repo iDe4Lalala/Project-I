@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.Events;
 
 public class BattleSceneManager : MonoBehaviour
 {
@@ -18,9 +19,12 @@ public class BattleSceneManager : MonoBehaviour
     [SerializeField] private string _resultSceneName;   // 結果シーンの名前
     [SerializeField] private OperationUIManager _operationUIManager;
     [SerializeField] private Canvas _battleCanvas;
+    [SerializeField] private UnityEvent<bool> OnKilledEnemy;   // 敵をキルした時のイベント
     
     public bool IsBeforeBattle { get; private set; }    // 戦闘前かどうか
     private GameObject _player;     // プレイヤー
+    private List<GameObject> _enemyList = new();   // 敵のリスト
+    private Dictionary<HumanType, GameObject> _humanDict;  // 人の辞書
 
     private void OnEnable()
     {
@@ -28,29 +32,75 @@ public class BattleSceneManager : MonoBehaviour
         IsBeforeBattle = true;
         _battleStartedText.gameObject.SetActive(false);
         _beforeBattleTimerText.gameObject.SetActive(true);
-        GenerateHumans();
+        SetHumanDictionary();
+        GeneratePlayer();
+        GenerateEnemies();
     }
 
-    private void GenerateHumans()
+    private void SetHumanDictionary()
     {
         /// <summary>
-        /// 人を生成する
+        /// 人を辞書に設定する
         /// </summary>
-        
+
+        _humanDict = new Dictionary<HumanType, GameObject>();
+
         foreach (var humanDataBase in HumanDataBasesList)
         {
-            if (humanDataBase.HumanType == HumanType.Player)    // プレイヤーを生成
-            {
-                _player = Instantiate(humanDataBase.HumanObject, Vector3.zero, Quaternion.identity);
-                _player.GetComponent<PlayerComponents>().AspectRatioManager.SetCanvas(_battleCanvas);
-                _operationUIManager.SetPlayer(_player);
-            }
-            else if (humanDataBase.HumanType == HumanType.Enemy)    // 敵を生成
-            {
-                Instantiate(humanDataBase.HumanObject, 
-                    new Vector3(Random.Range(-10f, 10f), 0, Random.Range(-10f, 10f)), Quaternion.identity);
-            }
+            _humanDict[humanDataBase.HumanType] = humanDataBase.HumanObject;
         }
+    }
+
+    private void GeneratePlayer()
+    {
+        /// <summary>
+        /// プレイヤーを生成する
+        /// </summary>
+        
+        if (_humanDict.TryGetValue(HumanType.Player, out GameObject playerObject))
+        {
+            _player = Instantiate(playerObject, Vector3.zero, Quaternion.identity);
+            _player.GetComponent<PlayerComponents>().AspectRatioManager.SetCanvas(_battleCanvas);
+            _operationUIManager.SetPlayer(_player);
+        }
+    }
+
+    private void GenerateEnemies()
+    {
+        /// <summary>
+        /// 敵を生成する
+        /// </summary>
+        
+        if (_humanDict.TryGetValue(HumanType.Enemy, out GameObject enemyObject))    // 敵を生成
+        {
+            GameObject enemy = Instantiate(enemyObject,
+                new Vector3(Random.Range(-10f, 10f), 0, Random.Range(-10f, 10f)), Quaternion.identity);
+            enemy.GetComponent<EnemyManager>().OnDeath += OnEnemyDied;
+            _enemyList.Add(enemy);
+        }   
+    }
+
+    private void OnEnemyDied(GameObject enemy)
+    {
+        /// <summary>
+        /// 敵が死亡した時の処理
+        /// </summary>
+
+        _enemyList.Remove(enemy);
+        Destroy(enemy);
+        OnKilledEnemy?.Invoke(true);
+
+        CountNumberOfEnemies();
+    }
+    
+    private void CountNumberOfEnemies()
+    {
+        /// <summary>
+        /// 敵の数を数える
+        /// </summary>
+
+        if (_enemyList.Count > 0) return;
+        GenerateEnemies();
     }
 
     private void Update()

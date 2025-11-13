@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyManager : MonoBehaviour, IDamageable
@@ -15,6 +17,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
     [SerializeField] private string _playerCompareTag;    // プレイヤーのタグ名
     [SerializeField] private float _searchInterval;     // 索敵間隔
 
+    public event Action<GameObject> OnDeath;  // 死亡時イベント
     private float _timeCount;   // 索敵用タイマー
     private float _deltaTime;   // deltaTime保存用
 
@@ -82,6 +85,6 @@ public class EnemyManager : MonoBehaviour, IDamageable
         Debug.Log($"Enemy HP: {_enemyHP}");
         if (_enemyHP > 0) return;
             // 死亡時処理
-            // Destroy(gameObject);
+            OnDeath?.Invoke(gameObject);
     }
 }

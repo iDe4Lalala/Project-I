@@ -49,7 +49,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         if (_joystickVector == Vector3.zero) return;
         
         // カメラの向きに合わせてプレイヤーを移動
-        this.gameObject.transform.position += 
+        gameObject.transform.position += 
             _camera.transform.forward * z * HumanDataBase.MovementSpeed + 
             _camera.transform.right * x * HumanDataBase.MovementSpeed;
         // 前はこの後に音を鳴らしていた。
@@ -68,7 +68,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         // 角度制限をつけて回転を適用
         _cameraRotation = ClampRotation(_cameraRotation);
         _camera.transform.localRotation = _cameraRotation;
-        this.gameObject.transform.localRotation = _characterRotation;
+        gameObject.transform.localRotation = _characterRotation;
     }
 
     public void OnJumpButtonDown()

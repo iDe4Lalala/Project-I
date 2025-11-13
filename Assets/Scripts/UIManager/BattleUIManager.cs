@@ -64,7 +64,7 @@ public class BattleUIManager : MonoBehaviour
         /// <summary>
         /// killテキストのアニメーション
         /// </summary>
-        
+
         _killText.gameObject.SetActive(true);
         yield return new WaitForSeconds(_killTextDisplayTime);
         _killText.gameObject.SetActive(false);

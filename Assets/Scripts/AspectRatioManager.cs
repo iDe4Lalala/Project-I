@@ -7,9 +7,10 @@ public class AspectRatioManager : MonoBehaviour
 	/// アスペクト比を管理する
 	/// </summary>
 
-	[SerializeField] private float _xAspect;
-	[SerializeField] private float _yAspect;
-	[SerializeField] private CanvasScaler[] _canvasScaler;
+	[SerializeField] private float _xAspect;	  // アスペクト比のX値
+	[SerializeField] private float _yAspect;	  // アスペクト比のY値
+
+	private CanvasScaler[] _canvasScaler;
 
 	private void Awake()
 	{

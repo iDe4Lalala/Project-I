@@ -2986,6 +2986,21 @@ MonoBehaviour:
   _resultSceneName: ResultScene
   _operationUIManager: {fileID: 2098377694}
   _battleCanvas: {fileID: 1892001366}
+  OnKilledEnemy:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 109883507}
+        m_TargetAssemblyTypeName: BattleUIManager, Assembly-CSharp
+        m_MethodName: OnKill
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1001 &213985176
 PrefabInstance:
   m_ObjectHideFlags: 0
