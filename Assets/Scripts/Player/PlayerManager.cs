@@ -7,7 +7,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
     /// </summary>
     
     [SerializeField] private Camera _camera;    // プレイヤーカメラ
-    [field: SerializeField] public HumanDataBase HumanDataBase { get; private set; }    // プレイヤーのデータベース
     [SerializeField] private PlayerComponents _playerComponents;
     [SerializeField] private int _canJumpCount;     // ジャンプ可能回数
     [SerializeField] private string _groundTagName;     // 地面のタグ名
@@ -16,7 +15,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private Quaternion _cameraRotation;     // カメラの回転保存用
     private Quaternion _characterRotation;      // キャラクターの回転保存用
     private Rigidbody _rigidbody;
-    private float _footSoundTimer;   // 足音用タイマー
     private int _jumpCount;   // 現在のジャンプ回数
     private Vector3 _joystickVector;    // ジョイスティックの入力保存用
 
@@ -34,7 +32,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _rigidbody = _playerComponents.Rigidbody;
         _cameraRotation = _camera.transform.localRotation;
         _characterRotation = gameObject.transform.localRotation;
-        PlayerHP = HumanDataBase.HumanHP;
+        PlayerHP = _playerComponents.HumanDataBase.HumanHP;
     }
 
     public void SetMovementInput(float x, float z)
@@ -46,12 +44,14 @@ public class PlayerManager : MonoBehaviour, IDamageable
         // ジョイスティック入力をベクトルに変換
         _joystickVector = Vector3.right * x + Vector3.up * z;
 
+        // アニメーションの速度パラメーターを更新
+        _playerComponents.Animator.SetFloat("speed", _joystickVector.magnitude);
+
         if (_joystickVector == Vector3.zero) return;
-        
         // カメラの向きに合わせてプレイヤーを移動
         gameObject.transform.position += 
-            _camera.transform.forward * z * HumanDataBase.MovementSpeed + 
-            _camera.transform.right * x * HumanDataBase.MovementSpeed;
+            _playerComponents.HumanDataBase.MovementSpeed * z * _camera.transform.forward + 
+            _playerComponents.HumanDataBase.MovementSpeed * x * _camera.transform.right;
         // 前はこの後に音を鳴らしていた。
     }
 
@@ -62,8 +62,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
         /// </summary>
 
         // カメラとプレイヤーの回転を検出
-        _cameraRotation *= Quaternion.Euler(-y * HumanDataBase.RotationSpeed, 0, 0);
-        _characterRotation *= Quaternion.Euler(0, x * HumanDataBase.RotationSpeed, 0);
+        _cameraRotation *= Quaternion.Euler(-y * _playerComponents.HumanDataBase.RotationSpeed, 0, 0);
+        _characterRotation *= Quaternion.Euler(0, x * _playerComponents.HumanDataBase.RotationSpeed, 0);
 
         // 角度制限をつけて回転を適用
         _cameraRotation = ClampRotation(_cameraRotation);
@@ -78,7 +78,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         /// </summary>
 
         if (_jumpCount >= _canJumpCount) return;
-        _rigidbody.linearVelocity = new Vector3(0, HumanDataBase.JumpForce, 0);
+        _rigidbody.linearVelocity = new Vector3(0, _playerComponents.HumanDataBase.JumpForce, 0);
         _jumpCount++;
     }
 
@@ -106,7 +106,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         q.w = 1f;
         
         float angleX = Mathf.Atan(q.x) * Mathf.Rad2Deg * 2f;
-        angleX = Mathf.Clamp(angleX, HumanDataBase.TurningMinAngle, HumanDataBase.TurningMaxAngle);
+        angleX = Mathf.Clamp(angleX, _playerComponents.HumanDataBase.TurningMinAngle, _playerComponents.HumanDataBase.TurningMaxAngle);
         q.x = Mathf.Tan(angleX * Mathf.Deg2Rad * 0.5f);
         return q;
     }

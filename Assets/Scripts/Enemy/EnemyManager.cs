@@ -5,31 +5,36 @@ using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyManager : MonoBehaviour, IDamageable
-{
+{    
     /// <summary>
-    ///  敵を管理する
+    /// 敵を管理する
     /// </summary>
 
+    [SerializeField] private EnemyComponents _enemyComponents;
     [SerializeField] private int _enemyHP;      // 敵のHP
-    [SerializeField] private NavMeshAgent _agent;
     [SerializeField] private float _wanderRange;    // 索敵範囲
-    [SerializeField] private RifleManager _rifleManager;
     [SerializeField] private string _playerCompareTag;    // プレイヤーのタグ名
     [SerializeField] private float _searchInterval;     // 索敵間隔
 
     public event Action<GameObject> OnDeath;  // 死亡時イベント
     private float _timeCount;   // 索敵用タイマー
     private float _deltaTime;   // deltaTime保存用
+    private Vector3 _speed;
 
-    void Start(){
-        _agent.avoidancePriority = Random.Range(0, 100);
+    void Start()
+    {
+        _enemyComponents.NavMeshAgent.avoidancePriority = Random.Range(0, 100);
     }
 
-    void Update(){
+    void Update()
+    {
         // 索敵の経過時間と移動処理
         _deltaTime = Time.deltaTime;
         _timeCount += _deltaTime;
-        transform.position += transform.forward * _deltaTime;
+        _speed = transform.forward * _deltaTime;
+        transform.position += _speed;
+        
+        _enemyComponents.Animator.SetFloat("speed", _speed.magnitude);
 
         // 一定時間ごとに索敵
         if (_timeCount <= _searchInterval) return;
@@ -67,13 +72,13 @@ public class EnemyManager : MonoBehaviour, IDamageable
 
             // プレイヤーの方向を向き、移動し、射撃する
             transform.rotation = Quaternion.LookRotation(directionToPlayer);
-            _agent.SetDestination(player.transform.position);
-            _rifleManager.ShootByRifle();
+            _enemyComponents.NavMeshAgent.SetDestination(player.transform.position);
+            _enemyComponents.RifleManager.ShootByRifle();
         }
         else    // プレイヤーが索敵範囲内にいなければ
         {
             // 移動をやめて、ランダムな方向を向く
-            _agent.ResetPath();
+            _enemyComponents.NavMeshAgent.ResetPath();
             var course = new Vector3(0, Random.Range(0, 180), 0);
             transform.localRotation = Quaternion.Euler(course);
         }

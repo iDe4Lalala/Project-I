@@ -12,6 +12,7 @@ public class BattleSceneManager : MonoBehaviour
     /// </summary>
 
     [field: SerializeField] public List<HumanDataBase> HumanDataBasesList { get; private set; }   // 人のデータベースリスト
+    [SerializeField] private GameObject _riflePrefab;  // ライフル
     [SerializeField] private TMP_Text _beforeBattleTimerText;   // 戦闘前のタイマーのテキスト
     [SerializeField] private TMP_Text _battleStartedText;   // 戦闘開始のテキスト
     [SerializeField] private float _beforeBattleTimer;   // 戦闘前のタイマーの時間
@@ -75,9 +76,13 @@ public class BattleSceneManager : MonoBehaviour
         {
             GameObject enemy = Instantiate(enemyObject,
                 new Vector3(Random.Range(-10f, 10f), 0, Random.Range(-10f, 10f)), Quaternion.identity);
-            enemy.GetComponent<EnemyManager>().OnDeath += OnEnemyDied;
+            EnemyComponents enemyComponents = enemy.GetComponent<EnemyComponents>();
+            GameObject rifle = Instantiate(_riflePrefab, enemyComponents.EnemyHand.transform);
+            rifle.transform.localPosition = Vector3.zero;
+            rifle.transform.localRotation = Quaternion.LookRotation(enemyComponents.EnemyHand.transform.forward);
+            enemyComponents.EnemyManager.OnDeath += OnEnemyDied;
             _enemyList.Add(enemy);
-        }   
+        }
     }
 
     private void OnEnemyDied(GameObject enemy)

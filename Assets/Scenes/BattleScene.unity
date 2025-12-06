@@ -2979,6 +2979,7 @@ MonoBehaviour:
   <HumanDataBasesList>k__BackingField:
   - {fileID: 11400000, guid: 104521dfa131f472d968cee9d77cbb86, type: 2}
   - {fileID: 11400000, guid: 9b17392f54fbb43bcace34bc53fd7ca6, type: 2}
+  _riflePrefab: {fileID: 1791490474942619446, guid: a9655ae40638940eaa7d34fa6596f947, type: 3}
   _beforeBattleTimerText: {fileID: 1622929871}
   _battleStartedText: {fileID: 1076278740}
   _beforeBattleTimer: 3
