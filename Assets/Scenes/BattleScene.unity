@@ -3002,6 +3002,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _rifleOffset: {x: 0.06, y: 0.1, z: -0.2}
+  _playerRifleOffset: {x: 0.22, y: -0.13, z: 0.4}
+  _enemyRifleOffset: {x: 0.06, y: 0.1, z: -0.2}
 --- !u!1001 &213985176
 PrefabInstance:
   m_ObjectHideFlags: 0

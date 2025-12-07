@@ -5,8 +5,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
     /// <summary>
     /// プレイヤーを管理する
     /// </summary>
-    
-    [SerializeField] private Camera _camera;    // プレイヤーカメラ
     [SerializeField] private PlayerComponents _playerComponents;
     [SerializeField] private int _canJumpCount;     // ジャンプ可能回数
     [SerializeField] private string _groundTagName;     // 地面のタグ名
@@ -18,19 +16,12 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private int _jumpCount;   // 現在のジャンプ回数
     private Vector3 _joystickVector;    // ジョイスティックの入力保存用
 
-    public void SetCamera(Camera camera)
-    {
-        /// <summary>
-        /// カメラ設定
-        /// </summary>
-        
-        _camera = camera;
-    }
 
-    void Start(){
+    void Start()
+    {
         // ステータス・コンポーネントの取得
         _rigidbody = _playerComponents.Rigidbody;
-        _cameraRotation = _camera.transform.localRotation;
+        _cameraRotation = _playerComponents.Camera.transform.localRotation;
         _characterRotation = gameObject.transform.localRotation;
         PlayerHP = _playerComponents.HumanDataBase.HumanHP;
     }
@@ -50,8 +41,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
         if (_joystickVector == Vector3.zero) return;
         // カメラの向きに合わせてプレイヤーを移動
         gameObject.transform.position += 
-            _playerComponents.HumanDataBase.MovementSpeed * z * _camera.transform.forward + 
-            _playerComponents.HumanDataBase.MovementSpeed * x * _camera.transform.right;
+            _playerComponents.HumanDataBase.MovementSpeed * z * _playerComponents.Camera.transform.forward + 
+            _playerComponents.HumanDataBase.MovementSpeed * x * _playerComponents.Camera.transform.right;
         // 前はこの後に音を鳴らしていた。
     }
 
@@ -67,7 +58,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
         // 角度制限をつけて回転を適用
         _cameraRotation = ClampRotation(_cameraRotation);
-        _camera.transform.localRotation = _cameraRotation;
+        _playerComponents.Camera.transform.localRotation = _cameraRotation;
         gameObject.transform.localRotation = _characterRotation;
     }
 
@@ -79,6 +70,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
         if (_jumpCount >= _canJumpCount) return;
         _rigidbody.linearVelocity = new Vector3(0, _playerComponents.HumanDataBase.JumpForce, 0);
+
+        _playerComponents.Animator.SetBool("isJumping", true);
+
         _jumpCount++;
     }
 
@@ -93,6 +87,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
         if (col.gameObject.transform.parent.tag != _groundTagName
             && col.gameObject.transform.parent.parent.tag != _groundTagName) return;
         _jumpCount = 0;
+
+        _playerComponents.Animator.SetBool("isJumping", false);
     }
 
     private Quaternion ClampRotation(Quaternion q){

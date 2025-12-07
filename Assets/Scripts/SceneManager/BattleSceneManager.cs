@@ -21,6 +21,8 @@ public class BattleSceneManager : MonoBehaviour
     [SerializeField] private OperationUIManager _operationUIManager;
     [SerializeField] private Canvas _battleCanvas;
     [SerializeField] private UnityEvent<bool> OnKilledEnemy;   // 敵をキルした時のイベント
+    [SerializeField] private Vector3 _playerRifleOffset;   // プレイヤーのライフルオフセット
+    [SerializeField] private Vector3 _enemyRifleOffset;    // 敵のライフルオフセット
     
     public bool IsBeforeBattle { get; private set; }    // 戦闘前かどうか
     private GameObject _player;     // プレイヤー
@@ -61,7 +63,11 @@ public class BattleSceneManager : MonoBehaviour
         if (_humanDict.TryGetValue(HumanType.Player, out GameObject playerObject))
         {
             _player = Instantiate(playerObject, Vector3.zero, Quaternion.identity);
-            _player.GetComponent<PlayerComponents>().AspectRatioManager.SetCanvas(_battleCanvas);
+            PlayerComponents playerComponents = _player.GetComponent<PlayerComponents>();
+            playerComponents.AspectRatioManager.SetCanvas(_battleCanvas);
+            GameObject rifle = Instantiate(_riflePrefab, playerComponents.PlayerHand.transform);
+            rifle.transform.localRotation = Quaternion.Euler(0, 180f, 0);
+            playerComponents.SetRifleManager(rifle);
             _operationUIManager.SetPlayer(_player);
         }
     }
@@ -78,9 +84,8 @@ public class BattleSceneManager : MonoBehaviour
                 new Vector3(Random.Range(-10f, 10f), 0, Random.Range(-10f, 10f)), Quaternion.identity);
             EnemyComponents enemyComponents = enemy.GetComponent<EnemyComponents>();
             GameObject rifle = Instantiate(_riflePrefab, enemyComponents.EnemyHand.transform);
-            rifle.transform.localPosition = Vector3.zero;
-            rifle.transform.localRotation = Quaternion.LookRotation(enemyComponents.EnemyHand.transform.forward);
-            enemyComponents.EnemyManager.OnDeath += OnEnemyDied;
+            rifle.transform.localPosition = _enemyRifleOffset;
+            enemyComponents.SetRifleManager(rifle);
             _enemyList.Add(enemy);
         }
     }

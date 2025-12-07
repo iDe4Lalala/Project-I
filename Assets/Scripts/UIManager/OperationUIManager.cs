@@ -48,7 +48,7 @@ public class OperationUIManager : MonoBehaviour
 
         _player = player;
         _playerComponents = player.GetComponent<PlayerComponents>();
-        _playerComponents.PlayerManager.SetCamera(Camera.main);
+        // _playerComponents.PlayerManager.SetCamera(Camera.main);
         _playerUIManager.SetPlayerHP(_playerComponents.PlayerManager.PlayerHP);
 
         // 入力方式に応じた初期設定

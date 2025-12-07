@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 568107998299155174}
   - component: {fileID: 568107998299155169}
   - component: {fileID: 568107998299155168}
-  - component: {fileID: 1120947378015066974}
   - component: {fileID: 7505691899567941399}
   - component: {fileID: -6650931224488715257}
   m_Layer: 0
@@ -104,23 +103,6 @@ MonoBehaviour:
   _wanderRange: 20
   _playerCompareTag: Player
   _searchInterval: 2.5
---- !u!114 &1120947378015066974
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 568107998299155171}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dac413140784a4aabb6455d523b313e2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _MaximumBallisticDistance: 30
-  _shootingAudioSource: {fileID: 0}
-  _opponentHumanType: 0
-  _camera: {fileID: 6232076617656178303}
-  _rifleDamage: 20
 --- !u!114 &7505691899567941399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -134,12 +116,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyComponents
   <EnemyManager>k__BackingField: {fileID: 568107998299155168}
-  <RifleManager>k__BackingField: {fileID: 1120947378015066974}
   <CapsuleCollider>k__BackingField: {fileID: -6650931224488715257}
   <Animator>k__BackingField: {fileID: 6235452071446665604}
   <NavMeshAgent>k__BackingField: {fileID: 568107998299155169}
-  <EnemyHand>k__BackingField: {fileID: 2471898365344598292}
-  <EnemyCamera>k__BackingField: {fileID: 6232076617656178303}
+  <EnemyHand>k__BackingField: {fileID: 9055258122782981432}
+  <Camera>k__BackingField: {fileID: 6232076617656178303}
+  <HumanDataBase>k__BackingField: {fileID: 11400000, guid: 9b17392f54fbb43bcace34bc53fd7ca6, type: 2}
 --- !u!136 &-6650931224488715257
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -247,6 +229,37 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!1 &9055258122782981432
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7483733634946262759}
+  m_Layer: 0
+  m_Name: RifleObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7483733634946262759
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9055258122782981432}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.16067784, y: -0.69977254, z: 0.51250464, w: 0.47099903}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2186497606038199261}
+  m_LocalEulerAnglesHint: {x: 60.3, y: -93.587, z: 31.368}
 --- !u!1001 &568107997604996117
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -317,7 +330,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 1852576806548013000, guid: ebdc88c4aeb43481fb9773e4c6c40b9f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7483733634946262759}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 944927156297921104, guid: ebdc88c4aeb43481fb9773e4c6c40b9f, type: 3}
       insertIndex: -1
@@ -355,9 +371,9 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!1 &2471898365344598292 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2715566404302941441, guid: ebdc88c4aeb43481fb9773e4c6c40b9f, type: 3}
+--- !u!4 &2186497606038199261 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: ebdc88c4aeb43481fb9773e4c6c40b9f, type: 3}
   m_PrefabInstance: {fileID: 568107997604996117}
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &6235452071446665604 stripped

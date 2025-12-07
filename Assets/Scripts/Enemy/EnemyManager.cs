@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyManager : MonoBehaviour, IDamageable
-{    
+{
     /// <summary>
     /// 敵を管理する
     /// </summary>
@@ -31,10 +31,16 @@ public class EnemyManager : MonoBehaviour, IDamageable
         // 索敵の経過時間と移動処理
         _deltaTime = Time.deltaTime;
         _timeCount += _deltaTime;
-        _speed = transform.forward * _deltaTime;
+        _speed = transform.forward * _enemyComponents.HumanDataBase.MovementSpeed;
         transform.position += _speed;
         
         _enemyComponents.Animator.SetFloat("speed", _speed.magnitude);
+
+        // アニメーションに応じて手の向きを調整
+        if (_enemyComponents.Animator.GetCurrentAnimatorStateInfo(0).IsName("Run"))
+        {
+            _enemyComponents.EnemyHand.transform.localRotation = Quaternion.Euler(51.276f, -103.915f, 22.893f);
+        }
 
         // 一定時間ごとに索敵
         if (_timeCount <= _searchInterval) return;
@@ -73,7 +79,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
             // プレイヤーの方向を向き、移動し、射撃する
             transform.rotation = Quaternion.LookRotation(directionToPlayer);
             _enemyComponents.NavMeshAgent.SetDestination(player.transform.position);
-            _enemyComponents.RifleManager.ShootByRifle();
+            // _enemyComponents.RifleManager.ShootByRifle();
         }
         else    // プレイヤーが索敵範囲内にいなければ
         {
