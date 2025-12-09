@@ -36,12 +36,6 @@ public class EnemyManager : MonoBehaviour, IDamageable
         
         _enemyComponents.Animator.SetFloat("speed", _speed.magnitude);
 
-        // アニメーションに応じて手の向きを調整
-        if (_enemyComponents.Animator.GetCurrentAnimatorStateInfo(0).IsName("Run"))
-        {
-            _enemyComponents.EnemyHand.transform.localRotation = Quaternion.Euler(51.276f, -103.915f, 22.893f);
-        }
-
         // 一定時間ごとに索敵
         if (_timeCount <= _searchInterval) return;
         SearchForPlayer();

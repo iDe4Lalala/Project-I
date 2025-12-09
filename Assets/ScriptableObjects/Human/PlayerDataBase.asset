@@ -15,7 +15,7 @@ MonoBehaviour:
   <HumanObject>k__BackingField: {fileID: 5603421663110265236, guid: fe59073eea8cf4ddcbac01897659e934, type: 3}
   <HumanType>k__BackingField: 0
   <HumanHP>k__BackingField: 100
-  <MovementSpeed>k__BackingField: 0.05
+  <MovementSpeed>k__BackingField: 0.02
   <RotationSpeed>k__BackingField: 1
   <TurningMaxAngle>k__BackingField: 90
   <TurningMinAngle>k__BackingField: -90

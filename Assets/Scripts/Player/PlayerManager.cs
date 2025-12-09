@@ -15,15 +15,17 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private Rigidbody _rigidbody;
     private int _jumpCount;   // 現在のジャンプ回数
     private Vector3 _joystickVector;    // ジョイスティックの入力保存用
+    private Transform _headRotation;
 
 
     void Start()
     {
         // ステータス・コンポーネントの取得
         _rigidbody = _playerComponents.Rigidbody;
+        PlayerHP = _playerComponents.HumanDataBase.HumanHP;
         _cameraRotation = _playerComponents.Camera.transform.localRotation;
         _characterRotation = gameObject.transform.localRotation;
-        PlayerHP = _playerComponents.HumanDataBase.HumanHP;
+        _headRotation = _playerComponents.Animator.GetBoneTransform(HumanBodyBones.Head);
     }
 
     public void SetMovementInput(float x, float z)
@@ -55,6 +57,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
         // カメラとプレイヤーの回転を検出
         _cameraRotation *= Quaternion.Euler(-y * _playerComponents.HumanDataBase.RotationSpeed, 0, 0);
         _characterRotation *= Quaternion.Euler(0, x * _playerComponents.HumanDataBase.RotationSpeed, 0);
+
+        AdjustHeadRotation();
 
         // 角度制限をつけて回転を適用
         _cameraRotation = ClampRotation(_cameraRotation);
@@ -105,6 +109,17 @@ public class PlayerManager : MonoBehaviour, IDamageable
         angleX = Mathf.Clamp(angleX, _playerComponents.HumanDataBase.TurningMinAngle, _playerComponents.HumanDataBase.TurningMaxAngle);
         q.x = Mathf.Tan(angleX * Mathf.Deg2Rad * 0.5f);
         return q;
+    }
+
+    private void AdjustHeadRotation()
+    {
+        /// <summary>
+        /// 頭の回転を調整
+        /// </summary>
+
+        Vector3 headEuler = _headRotation.localEulerAngles;
+
+        _cameraRotation = Quaternion.Euler(_cameraRotation.eulerAngles.x, headEuler.y, 0f);
     }
 
     public void TakeDamage(int damage)

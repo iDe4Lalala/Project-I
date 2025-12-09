@@ -21,8 +21,6 @@ public class BattleSceneManager : MonoBehaviour
     [SerializeField] private OperationUIManager _operationUIManager;
     [SerializeField] private Canvas _battleCanvas;
     [SerializeField] private UnityEvent<bool> OnKilledEnemy;   // 敵をキルした時のイベント
-    [SerializeField] private Vector3 _playerRifleOffset;   // プレイヤーのライフルオフセット
-    [SerializeField] private Vector3 _enemyRifleOffset;    // 敵のライフルオフセット
     
     public bool IsBeforeBattle { get; private set; }    // 戦闘前かどうか
     private GameObject _player;     // プレイヤー
@@ -65,8 +63,7 @@ public class BattleSceneManager : MonoBehaviour
             _player = Instantiate(playerObject, Vector3.zero, Quaternion.identity);
             PlayerComponents playerComponents = _player.GetComponent<PlayerComponents>();
             playerComponents.AspectRatioManager.SetCanvas(_battleCanvas);
-            GameObject rifle = Instantiate(_riflePrefab, playerComponents.PlayerHand.transform);
-            rifle.transform.localRotation = Quaternion.Euler(0, 180f, 0);
+            GameObject rifle = Instantiate(_riflePrefab, playerComponents.RifleSocket.transform);
             playerComponents.SetRifleManager(rifle);
             _operationUIManager.SetPlayer(_player);
         }
@@ -83,8 +80,7 @@ public class BattleSceneManager : MonoBehaviour
             GameObject enemy = Instantiate(enemyObject,
                 new Vector3(Random.Range(-10f, 10f), 0, Random.Range(-10f, 10f)), Quaternion.identity);
             EnemyComponents enemyComponents = enemy.GetComponent<EnemyComponents>();
-            GameObject rifle = Instantiate(_riflePrefab, enemyComponents.EnemyHand.transform);
-            rifle.transform.localPosition = _enemyRifleOffset;
+            GameObject rifle = Instantiate(_riflePrefab, enemyComponents.RifleSocket.transform);
             enemyComponents.SetRifleManager(rifle);
             _enemyList.Add(enemy);
         }
