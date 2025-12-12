@@ -58,7 +58,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _cameraRotation *= Quaternion.Euler(-y * _playerComponents.HumanDataBase.RotationSpeed, 0, 0);
         _characterRotation *= Quaternion.Euler(0, x * _playerComponents.HumanDataBase.RotationSpeed, 0);
 
-        AdjustHeadRotation();
+        // AdjustHeadRotation();
 
         // 角度制限をつけて回転を適用
         _cameraRotation = ClampRotation(_cameraRotation);
