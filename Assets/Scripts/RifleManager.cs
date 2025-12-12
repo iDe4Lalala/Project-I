@@ -12,6 +12,7 @@ public class RifleManager : MonoBehaviour
 
     private Camera _camera;    // 視点カメラ
     private HumanType _opponentHumanType;   // ダメージを与える相手のHumanType
+    private IDamageable _opponentHuman;
     private Vector3 _rayStartPosition;      // Rayのスタート位置
     private Vector3 _rayDirection;      // Rayの方向
     private bool _isHitSomething;       // 何かに着弾したか
@@ -68,8 +69,8 @@ public class RifleManager : MonoBehaviour
 
         // ダメージを与える
         Debug.Log($"PlayerHitObject: {raycastHit.collider.gameObject.name}");
-        var opponentHuman = raycastHit.collider.gameObject.GetComponent<IDamageable>();
-        if(opponentHuman == null) return;
-        opponentHuman.TakeDamage(_rifleDamage);
+        _opponentHuman = raycastHit.collider.gameObject.GetComponent<IDamageable>();
+        if(_opponentHuman == null) return;
+        _opponentHuman.TakeDamage(_rifleDamage);
     }
 }

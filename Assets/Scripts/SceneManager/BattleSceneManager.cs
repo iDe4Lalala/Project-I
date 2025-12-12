@@ -83,6 +83,7 @@ public class BattleSceneManager : MonoBehaviour
             GameObject rifle = Instantiate(_riflePrefab, enemyComponents.RifleSocket.transform);
             enemyComponents.SetRifleManager(rifle);
             _enemyList.Add(enemy);
+            enemyComponents.EnemyManager.OnDeath += OnEnemyDied;
         }
     }
 
@@ -93,6 +94,7 @@ public class BattleSceneManager : MonoBehaviour
         /// </summary>
 
         _enemyList.Remove(enemy);
+        enemy.GetComponent<EnemyComponents>().EnemyManager.OnDeath -= OnEnemyDied;
         Destroy(enemy);
         OnKilledEnemy?.Invoke(true);
 
