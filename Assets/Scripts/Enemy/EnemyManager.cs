@@ -11,35 +11,38 @@ public class EnemyManager : MonoBehaviour, IDamageable
     /// </summary>
 
     [SerializeField] private EnemyComponents _enemyComponents;
-    [SerializeField] private int _enemyHP;      // 敵のHP
     [SerializeField] private float _wanderRange;    // 索敵範囲
+    [SerializeField] private float _attackRange;    // 攻撃範囲
     [SerializeField] private string _playerCompareTag;    // プレイヤーのタグ名
     [SerializeField] private float _searchInterval;     // 索敵間隔
 
+    private int _enemyHP;
     public event Action<GameObject> OnDeath;  // 死亡時イベント
-    private float _timeCount;   // 索敵用タイマー
-    private float _deltaTime;   // deltaTime保存用
-    private Vector3 _speed;
+    private float _timer;
+    private float _deltaTime; 
 
     void Start()
     {
         _enemyComponents.NavMeshAgent.avoidancePriority = Random.Range(0, 100);
+        _enemyHP = _enemyComponents.HumanDataBase.HumanHP;
+
+        _enemyComponents.NavMeshAgent.updateRotation = true;
+        _enemyComponents.NavMeshAgent.speed = _enemyComponents.HumanDataBase.MovementSpeed;
+        _enemyComponents.NavMeshAgent.angularSpeed = _enemyComponents.HumanDataBase.RotationSpeed;
     }
 
     void Update()
     {
-        // 索敵の経過時間と移動処理
         _deltaTime = Time.deltaTime;
-        _timeCount += _deltaTime;
-        _speed = transform.forward * _enemyComponents.HumanDataBase.MovementSpeed;
-        transform.position += _speed;
+        _timer += _deltaTime;
         
-        _enemyComponents.Animator.SetFloat("speed", _speed.magnitude);
+        _enemyComponents.Animator.SetFloat("speed", _enemyComponents.NavMeshAgent.velocity.magnitude);
 
         // 一定時間ごとに索敵
-        if (_timeCount <= _searchInterval) return;
+        if (_timer <= _searchInterval) return;
+
         SearchForPlayer();
-        _timeCount = 0;
+        _timer = 0;
     }
 
     private void SearchForPlayer()
@@ -52,9 +55,10 @@ public class EnemyManager : MonoBehaviour, IDamageable
         
         // 索敵範囲のhitColliderを作成
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, _wanderRange);
+        
+        // hitCollider内のプレイヤーを探す
         foreach (var hitCollider in hitColliders)
         {
-            // hitCollider内のプレイヤーを探す
             if (hitCollider.CompareTag(_playerCompareTag))
             {
                 player = hitCollider.gameObject;
@@ -62,27 +66,36 @@ public class EnemyManager : MonoBehaviour, IDamageable
             }
         }
 
-        if (player != null)     // プレイヤーが索敵範囲内にいれば
-        {
-            // プレイヤーの方向を算出
-            Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
-            directionToPlayer.y = 0;
-
-            if (directionToPlayer == Vector3.zero) return;
-
-            // プレイヤーの方向を向き、移動し、射撃する
-            transform.rotation = Quaternion.LookRotation(directionToPlayer);
-            _enemyComponents.NavMeshAgent.SetDestination(player.transform.position);
-            // _enemyComponents.RifleManager.ShootByRifle();
-        }
-        else    // プレイヤーが索敵範囲内にいなければ
+        if (player == null)
         {
             // 移動をやめて、ランダムな方向を向く
             _enemyComponents.NavMeshAgent.ResetPath();
             var course = new Vector3(0, Random.Range(0, 180), 0);
             transform.localRotation = Quaternion.Euler(course);
+            return;
         }
+
+        // プレイヤーとの距離を算出
+        float distance = Vector3.Distance(transform.position, player.transform.position);
+
+        if (distance > _attackRange)
+        {
+            // 追跡
+            _enemyComponents.NavMeshAgent.isStopped = false;
+            _enemyComponents.NavMeshAgent.SetDestination(player.transform.position);
+        }
+        else
+        {
+            // 攻撃
+            _enemyComponents.NavMeshAgent.isStopped = true;
+            Vector3 direction = player.transform.position - transform.position;
+            direction.y = 0;
+            transform.rotation = Quaternion.LookRotation(direction);
+
+            _enemyComponents.RifleManager.ShootByRifle();
+        }        
     }
+
 
     public void TakeDamage(int damage)
     {

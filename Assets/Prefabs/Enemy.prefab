@@ -100,8 +100,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _enemyComponents: {fileID: 7505691899567941399}
-  _enemyHP: 100
-  _wanderRange: 20
+  _wanderRange: 35
+  _attackRange: 15
   _playerCompareTag: Player
   _searchInterval: 2.5
 --- !u!114 &7505691899567941399
