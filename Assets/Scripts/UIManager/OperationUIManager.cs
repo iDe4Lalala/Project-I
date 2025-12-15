@@ -12,7 +12,6 @@ public class OperationUIManager : MonoBehaviour
     [SerializeField] private Button _jumpButton;    // ジャンプボタン
     [SerializeField] private Button _shootingButton;    // 射撃ボタン
     [SerializeField] private bool _isUseJoystick;   // 入力方式がジョイスティックか
-    [SerializeField] private PlayerUIManager _playerUIManager;
 
     private GameObject _player; // プレイヤー
     private PlayerComponents _playerComponents;
@@ -20,6 +19,31 @@ public class OperationUIManager : MonoBehaviour
     private float _zMovement;   // 垂直方向の移動入力
     private float _xRotation;   // 水平方向の視点入力
     private float _yRotation;   // 垂直方向の視点入力
+
+    private void Start()
+    {
+        if(_isUseJoystick)
+        {
+            SetMethods();
+        }
+        else
+        {
+            DisplayeOrHideOperationButtons(false);
+            FixCursorAndHide();
+        }
+    }
+
+    private void DisplayeOrHideOperationButtons(bool isDisplay)
+    {
+        /// <summary>
+        /// ジョイスティックとボタンを表示/非表示にする
+        /// </summary>
+        
+        _fixedJoystick.gameObject.SetActive(isDisplay);
+        _floatingJoystick.gameObject.SetActive(isDisplay);
+        _jumpButton.gameObject.SetActive(isDisplay);
+        _shootingButton.gameObject.SetActive(isDisplay);
+    }
 
     private void FixCursorAndHide()
     {
@@ -48,18 +72,6 @@ public class OperationUIManager : MonoBehaviour
 
         _player = player;
         _playerComponents = player.GetComponent<PlayerComponents>();
-        // _playerComponents.PlayerManager.SetCamera(Camera.main);
-        _playerUIManager.SetPlayerHP(_playerComponents.PlayerManager.PlayerHP);
-
-        // 入力方式に応じた初期設定
-        if(_isUseJoystick)
-        {
-            SetMethods();
-        }
-        else
-        {
-            FixCursorAndHide();
-        }
     }
 
     private void Update()

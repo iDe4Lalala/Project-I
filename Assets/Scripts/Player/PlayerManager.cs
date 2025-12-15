@@ -1,4 +1,6 @@
 using UnityEngine;
+using System;
+using Random = UnityEngine.Random;
 
 public class PlayerManager : MonoBehaviour, IDamageable
 {
@@ -16,6 +18,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private int _jumpCount;   // 現在のジャンプ回数
     private Vector3 _joystickVector;    // ジョイスティックの入力保存用
     private Transform _headRotation;
+    public event Action OnDamaged;   // プレイヤーがダメージを受けた時のイベント
+    public event Action<GameObject> OnDied;   // プレイヤーが死亡した時のイベント
 
 
     void Start()
@@ -130,36 +134,12 @@ public class PlayerManager : MonoBehaviour, IDamageable
         
         PlayerHP -= damage;
         Debug.Log($"Player HP: {PlayerHP}");
-        
-        if (PlayerHP <= 0){    // 死亡時処理
-        }
-    }
+        OnDamaged?.Invoke();
 
-    private void respawnPointSetting()
-    {
-        /// <summary>
-        /// リスポーンポイント設定
-        /// </summary>
-
-        int rnd = Random.Range(1, 5);
-
-        switch (rnd)
+        // 死亡時処理
+        if (PlayerHP <= 0)
         {
-            case 1:
-                transform.position = new Vector3(9.8f, 2.0f, 23.1f);
-                break;
-            case 2:
-                transform.position = new Vector3(-3.5f, 2.0f, -46.7f);
-                break;
-            case 3:
-                transform.position = new Vector3(44.2f, 2.0f, -17.8f);
-                break;
-            case 4:
-                transform.position = new Vector3(69.7f, 2.4f, 21.4f);
-                break;
-            default:
-                transform.position = new Vector3(88.96f, 2.2f, 82.8f);
-                break;
+            OnDied?.Invoke(gameObject);
         }
     }
 }

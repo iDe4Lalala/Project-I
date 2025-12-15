@@ -17,7 +17,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
     [SerializeField] private float _searchInterval;     // 索敵間隔
 
     private int _enemyHP;
-    public event Action<GameObject> OnDeath;  // 死亡時イベント
+    public event Action<GameObject, EnemyComponents> OnDied;  // 死亡時イベント
     private float _timer;
     private float _deltaTime; 
 
@@ -103,6 +103,6 @@ public class EnemyManager : MonoBehaviour, IDamageable
         Debug.Log($"Enemy HP: {_enemyHP}");
         if (_enemyHP > 0) return;
             // 死亡時処理
-            OnDeath?.Invoke(gameObject);
+            OnDied?.Invoke(gameObject, _enemyComponents);
     }
 }

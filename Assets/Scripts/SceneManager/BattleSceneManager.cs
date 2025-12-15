@@ -13,19 +13,22 @@ public class BattleSceneManager : MonoBehaviour
 
     [field: SerializeField] public List<HumanDataBase> HumanDataBasesList { get; private set; }   // 人のデータベースリスト
     [SerializeField] private GameObject _riflePrefab;  // ライフル
+    [SerializeField] private Transform _respawnPointParent;
     [SerializeField] private TMP_Text _beforeBattleTimerText;   // 戦闘前のタイマーのテキスト
     [SerializeField] private TMP_Text _battleStartedText;   // 戦闘開始のテキスト
     [SerializeField] private float _beforeBattleTimer;   // 戦闘前のタイマーの時間
     [SerializeField] private float _startedTextDisplayTime;   // 戦闘開始テキストの表示時間
     [SerializeField] private string _resultSceneName;   // 結果シーンの名前
-    [SerializeField] private OperationUIManager _operationUIManager;
     [SerializeField] private Canvas _battleCanvas;
-    [SerializeField] private UnityEvent<bool> OnKilledEnemy;   // 敵をキルした時のイベント
+    [SerializeField] private OperationUIManager _operationUIManager;
+    [SerializeField] private PlayerUIManager _playerUIManager;
+    [SerializeField] private UnityEvent<bool> OnKilled;   // キルが発生した時のイベント
     
     public bool IsBeforeBattle { get; private set; }    // 戦闘前かどうか
-    private GameObject _player;     // プレイヤー
-    private List<GameObject> _enemyList = new();   // 敵のリスト
+    private PlayerComponents _playerComponents;
+    private List<EnemyComponents> _enemyComponentsList;
     private Dictionary<HumanType, GameObject> _humanDict;  // 人の辞書
+    private Transform[] _respawnPoints;
 
     private void OnEnable()
     {
@@ -33,6 +36,16 @@ public class BattleSceneManager : MonoBehaviour
         IsBeforeBattle = true;
         _battleStartedText.gameObject.SetActive(false);
         _beforeBattleTimerText.gameObject.SetActive(true);
+        _enemyComponentsList = new List<EnemyComponents>();
+
+        int count = _respawnPointParent.childCount;
+        _respawnPoints = new Transform[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            _respawnPoints[i] = _respawnPointParent.GetChild(i);
+        }
+
         SetHumanDictionary();
         GeneratePlayer();
         GenerateEnemies();
@@ -60,12 +73,18 @@ public class BattleSceneManager : MonoBehaviour
         
         if (_humanDict.TryGetValue(HumanType.Player, out GameObject playerObject))
         {
-            _player = Instantiate(playerObject, Vector3.zero, Quaternion.identity);
-            PlayerComponents playerComponents = _player.GetComponent<PlayerComponents>();
-            playerComponents.AspectRatioManager.SetCanvas(_battleCanvas);
-            GameObject rifle = Instantiate(_riflePrefab, playerComponents.RifleSocket.transform);
-            playerComponents.SetRifleManager(rifle);
-            _operationUIManager.SetPlayer(_player);
+            GameObject player = Instantiate(playerObject);
+            SetRespawnPoint(player, true);
+
+            _playerComponents = player.GetComponent<PlayerComponents>();
+            _playerComponents.AspectRatioManager.SetCanvas(_battleCanvas);
+            _playerComponents.PlayerManager.OnDied += OnPlayerDied;
+
+            GameObject rifle = Instantiate(_riflePrefab, _playerComponents.RifleSocket.transform);
+            _playerComponents.SetRifleManager(rifle);
+
+            _operationUIManager.SetPlayer(player);
+            _playerUIManager.SetPlayerHP(_playerComponents);
         }
     }
 
@@ -77,28 +96,57 @@ public class BattleSceneManager : MonoBehaviour
         
         if (_humanDict.TryGetValue(HumanType.Enemy, out GameObject enemyObject))    // 敵を生成
         {
-            GameObject enemy = Instantiate(enemyObject,
-                new Vector3(Random.Range(-10f, 10f), 0, Random.Range(-10f, 10f)), Quaternion.identity);
+            GameObject enemy = Instantiate(enemyObject);
+            SetRespawnPoint(enemy, false);
+
             EnemyComponents enemyComponents = enemy.GetComponent<EnemyComponents>();
+            _enemyComponentsList.Add(enemyComponents);
+            enemyComponents.EnemyManager.OnDied += OnEnemyDied;
+
             GameObject rifle = Instantiate(_riflePrefab, enemyComponents.RifleSocket.transform);
             enemyComponents.SetRifleManager(rifle);
-            _enemyList.Add(enemy);
-            enemyComponents.EnemyManager.OnDeath += OnEnemyDied;
         }
     }
 
-    private void OnEnemyDied(GameObject enemy)
+    private void SetRespawnPoint(GameObject human, bool isPlayer)
+    {
+        /// <summary>
+        /// リスポーンポイントを設定する
+        /// </summary>
+        
+        if (isPlayer)
+        {
+            human.transform.SetPositionAndRotation(_respawnPoints[0].position, _respawnPoints[0].rotation);
+            return;
+        }
+
+        int rand = Random.Range(1, _respawnPoints.Length - 1);
+        human.transform.SetPositionAndRotation(_respawnPoints[rand].position, _respawnPoints[rand].rotation);
+    }
+
+    private void OnEnemyDied(GameObject enemy, EnemyComponents enemyComponents)
     {
         /// <summary>
         /// 敵が死亡した時の処理
         /// </summary>
 
-        _enemyList.Remove(enemy);
-        enemy.GetComponent<EnemyComponents>().EnemyManager.OnDeath -= OnEnemyDied;
+        enemyComponents.EnemyManager.OnDied -= OnEnemyDied;
+        _enemyComponentsList.Remove(enemyComponents);
         Destroy(enemy);
-        OnKilledEnemy?.Invoke(true);
+        OnKilled?.Invoke(true);
 
         CountNumberOfEnemies();
+    }
+
+    private void OnPlayerDied(GameObject player)
+    {
+        /// <summary>
+        /// プレイヤーが死亡した時の処理
+        /// </summary>
+        Destroy(player);
+        OnKilled?.Invoke(false);
+
+        GeneratePlayer();
     }
     
     private void CountNumberOfEnemies()
@@ -107,7 +155,7 @@ public class BattleSceneManager : MonoBehaviour
         /// 敵の数を数える
         /// </summary>
 
-        if (_enemyList.Count > 0) return;
+        if (_enemyComponentsList.Count > 0) return;
         GenerateEnemies();
     }
 
