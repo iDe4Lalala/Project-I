@@ -18,6 +18,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
 
     private int _enemyHP;
     public event Action<GameObject, EnemyComponents> OnDied;  // 死亡時イベント
+    public event Action OnDamaged;   // ダメージを受けた時のイベント
     private float _timer;
     private float _deltaTime; 
 
@@ -101,8 +102,10 @@ public class EnemyManager : MonoBehaviour, IDamageable
     {
         _enemyHP -= damage;
         Debug.Log($"Enemy HP: {_enemyHP}");
+        OnDamaged?.Invoke();
+
         if (_enemyHP > 0) return;
-            // 死亡時処理
-            OnDied?.Invoke(gameObject, _enemyComponents);
+        // 死亡時処理
+        OnDied?.Invoke(gameObject, _enemyComponents);
     }
 }

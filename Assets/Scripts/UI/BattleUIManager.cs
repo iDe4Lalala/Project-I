@@ -24,20 +24,18 @@ public class BattleUIManager : MonoBehaviour
 
     private void Update()
     {
-        // バトル中の時
-        if(!_battleSceneManager.IsBeforeBattle)
+        if(!_battleSceneManager.IsBeforeBattle) return;
+
+        // タイマーを更新
+        if (_battleTimer >= 0)
         {
-            // タイマーを更新
-            if (_battleTimer >= 0)
-            {
-                _battleTimer -= Time.deltaTime;
-                _battleTimerText.text = _battleTimer.ToString("f2");
-            }
-            else
-            {
-                // シーン遷移
-                _battleSceneManager.LoadOtherScene();
-            }
+            _battleTimer -= Time.deltaTime;
+            _battleTimerText.text = _battleTimer.ToString("f2");
+        }
+        else
+        {
+            // シーン遷移
+            _battleSceneManager.LoadOtherScene();
         }
     }
 
@@ -47,7 +45,6 @@ public class BattleUIManager : MonoBehaviour
         /// kill時のUIを表示する
         /// </summary>
         
-        // killテキストを更新
         if (isPlayerKill)
         {
             _killText.text = _playerKillSentence;
@@ -56,6 +53,7 @@ public class BattleUIManager : MonoBehaviour
         {
             _killText.text = _enemyKillSentence;
         }
+        
         StartCoroutine(ShowKillText());
     }
 

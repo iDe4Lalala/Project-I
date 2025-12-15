@@ -20,7 +20,6 @@ public class BattleSceneManager : MonoBehaviour
     [SerializeField] private float _startedTextDisplayTime;   // 戦闘開始テキストの表示時間
     [SerializeField] private string _resultSceneName;   // 結果シーンの名前
     [SerializeField] private Canvas _battleCanvas;
-    [SerializeField] private OperationUIManager _operationUIManager;
     [SerializeField] private PlayerUIManager _playerUIManager;
     [SerializeField] private UnityEvent<bool> OnKilled;   // キルが発生した時のイベント
     
@@ -83,8 +82,7 @@ public class BattleSceneManager : MonoBehaviour
             GameObject rifle = Instantiate(_riflePrefab, _playerComponents.RifleSocket.transform);
             _playerComponents.SetRifleManager(rifle);
 
-            _operationUIManager.SetPlayer(player);
-            _playerUIManager.SetPlayerHP(_playerComponents);
+            _playerUIManager.SetPlayer(player);
         }
     }
 
@@ -102,6 +100,7 @@ public class BattleSceneManager : MonoBehaviour
             EnemyComponents enemyComponents = enemy.GetComponent<EnemyComponents>();
             _enemyComponentsList.Add(enemyComponents);
             enemyComponents.EnemyManager.OnDied += OnEnemyDied;
+            enemyComponents.EnemyManager.OnDamaged += OnEnemyDamaged;
 
             GameObject rifle = Instantiate(_riflePrefab, enemyComponents.RifleSocket.transform);
             enemyComponents.SetRifleManager(rifle);
@@ -131,6 +130,8 @@ public class BattleSceneManager : MonoBehaviour
         /// </summary>
 
         enemyComponents.EnemyManager.OnDied -= OnEnemyDied;
+        enemyComponents.EnemyManager.OnDamaged -= OnEnemyDamaged;
+        
         _enemyComponentsList.Remove(enemyComponents);
         Destroy(enemy);
         OnKilled?.Invoke(true);
@@ -147,6 +148,15 @@ public class BattleSceneManager : MonoBehaviour
         OnKilled?.Invoke(false);
 
         GeneratePlayer();
+    }
+
+    private void OnEnemyDamaged()
+    {
+        /// <summary>
+        /// 敵がダメージを受けた時の処理
+        /// </summary>
+        
+        StartCoroutine(_playerUIManager.ShowHitCrossHair());
     }
     
     private void CountNumberOfEnemies()
