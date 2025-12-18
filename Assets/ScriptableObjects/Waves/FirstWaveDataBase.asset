@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70032d25cfa6d4ddbafd21970a40018d, type: 3}
+  m_Name: FirstWaveDataBase
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyWaveDataBase
+  <WaveStartTime>k__BackingField: 0
+  <EnemyTotalCount>k__BackingField: 30
+  <MaxEnemyAppearanceCount>k__BackingField: 6
+  <SpawnInterval>k__BackingField: 2

@@ -2977,6 +2977,7 @@ GameObject:
   m_Component:
   - component: {fileID: 212903798}
   - component: {fileID: 212903799}
+  - component: {fileID: 212903800}
   m_Layer: 0
   m_Name: BattleSceneManager
   m_TagString: Untagged
@@ -3011,19 +3012,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bba8bbd5b202409fb10a08e6490c46a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <HumanDataBasesList>k__BackingField:
-  - {fileID: 11400000, guid: 104521dfa131f472d968cee9d77cbb86, type: 2}
-  - {fileID: 11400000, guid: 9b17392f54fbb43bcace34bc53fd7ca6, type: 2}
-  _riflePrefab: {fileID: 1791490474942619446, guid: a9655ae40638940eaa7d34fa6596f947, type: 3}
-  _respawnPointParent: {fileID: 1294848366}
+  _playerDataBase: {fileID: 11400000, guid: 104521dfa131f472d968cee9d77cbb86, type: 2}
+  <RiflePrefab>k__BackingField: {fileID: 1791490474942619446, guid: a9655ae40638940eaa7d34fa6596f947, type: 3}
+  _playerRespawnPoint: {fileID: 188214309}
   _beforeBattleTimerText: {fileID: 1622929871}
   _battleStartedText: {fileID: 1076278740}
   _beforeBattleTimer: 3
   _startedTextDisplayTime: 1.5
-  _resultSceneName: ResultScene
+  _nextSceneName: ResultScene
   _battleCanvas: {fileID: 1892001366}
-  _playerUIManager: {fileID: 66335768}
-  OnKilled:
+  <PlayerUIManager>k__BackingField: {fileID: 66335768}
+  <OnKilled>k__BackingField:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 109883507}
@@ -3038,6 +3037,25 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &212903800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 212903796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caea05ec2e91a4e2d95b714c858a06e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAppearanceManager
+  _enemyDataBase: {fileID: 11400000, guid: 9b17392f54fbb43bcace34bc53fd7ca6, type: 2}
+  _enemyWaveDataBaseList:
+  - {fileID: 11400000, guid: de9f259596d794a2ba58acf77c8c485f, type: 2}
+  - {fileID: 11400000, guid: 7d88b321c05074ce88701501d2ba4dbc, type: 2}
+  - {fileID: 11400000, guid: 1d4938a7a9d014589acbcb8d482b550f, type: 2}
+  _respawnPointParent: {fileID: 1294848366}
+  _battleSceneManager: {fileID: 212903799}
 --- !u!1001 &213985176
 PrefabInstance:
   m_ObjectHideFlags: 0
