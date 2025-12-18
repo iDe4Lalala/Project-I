@@ -1424,11 +1424,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _battleTimerText: {fileID: 1344309646}
-  _battleTimer: 180
   _killText: {fileID: 1050283845}
   _killTextDisplayTime: 2.5
   _playerKillSentence: You killed an Enemey!
   _enemyKillSentence: An enemy killed You!
+  _beforeBattleTimerText: {fileID: 1622929871}
+  _battleStartedText: {fileID: 1076278740}
+  _beforeBattleTimer: 3
+  _startedTextDisplayTime: 1.5
   _battleSceneManager: {fileID: 212903799}
 --- !u!1001 &117320326
 PrefabInstance:
@@ -3015,13 +3018,11 @@ MonoBehaviour:
   _playerDataBase: {fileID: 11400000, guid: 104521dfa131f472d968cee9d77cbb86, type: 2}
   <RiflePrefab>k__BackingField: {fileID: 1791490474942619446, guid: a9655ae40638940eaa7d34fa6596f947, type: 3}
   _playerRespawnPoint: {fileID: 188214309}
-  _beforeBattleTimerText: {fileID: 1622929871}
-  _battleStartedText: {fileID: 1076278740}
-  _beforeBattleTimer: 3
-  _startedTextDisplayTime: 1.5
   _nextSceneName: ResultScene
   _battleCanvas: {fileID: 1892001366}
+  _battleTimer: 180
   <PlayerUIManager>k__BackingField: {fileID: 66335768}
+  _battleUIManager: {fileID: 109883507}
   <OnKilled>k__BackingField:
     m_PersistentCalls:
       m_Calls:
