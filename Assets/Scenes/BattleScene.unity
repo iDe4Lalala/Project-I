@@ -3023,6 +3023,7 @@ MonoBehaviour:
   _battleTimer: 180
   <PlayerUIManager>k__BackingField: {fileID: 66335768}
   _battleUIManager: {fileID: 109883507}
+  _enemyAppearanceManager: {fileID: 212903800}
   <OnKilled>k__BackingField:
     m_PersistentCalls:
       m_Calls:
@@ -3051,7 +3052,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAppearanceManager
   _enemyDataBase: {fileID: 11400000, guid: 9b17392f54fbb43bcace34bc53fd7ca6, type: 2}
-  _enemyWaveDataBaseList:
+  <EnemyWaveDataBaseList>k__BackingField:
   - {fileID: 11400000, guid: de9f259596d794a2ba58acf77c8c485f, type: 2}
   - {fileID: 11400000, guid: 7d88b321c05074ce88701501d2ba4dbc, type: 2}
   - {fileID: 11400000, guid: 1d4938a7a9d014589acbcb8d482b550f, type: 2}

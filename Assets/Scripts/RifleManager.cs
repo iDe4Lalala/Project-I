@@ -64,11 +64,7 @@ public class RifleManager : MonoBehaviour
         // 着弾したオブジェクトが敵であるかどうか
         if (!raycastHit.collider.gameObject.name.Contains(_opponentHumanType.ToString())) return;
 
-        // 人への着弾時UIを表示
-        // _crosshairImage.SetActive(true);
-
         // ダメージを与える
-        Debug.Log($"PlayerHitObject: {raycastHit.collider.gameObject.name}");
         _opponentHuman = raycastHit.collider.gameObject.GetComponent<IDamageable>();
         if(_opponentHuman == null) return;
         _opponentHuman.TakeDamage(_rifleDamage);

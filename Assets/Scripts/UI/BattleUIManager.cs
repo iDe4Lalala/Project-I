@@ -19,7 +19,7 @@ public class BattleUIManager : MonoBehaviour
     [SerializeField] private float _beforeBattleTimer;   // 戦闘前の待ち時間
     [SerializeField] private float _startedTextDisplayTime;   // 戦闘開始テキストの表示時間
     [SerializeField] private BattleSceneManager _battleSceneManager;
-    public event Action<bool> OnStartBattle;    // 戦闘開始時のイベント
+    public event Action OnStartBattle;    // 戦闘開始時のイベント
 
     private void OnEnable()
     {
@@ -46,7 +46,10 @@ public class BattleUIManager : MonoBehaviour
         /// 戦闘タイマーを設定する
         /// </summary>
         
-        _battleTimerText.text = time.ToString("f2");
+        int m = (int)(time / 60);
+        int s = (int)(time % 60);
+
+        _battleTimerText.text = $"{m:00}:{s:00}";
     }
 
     public void OnKill(bool isPlayerKill)
@@ -94,7 +97,7 @@ public class BattleUIManager : MonoBehaviour
         }
 
         _beforeBattleTimerText.gameObject.SetActive(false);
-        OnStartBattle?.Invoke(true);
+        OnStartBattle?.Invoke();
         StartCoroutine(ShowBattleStartedText());
     }
 

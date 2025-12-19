@@ -101,7 +101,6 @@ public class EnemyManager : MonoBehaviour, IDamageable
     public void TakeDamage(int damage)
     {
         _enemyHP -= damage;
-        Debug.Log($"Enemy HP: {_enemyHP}");
         OnDamaged?.Invoke();
 
         if (_enemyHP > 0) return;

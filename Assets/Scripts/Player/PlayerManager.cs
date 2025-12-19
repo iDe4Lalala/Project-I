@@ -1,6 +1,5 @@
 using UnityEngine;
 using System;
-using Random = UnityEngine.Random;
 
 public class PlayerManager : MonoBehaviour, IDamageable
 {
@@ -133,7 +132,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
         /// </summary>
         
         PlayerHP -= damage;
-        Debug.Log($"Player HP: {PlayerHP}");
         OnDamaged?.Invoke();
 
         // 死亡時処理

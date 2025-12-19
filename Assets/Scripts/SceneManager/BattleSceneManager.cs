@@ -17,17 +17,20 @@ public class BattleSceneManager : MonoBehaviour
     [SerializeField] private float _battleTimer;   // 戦闘時間
     [field: SerializeField] public PlayerUIManager PlayerUIManager { get; private set; }
     [SerializeField] private BattleUIManager _battleUIManager;
+    [SerializeField] private EnemyAppearanceManager _enemyAppearanceManager;
     [field: SerializeField] public UnityEvent<bool> OnKilled { get; private set; } // キルが発生した時のイベント
     public event Action<float> OnTimerUpdated;   // タイマーが更新された時のイベント
 
-    private bool _isBattle;    // 戦闘中かどうか
+    private float _currentTimer;
     private PlayerComponents _playerComponents;
 
     private void OnEnable()
     {
         // 戦闘前の初期化
-        _isBattle = false;
         _battleUIManager.OnStartBattle += OnStartBattle;
+        _currentTimer = _battleTimer;
+
+        OnTimerUpdated?.Invoke(_battleTimer);
         GeneratePlayer();
     }
 
@@ -42,6 +45,7 @@ public class BattleSceneManager : MonoBehaviour
         /// プレイヤーを生成する
         /// </summary>
         
+        if (_playerComponents != null) return;
         GameObject player = Instantiate(_playerDataBase.HumanObject);
         SetPlayerRespawnPoint(player);
 
@@ -67,29 +71,30 @@ public class BattleSceneManager : MonoBehaviour
 
     private void Update()
     {
-        if(!_isBattle) return;
+        if(_enemyAppearanceManager.CurrentWaveState == EnemyWaveState.Waiting) return;
 
         // タイマーを更新
-        if (_battleTimer >= 0)
+        if (_currentTimer >= 0)
         {
-            _battleTimer -= Time.deltaTime;
-            OnTimerUpdated?.Invoke(_battleTimer);
+            _currentTimer -= Time.deltaTime;
+            OnTimerUpdated?.Invoke(_currentTimer);
         }
         else
         {
             // シーン遷移
-            _isBattle = false;
+            _enemyAppearanceManager.SetEnemyWaveState(EnemyWaveState.Finished);
             LoadOtherScene();
         }
     }
 
-    public void OnStartBattle(bool isStart)
+    public void OnStartBattle()
     {
         /// <summary>
         /// 戦闘開始時の処理
         /// </summary>
-        
-        _isBattle = isStart;
+
+        _enemyAppearanceManager.SetEnemyWaveState(EnemyWaveState.Cleared);
+        _enemyAppearanceManager.StartNextWave();
     }
 
     private void OnPlayerDied(GameObject player)
@@ -98,6 +103,7 @@ public class BattleSceneManager : MonoBehaviour
         /// プレイヤーが死亡した時の処理
         /// </summary>
         Destroy(player);
+        _playerComponents = null;
         OnKilled?.Invoke(false);
 
         GeneratePlayer();

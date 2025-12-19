@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70032d25cfa6d4ddbafd21970a40018d, type: 3}
   m_Name: FirstWaveDataBase
   m_EditorClassIdentifier: Assembly-CSharp::EnemyWaveDataBase
-  <WaveStartTime>k__BackingField: 0
-  <EnemyTotalCount>k__BackingField: 30
-  <MaxEnemyAppearanceCount>k__BackingField: 6
-  <SpawnInterval>k__BackingField: 2
+  <BeforeWaveInterval>k__BackingField: 0
+  <EnemyTotalCount>k__BackingField: 1
+  <MaxEnemyAppearanceCount>k__BackingField: 3
+  <SpawnInterval>k__BackingField: 1
+  <WaveText>k__BackingField: 1st
