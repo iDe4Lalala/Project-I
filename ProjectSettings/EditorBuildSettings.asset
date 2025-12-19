@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MapSerectScene.unity
+    path: Assets/Scenes/MapSelectScene.unity
     guid: d2a1f3870fb3140928fa8030c466a2bc
   - enabled: 1
     path: Assets/Scenes/StartScene.unity
