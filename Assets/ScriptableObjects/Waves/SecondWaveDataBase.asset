@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SecondWaveDataBase
   m_EditorClassIdentifier: Assembly-CSharp::EnemyWaveDataBase
   <BeforeWaveInterval>k__BackingField: 3
-  <EnemyTotalCount>k__BackingField: 2
-  <MaxEnemyAppearanceCount>k__BackingField: 8
+  <EnemyTotalCount>k__BackingField: 10
+  <MaxEnemyAppearanceCount>k__BackingField: 3
   <SpawnInterval>k__BackingField: 1.5
   <WaveText>k__BackingField: 2nd
