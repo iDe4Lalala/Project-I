@@ -9,6 +9,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
     [SerializeField] private PlayerComponents _playerComponents;
     [SerializeField] private int _canJumpCount;     // ジャンプ可能回数
     [SerializeField] private string _groundTagName;     // 地面のタグ名
+    [SerializeField] private float _footSoundThreshold;   // 足音を鳴らす速度の閾値
 
     public int PlayerHP { get; private set; }       // プレイヤーの体力
     private Quaternion _cameraRotation;     // カメラの回転保存用
@@ -19,7 +20,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private Transform _headRotation;
     public event Action OnDamaged;   // プレイヤーがダメージを受けた時のイベント
     public event Action<GameObject> OnDied;   // プレイヤーが死亡した時のイベント
-
 
     void Start()
     {
@@ -42,6 +42,16 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
         // アニメーションの速度パラメーターを更新
         _playerComponents.Animator.SetFloat("speed", _joystickVector.magnitude);
+
+        // 足音を再生
+        if (_joystickVector.magnitude > _footSoundThreshold && !_playerComponents.FootstepAudioSource.isPlaying)
+        {
+            _playerComponents.FootstepAudioSource.PlayOneShot(_playerComponents.ShootingAudioClip);
+        }
+        else if (_joystickVector.magnitude <= _footSoundThreshold && _playerComponents.FootstepAudioSource.isPlaying)
+        {
+            _playerComponents.FootstepAudioSource.Stop();
+        }
 
         if (_joystickVector == Vector3.zero) return;
         // カメラの向きに合わせてプレイヤーを移動

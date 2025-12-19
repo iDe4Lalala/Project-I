@@ -71,7 +71,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
         {
             // 移動をやめて、ランダムな方向を向く
             _enemyComponents.NavMeshAgent.ResetPath();
-            var course = new Vector3(0, Random.Range(0, 180), 0);
+            var course = new Vector3(0, Random.Range(0, 60), 0);
             transform.localRotation = Quaternion.Euler(course);
             return;
         }
@@ -84,17 +84,29 @@ public class EnemyManager : MonoBehaviour, IDamageable
             // 追跡
             _enemyComponents.NavMeshAgent.isStopped = false;
             _enemyComponents.NavMeshAgent.SetDestination(player.transform.position);
+
+            // 足音を再生
+            if (!_enemyComponents.FootstepAudioSource.isPlaying)
+            {
+                _enemyComponents.FootstepAudioSource.Play();
+            }
         }
         else
         {
             // 攻撃
             _enemyComponents.NavMeshAgent.isStopped = true;
+            if (_enemyComponents.FootstepAudioSource.isPlaying)
+            {
+                _enemyComponents.FootstepAudioSource.Stop();
+            }
+
+            var rand =  Quaternion.Euler(Random.Range(-15f, 15f), 0, Random.Range(-15f, 15f));
             Vector3 direction = player.transform.position - transform.position;
             direction.y = 0;
-            transform.rotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.LookRotation(direction) * rand;
 
             _enemyComponents.RifleManager.ShootByRifle();
-        }        
+        }
     }
 
 

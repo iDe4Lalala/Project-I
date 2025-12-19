@@ -4,6 +4,7 @@ using System.Collections;
 
 public class PlayerUIManager : MonoBehaviour
 {
+    [SerializeField] private BattleUIManager _battleUIManager; 
     [SerializeField] private TMP_Text _playerCurrentHP;
     [SerializeField] private TMP_Text _playerMaxHP;
     [SerializeField] private GameObject _hitCrossHair;
@@ -17,10 +18,18 @@ public class PlayerUIManager : MonoBehaviour
     private float _zMovement;   // 垂直方向の移動入力
     private float _xRotation;   // 水平方向の視点入力
     private float _yRotation;   // 垂直方向の視点入力
+    private bool _isWaiting;
 
     private void OnEnable()
     {
         _hitCrossHair.SetActive(false);
+        _isWaiting = true;
+        _battleUIManager.OnStartBattle += () => _isWaiting = false;
+    }
+
+    private void OnDisable()
+    {
+        _battleUIManager.OnStartBattle -= () => _isWaiting = false;
     }
 
     private void Start()
@@ -114,6 +123,8 @@ public class PlayerUIManager : MonoBehaviour
     private void Update()
     {
         if (_playerComponents == null) return;
+        if (_isWaiting) return;
+        
         if(_isUseJoystick)
         {
             // ジョイスティックによる入力
@@ -141,7 +152,7 @@ public class PlayerUIManager : MonoBehaviour
         {
             _playerComponents.PlayerManager.OnJumpButtonDown();
         }
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetKey(KeyCode.Mouse0))
         {
             _playerComponents.RifleManager.ShootByRifle();
         }

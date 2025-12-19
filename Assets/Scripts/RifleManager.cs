@@ -9,6 +9,8 @@ public class RifleManager : MonoBehaviour
     [SerializeField] private float _MaximumBallisticDistance;    // 検出可能な最大距離
     [SerializeField] private AudioSource _shootingAudioSource;      // 射撃時のオーディオソース
     [SerializeField] private int _rifleDamage;      // ライフルのダメージ
+    [SerializeField] private AudioClip _rifleAudioClip;      // ライフルの射撃音
+    [SerializeField] private float _playerRifleRate;    // プレイヤーのライフルの連射速度
 
     private Camera _camera;    // 視点カメラ
     private HumanType _opponentHumanType;   // ダメージを与える相手のHumanType
@@ -18,6 +20,14 @@ public class RifleManager : MonoBehaviour
     private bool _isHitSomething;       // 何かに着弾したか
     private PlayerComponents _playerComponents;    // プレイヤーのコンポーネント
     private EnemyComponents _enemyComponents;      // 敵のコンポーネント
+    private float _timer;    // 次に射撃可能な時間
+    private bool _canShoot;   // 射撃可能かどうか
+
+    private void OnEnable()
+    {
+        _timer = 0;
+        _canShoot = true;
+    }
 
     public void GetOwnerInfo(HumanType humanType, GameObject owner)
     {
@@ -44,11 +54,22 @@ public class RifleManager : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        _timer += Time.deltaTime;
+
+        if(_timer <= 1f / _playerRifleRate) return;
+        _timer = 0;
+        _canShoot = true;
+    }
+
     public void ShootByRifle(){
         /// <summary>
         /// 射撃する
         /// </summary>
         
+        if (!_canShoot) return;
+
         // 射撃のRayを飛ばし、着弾判定
         _rayStartPosition = _camera.transform.position;
         _rayDirection = _camera.transform.forward.normalized;
@@ -56,7 +77,8 @@ public class RifleManager : MonoBehaviour
             _rayStartPosition, _rayDirection, out RaycastHit raycastHit, _MaximumBallisticDistance);
         
         // 射撃音を再生
-        _shootingAudioSource.Play();
+        _shootingAudioSource.PlayOneShot(_rifleAudioClip);
+        _canShoot = false;
 
         // 着弾確認
         if (!_isHitSomething) return;

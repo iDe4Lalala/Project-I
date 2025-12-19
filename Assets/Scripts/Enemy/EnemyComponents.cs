@@ -14,6 +14,7 @@ public class EnemyComponents : MonoBehaviour
     [field: SerializeField] public GameObject RifleSocket { get; private set; }
     [field: SerializeField] public Camera Camera { get; private set; }
     [field: SerializeField] public HumanDataBase HumanDataBase { get; private set; }
+    [field: SerializeField] public AudioSource FootstepAudioSource { get; private set; }
     public RifleManager RifleManager { get; private set; }
 
     public void SetRifleManager(GameObject rifle)

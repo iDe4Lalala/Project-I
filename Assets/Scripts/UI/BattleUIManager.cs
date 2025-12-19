@@ -20,6 +20,7 @@ public class BattleUIManager : MonoBehaviour
     [SerializeField] private float _startedTextDisplayTime;   // 戦闘開始テキストの表示時間
     [SerializeField] private BattleSceneManager _battleSceneManager;
     [SerializeField] private EnemyAppearanceManager _enemyAppearanceManager;
+
     public event Action OnStartBattle;    // 戦闘開始時のイベント
 
     private void OnEnable()
