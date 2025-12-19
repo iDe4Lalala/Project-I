@@ -95,6 +95,7 @@ public class BattleSceneManager : MonoBehaviour
 
         _enemyAppearanceManager.SetEnemyWaveState(EnemyWaveState.Cleared);
         _enemyAppearanceManager.StartNextWave();
+        _battleUIManager.OnNextWaveStarted(_enemyAppearanceManager.EnemyWaveDataBaseList[0].WaveText);
     }
 
     private void OnPlayerDied(GameObject player)

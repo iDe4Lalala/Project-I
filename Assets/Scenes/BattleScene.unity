@@ -1433,6 +1433,7 @@ MonoBehaviour:
   _beforeBattleTimer: 3
   _startedTextDisplayTime: 1.5
   _battleSceneManager: {fileID: 212903799}
+  _enemyAppearanceManager: {fileID: 212903800}
 --- !u!1001 &117320326
 PrefabInstance:
   m_ObjectHideFlags: 0

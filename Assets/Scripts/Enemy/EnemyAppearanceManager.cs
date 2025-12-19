@@ -24,14 +24,14 @@ public class EnemyAppearanceManager : MonoBehaviour
     private Transform[] _respawnPoints;
     private List<EnemyComponents> _enemyComponentsList;
     private int _currentWaveIndex = 0;
-    public event Action<string> OnWaveStarted;
-    public bool[] WaveFinishedList { get; private set; }
+    private bool _isLastWave;
+    public event Action<string> OnWaveStarted;  // ウェーブが開始された時のイベント
 
     private void OnEnable()
     {
         CurrentWaveState = EnemyWaveState.Waiting;
-        WaveFinishedList = new bool[EnemyWaveDataBaseList.Count];
         _enemyComponentsList = new List<EnemyComponents>();
+        _isLastWave = false;
         GetEnemyRespawnPoints();
     }
 
@@ -116,8 +116,18 @@ public class EnemyAppearanceManager : MonoBehaviour
 
     private void CountRemainingEnemies()
     {
+        if (_isLastWave && _enemyComponentsList.Count <= 0)
+        {
+            CurrentWaveState = EnemyWaveState.Finished;
+            _battleSceneManager.PlayerUIManager.DisplayOrHideCursor(true);
+            _battleSceneManager.LoadOtherScene();
+            return;
+        }
+
         if (_enemyComponentsList.Count > 0) return;
         CurrentWaveState = EnemyWaveState.Cleared;
+        OnWaveStarted?.Invoke(EnemyWaveDataBaseList[_currentWaveIndex].WaveText);
+        
         StartNextWave();
     }
 
@@ -127,10 +137,12 @@ public class EnemyAppearanceManager : MonoBehaviour
         /// 次のウェーブを開始する
         /// </summary>
         
-        if (_currentWaveIndex >= EnemyWaveDataBaseList.Count) return;
         if (CurrentWaveState != EnemyWaveState.Cleared) return;
-        
-        OnWaveStarted?.Invoke(EnemyWaveDataBaseList[_currentWaveIndex].WaveText);
+        if (_currentWaveIndex == EnemyWaveDataBaseList.Count - 1)
+        {
+            _isLastWave = true;
+        }
+
         StartCoroutine(SpawnEnemiesInWave(EnemyWaveDataBaseList[_currentWaveIndex]));
     }
 
@@ -148,7 +160,6 @@ public class EnemyAppearanceManager : MonoBehaviour
 
         while (spawnedCount > 0)
         {   
-            Debug.Log($"Spawning enemies. Remaining: {spawnedCount}");
             // 最後のスポーンの時
             if (spawnedCount <= enemiesPerSpawn)
             {
@@ -161,8 +172,6 @@ public class EnemyAppearanceManager : MonoBehaviour
             spawnedCount -= enemiesPerSpawn;
             yield return new WaitForSeconds(waveData.SpawnInterval);
         }
-
-        Debug.Log($"Wave {_currentWaveIndex + 1} spawned.");
 
         if (CurrentWaveState == EnemyWaveState.Cleared) yield break;
         CurrentWaveState = EnemyWaveState.InProgress;

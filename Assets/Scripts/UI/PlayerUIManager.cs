@@ -34,7 +34,7 @@ public class PlayerUIManager : MonoBehaviour
         else
         {
             SwitchOperationButtonsDisplay(false);
-            FixCursorAndHide();
+            DisplayOrHideCursor(false);
         }
     }
 
@@ -47,11 +47,17 @@ public class PlayerUIManager : MonoBehaviour
         _operationButtonParent.SetActive(isDisplay);
     }
 
-    private void FixCursorAndHide()
+    public void DisplayOrHideCursor(bool isDisplay)
     {
-        // カーソルを画面中央に固定して非表示(キーマウ操作時)
-        Cursor.lockState = CursorLockMode.Locked; 
-        Cursor.visible = false;
+        if (isDisplay)
+        {
+            Cursor.lockState = CursorLockMode.None; 
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked; 
+        }
+        Cursor.visible = isDisplay;
     }
 
     private void SetMethods()

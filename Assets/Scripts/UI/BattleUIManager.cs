@@ -19,12 +19,14 @@ public class BattleUIManager : MonoBehaviour
     [SerializeField] private float _beforeBattleTimer;   // 戦闘前の待ち時間
     [SerializeField] private float _startedTextDisplayTime;   // 戦闘開始テキストの表示時間
     [SerializeField] private BattleSceneManager _battleSceneManager;
+    [SerializeField] private EnemyAppearanceManager _enemyAppearanceManager;
     public event Action OnStartBattle;    // 戦闘開始時のイベント
 
     private void OnEnable()
     {
         // イベント登録
         _battleSceneManager.OnTimerUpdated += SetBattleTimer;
+        _enemyAppearanceManager.OnWaveStarted += OnNextWaveStarted;
 
         // killテキストを非表示
         _killText.gameObject.SetActive(false);
@@ -38,6 +40,7 @@ public class BattleUIManager : MonoBehaviour
     {
         // イベント解除
         _battleSceneManager.OnTimerUpdated -= SetBattleTimer;
+        _enemyAppearanceManager.OnWaveStarted -= OnNextWaveStarted;
     }
 
     public void SetBattleTimer(float time)
@@ -98,7 +101,6 @@ public class BattleUIManager : MonoBehaviour
 
         _beforeBattleTimerText.gameObject.SetActive(false);
         OnStartBattle?.Invoke();
-        StartCoroutine(ShowBattleStartedText());
     }
 
     private IEnumerator ShowBattleStartedText()
@@ -110,5 +112,15 @@ public class BattleUIManager : MonoBehaviour
         _battleStartedText.gameObject.SetActive(true);
         yield return new WaitForSeconds(_startedTextDisplayTime);
         _battleStartedText.gameObject.SetActive(false);
+    }
+
+    public void OnNextWaveStarted(string waveText)
+    {
+        /// <summary>
+        /// 次のウェーブ開始時のテキスト表示処理
+        /// </summary>
+        
+        _battleStartedText.text = $"{waveText} Wave Start";
+        StartCoroutine(ShowBattleStartedText());
     }
 }
