@@ -37,7 +37,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
         _deltaTime = Time.deltaTime;
         _timer += _deltaTime;
         
-        _enemyComponents.Animator.SetFloat("speed", _enemyComponents.NavMeshAgent.velocity.magnitude);
+        _enemyComponents.Animator.SetFloat("Speed", _enemyComponents.NavMeshAgent.velocity.magnitude);
 
         // 一定時間ごとに索敵
         if (_timer <= _searchInterval) return;
