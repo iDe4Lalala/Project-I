@@ -143,7 +143,14 @@ public class PlayerUIManager : MonoBehaviour
         }
 
         // プレイヤーの移動と視点操作の入力を反映
-        _playerComponents.PlayerManager.SetMovementInput(_xMovement, _zMovement);
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            _playerComponents.PlayerManager.SetMovementInput(_xMovement, _zMovement, _playerComponents.HumanDataBase.SprintSpeed);
+        }
+        else
+        {
+            _playerComponents.PlayerManager.SetMovementInput(_xMovement, _zMovement);
+        }
         _playerComponents.PlayerManager.SetRotationInput(_xRotation, _yRotation);
 
         // ジャンプと射撃の入力(キーマウ操作時のみ)

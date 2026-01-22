@@ -20,4 +20,5 @@ public class HumanDataBase : ScriptableObject
     [field: SerializeField] public float JumpForce { get; private set; }
     [field: SerializeField] public float RecoilApplySpeed { get; private set; }
     [field: SerializeField] public float RecoilReturnSpeed { get; private set; }
+    [field: SerializeField] public float SprintSpeed { get; private set; }
 }

@@ -40,7 +40,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _ammoCount = _playerComponents.RifleManager.WeaponDataBase.MagazineCapacity;
     }
 
-    public void SetMovementInput(float x, float z)
+    public void SetMovementInput(float x, float z, float sprintSpeed = 1f)
     {
         /// <summary>
         /// 移動処理
@@ -65,7 +65,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         if (_joystickVector == Vector3.zero) return;
         // カメラの向きに合わせてプレイヤーを移動
         gameObject.transform.position += 
-            _playerComponents.HumanDataBase.MovementSpeed * z * _playerComponents.Camera.transform.forward + 
+            _playerComponents.HumanDataBase.MovementSpeed * z * _playerComponents.Camera.transform.forward * sprintSpeed + 
             _playerComponents.HumanDataBase.MovementSpeed * x * _playerComponents.Camera.transform.right;
     }
 
