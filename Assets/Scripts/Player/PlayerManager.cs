@@ -11,6 +11,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
     [SerializeField] private string _groundTagName;     // 地面のタグ名
     [SerializeField] private float _footSoundThreshold;   // 足音を鳴らす速度の閾値
     [SerializeField] private float _movementThreshold;
+    [SerializeField] private ViewRifleAnimationManager _viewRifleAnimationManager;
 
     public int PlayerHP { get; private set; }       // プレイヤーの体力
     private Quaternion _cameraRotation;     // カメラの回転保存用
@@ -20,6 +21,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private Vector3 _joystickVector;    // ジョイスティックの入力保存用
     private Transform _headRotation;
     private bool _isMoving;
+    private int _ammoCount;
+    private float _shootTimer;
     public event Action OnDamaged;   // プレイヤーがダメージを受けた時のイベント
     public event Action<GameObject> OnDied;   // プレイヤーが死亡した時のイベント
 
@@ -31,6 +34,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _cameraRotation = _playerComponents.Camera.transform.localRotation;
         _characterRotation = gameObject.transform.localRotation;
         _headRotation = _playerComponents.Animator.GetBoneTransform(HumanBodyBones.Head);
+        _ammoCount = _playerComponents.RifleManager.WeaponDataBase.MagazineCapacity;
     }
 
     public void SetMovementInput(float x, float z)
@@ -48,7 +52,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         // 足音を再生
         if (_joystickVector.magnitude > _footSoundThreshold && !_playerComponents.FootstepAudioSource.isPlaying)
         {
-            _playerComponents.FootstepAudioSource.PlayOneShot(_playerComponents.ShootingAudioClip);
+            _playerComponents.FootstepAudioSource.PlayOneShot(_playerComponents.FootstepAudioClip);
         }
         else if (_joystickVector.magnitude <= _footSoundThreshold && _playerComponents.FootstepAudioSource.isPlaying)
         {
@@ -153,5 +157,29 @@ public class PlayerManager : MonoBehaviour, IDamageable
         {
             OnDied?.Invoke(gameObject);
         }
+    }
+
+    private void Update()
+    {
+        _shootTimer += Time.deltaTime;
+    }
+
+    public void CheckCanShoot()
+    {
+        if (_shootTimer <= 1f / _playerComponents.RifleManager.WeaponDataBase.FireRate) return;
+        _shootTimer = 0;
+        if (_ammoCount <= 0) return;
+        _ammoCount--;
+        _playerComponents.RifleManager.ShootByRifle();
+    }
+
+    public void Reload()
+    {
+        _viewRifleAnimationManager.PlayReloadAnimation();
+    }
+
+    public void FinishedReload()
+    {
+        _ammoCount = _playerComponents.RifleManager.WeaponDataBase.MagazineCapacity;
     }
 }

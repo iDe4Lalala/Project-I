@@ -21,6 +21,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
     public event Action OnDamaged;   // ダメージを受けた時のイベント
     private float _timer;
     private float _deltaTime; 
+    private float _shootTimer;
 
     void Start()
     {
@@ -36,6 +37,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
     {
         _deltaTime = Time.deltaTime;
         _timer += _deltaTime;
+        _shootTimer += _deltaTime;
         
         _enemyComponents.Animator.SetFloat("Speed", _enemyComponents.NavMeshAgent.velocity.magnitude);
 
@@ -108,7 +110,6 @@ public class EnemyManager : MonoBehaviour, IDamageable
             _enemyComponents.RifleManager.ShootByRifle();
         }
     }
-
 
     public void TakeDamage(int damage)
     {

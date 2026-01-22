@@ -19,8 +19,8 @@ public class BattleSceneManager : MonoBehaviour
     [SerializeField] private BattleUIManager _battleUIManager;
     [SerializeField] private EnemyAppearanceManager _enemyAppearanceManager;
     [field: SerializeField] public UnityEvent<bool> OnKilled { get; private set; } // キルが発生した時のイベント
+    
     public event Action<float> OnTimerUpdated;   // タイマーが更新された時のイベント
-
     private float _currentTimer;
     private PlayerComponents _playerComponents;
 

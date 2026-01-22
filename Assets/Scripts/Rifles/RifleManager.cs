@@ -6,11 +6,8 @@ public class RifleManager : MonoBehaviour
     /// ライフルを管理する
     /// </summary>
     
-    [SerializeField] private float _MaximumBallisticDistance;    // 検出可能な最大距離
     [SerializeField] private AudioSource _shootingAudioSource;      // 射撃時のオーディオソース
-    [SerializeField] private int _rifleDamage;      // ライフルのダメージ
-    [SerializeField] private AudioClip _rifleAudioClip;      // ライフルの射撃音
-    [SerializeField] private float _playerRifleRate;    // プレイヤーのライフルの連射速度
+    [field: SerializeField] public WeaponDataBase WeaponDataBase { get; private set; }    // 武器のデータベース
 
     private Camera _camera;    // 視点カメラ
     private HumanType _opponentHumanType;   // ダメージを与える相手のHumanType
@@ -58,12 +55,13 @@ public class RifleManager : MonoBehaviour
     {
         _timer += Time.deltaTime;
 
-        if(_timer <= 1f / _playerRifleRate) return;
+        if(_timer <= 1f / WeaponDataBase.FireRate) return;
         _timer = 0;
         _canShoot = true;
     }
 
-    public void ShootByRifle(){
+    public void ShootByRifle()
+    {
         /// <summary>
         /// 射撃する
         /// </summary>
@@ -74,10 +72,10 @@ public class RifleManager : MonoBehaviour
         _rayStartPosition = _camera.transform.position;
         _rayDirection = _camera.transform.forward.normalized;
         _isHitSomething = Physics.Raycast(
-            _rayStartPosition, _rayDirection, out RaycastHit raycastHit, _MaximumBallisticDistance);
+            _rayStartPosition, _rayDirection, out RaycastHit raycastHit, WeaponDataBase.MaximumBallisticDistance);
         
         // 射撃音を再生
-        _shootingAudioSource.PlayOneShot(_rifleAudioClip);
+        _shootingAudioSource.PlayOneShot(WeaponDataBase.ShootingAudioClip);
         _canShoot = false;
 
         // 着弾確認
@@ -89,6 +87,6 @@ public class RifleManager : MonoBehaviour
         // ダメージを与える
         _opponentHuman = raycastHit.collider.gameObject.GetComponent<IDamageable>();
         if(_opponentHuman == null) return;
-        _opponentHuman.TakeDamage(_rifleDamage);
+        _opponentHuman.TakeDamage(WeaponDataBase.Damage);
     }
 }

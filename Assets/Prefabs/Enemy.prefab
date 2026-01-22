@@ -124,6 +124,9 @@ MonoBehaviour:
   <Camera>k__BackingField: {fileID: 6232076617656178303}
   <HumanDataBase>k__BackingField: {fileID: 11400000, guid: 9b17392f54fbb43bcace34bc53fd7ca6, type: 2}
   <FootstepAudioSource>k__BackingField: {fileID: 2396631518356617317}
+  <DamageCorrection>k__BackingField: 0.75
+  <FireRateCorrection>k__BackingField: 0.5
+  <RecoilForceCorrection>k__BackingField: 0
 --- !u!136 &-6650931224488715257
 CapsuleCollider:
   m_ObjectHideFlags: 0

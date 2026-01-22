@@ -301,6 +301,7 @@ MonoBehaviour:
   _groundTagName: Ground
   _footSoundThreshold: 0.001
   _movementThreshold: 0.07
+  _viewRifleAnimationManager: {fileID: 9186936515786832544}
 --- !u!114 &2214391279192201276
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -322,7 +323,7 @@ MonoBehaviour:
   <RifleSocket>k__BackingField: {fileID: 4176937832793301188}
   <Camera>k__BackingField: {fileID: 5603421663079228801}
   <FootstepAudioSource>k__BackingField: {fileID: 5598008002194003253}
-  <ShootingAudioClip>k__BackingField: {fileID: 0}
+  <FootstepAudioClip>k__BackingField: {fileID: 8300000, guid: 21f1fbb5a89b742d68345f1ac0604de8, type: 3}
 --- !u!1001 &5203312489210632173
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -375,6 +376,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3984400572308073805, guid: 4befea8fe4a09479bbcb1eabce2f6270, type: 3}
+      propertyPath: _playerManager
+      value: 
+      objectReference: {fileID: 5603421663110265246}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -385,6 +390,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1791490474942710550, guid: 4befea8fe4a09479bbcb1eabce2f6270, type: 3}
   m_PrefabInstance: {fileID: 5203312489210632173}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &9186936515786832544 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3984400572308073805, guid: 4befea8fe4a09479bbcb1eabce2f6270, type: 3}
+  m_PrefabInstance: {fileID: 5203312489210632173}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cd91b35ff0104d529eddcdcd5602ca5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ViewRifleAnimationManager
 --- !u!1001 &5603421662218080644
 PrefabInstance:
   m_ObjectHideFlags: 0

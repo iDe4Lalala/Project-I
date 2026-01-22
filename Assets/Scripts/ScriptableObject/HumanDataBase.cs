@@ -18,5 +18,4 @@ public class HumanDataBase : ScriptableObject
     [field: SerializeField] public float TurningMaxAngle { get; private set; }
     [field: SerializeField] public float TurningMinAngle { get; private set; }
     [field: SerializeField] public float JumpForce { get; private set; }
-    // [field: SerializeField] public AudioSource FootStepAudio { get; private set; }
 }

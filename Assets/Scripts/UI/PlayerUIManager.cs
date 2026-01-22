@@ -154,7 +154,11 @@ public class PlayerUIManager : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.Mouse0))
         {
-            _playerComponents.RifleManager.ShootByRifle();
+            _playerComponents.PlayerManager.CheckCanShoot();
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            _playerComponents.PlayerManager.Reload();
         }
     }
 }
