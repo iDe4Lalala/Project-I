@@ -23,6 +23,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private bool _isMoving;
     private int _ammoCount;
     private float _shootTimer;
+    private Vector2 _recoil;
+    private Vector2 _currentRecoil;
+    private Vector2 _targetRecoil;
     public event Action OnDamaged;   // プレイヤーがダメージを受けた時のイベント
     public event Action<GameObject> OnDied;   // プレイヤーが死亡した時のイベント
 
@@ -64,20 +67,17 @@ public class PlayerManager : MonoBehaviour, IDamageable
         gameObject.transform.position += 
             _playerComponents.HumanDataBase.MovementSpeed * z * _playerComponents.Camera.transform.forward + 
             _playerComponents.HumanDataBase.MovementSpeed * x * _playerComponents.Camera.transform.right;
-        // 前はこの後に音を鳴らしていた。
     }
 
-    public void SetRotationInput(float x, float y)
+    public void SetRotationInput(float x, float y, Vector2 recoil = default)
     {
         /// <summary>
         /// 回転処理
         /// </summary>
 
         // カメラとプレイヤーの回転を検出
-        _cameraRotation *= Quaternion.Euler(-y * _playerComponents.HumanDataBase.RotationSpeed, 0, 0);
-        _characterRotation *= Quaternion.Euler(0, x * _playerComponents.HumanDataBase.RotationSpeed, 0);
-
-        // AdjustHeadRotation();
+        _cameraRotation *= Quaternion.Euler(-y * _playerComponents.HumanDataBase.RotationSpeed - recoil.y, 0, 0);
+        _characterRotation *= Quaternion.Euler(0, x * _playerComponents.HumanDataBase.RotationSpeed + recoil.x, 0);
 
         // 角度制限をつけて回転を適用
         _cameraRotation = ClampRotation(_cameraRotation);
@@ -132,17 +132,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
         return q;
     }
 
-    private void AdjustHeadRotation()
-    {
-        /// <summary>
-        /// 頭の回転を調整
-        /// </summary>
-
-        Vector3 headEuler = _headRotation.localEulerAngles;
-
-        _cameraRotation = Quaternion.Euler(_cameraRotation.eulerAngles.x, headEuler.y, 0f);
-    }
-
     public void TakeDamage(int damage)
     {
         /// <summary>
@@ -170,7 +159,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _shootTimer = 0;
         if (_ammoCount <= 0) return;
         _ammoCount--;
-        _playerComponents.RifleManager.ShootByRifle();
+
+        _recoil = _playerComponents.RifleManager.ShootByRifle();
+        SetRotationInput(0, 0, _recoil);
     }
 
     public void Reload()

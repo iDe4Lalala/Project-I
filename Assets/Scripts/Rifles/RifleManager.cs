@@ -17,14 +17,9 @@ public class RifleManager : MonoBehaviour
     private bool _isHitSomething;       // 何かに着弾したか
     private PlayerComponents _playerComponents;    // プレイヤーのコンポーネント
     private EnemyComponents _enemyComponents;      // 敵のコンポーネント
-    private float _timer;    // 次に射撃可能な時間
-    private bool _canShoot;   // 射撃可能かどうか
-
-    private void OnEnable()
-    {
-        _timer = 0;
-        _canShoot = true;
-    }
+    private float _recoilX;
+    private float _recoilY;
+    private Vector2 _recoil;
 
     public void GetOwnerInfo(HumanType humanType, GameObject owner)
     {
@@ -51,22 +46,15 @@ public class RifleManager : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        _timer += Time.deltaTime;
-
-        if(_timer <= 1f / WeaponDataBase.FireRate) return;
-        _timer = 0;
-        _canShoot = true;
-    }
-
-    public void ShootByRifle()
+    public Vector2 ShootByRifle()
     {
         /// <summary>
         /// 射撃する
         /// </summary>
-        
-        if (!_canShoot) return;
+
+        _recoilX = Random.Range(WeaponDataBase.RecoilMinX, WeaponDataBase.RecoilMaxX);
+        _recoilY = Random.Range(WeaponDataBase.RecoilMinY, WeaponDataBase.RecoilMaxY);
+        _recoil = new Vector2(_recoilX, _recoilY);
 
         // 射撃のRayを飛ばし、着弾判定
         _rayStartPosition = _camera.transform.position;
@@ -76,17 +64,18 @@ public class RifleManager : MonoBehaviour
         
         // 射撃音を再生
         _shootingAudioSource.PlayOneShot(WeaponDataBase.ShootingAudioClip);
-        _canShoot = false;
 
         // 着弾確認
-        if (!_isHitSomething) return;
+        if (!_isHitSomething) return _recoil;
 
         // 着弾したオブジェクトが敵であるかどうか
-        if (!raycastHit.collider.gameObject.name.Contains(_opponentHumanType.ToString())) return;
+        if (!raycastHit.collider.gameObject.name.Contains(_opponentHumanType.ToString())) return _recoil;
 
         // ダメージを与える
         _opponentHuman = raycastHit.collider.gameObject.GetComponent<IDamageable>();
-        if(_opponentHuman == null) return;
+        if(_opponentHuman == null) return _recoil;
         _opponentHuman.TakeDamage(WeaponDataBase.Damage);
+
+        return _recoil;
     }
 }

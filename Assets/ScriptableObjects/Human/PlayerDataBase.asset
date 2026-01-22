@@ -20,3 +20,5 @@ MonoBehaviour:
   <TurningMaxAngle>k__BackingField: 90
   <TurningMinAngle>k__BackingField: -90
   <JumpForce>k__BackingField: 5
+  <RecoilApplySpeed>k__BackingField: 25
+  <RecoilReturnSpeed>k__BackingField: 15

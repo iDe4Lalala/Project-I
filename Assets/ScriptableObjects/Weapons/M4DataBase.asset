@@ -17,5 +17,8 @@ MonoBehaviour:
   <MagazineCapacity>k__BackingField: 31
   <FireRate>k__BackingField: 8
   <ReloadTime>k__BackingField: 2.5
-  <RecoilForce>k__BackingField: 1.1
+  <RecoilMinX>k__BackingField: -0.1
+  <RecoilMaxX>k__BackingField: 0.2
+  <RecoilMinY>k__BackingField: 0.4
+  <RecoilMaxY>k__BackingField: 1
   <ShootingAudioClip>k__BackingField: {fileID: 8300000, guid: 31882c91d9dab4049933dc7ada618b85, type: 3}
