@@ -124,9 +124,7 @@ MonoBehaviour:
   <Camera>k__BackingField: {fileID: 6232076617656178303}
   <HumanDataBase>k__BackingField: {fileID: 11400000, guid: 9b17392f54fbb43bcace34bc53fd7ca6, type: 2}
   <FootstepAudioSource>k__BackingField: {fileID: 2396631518356617317}
-  <DamageCorrection>k__BackingField: 0.75
-  <FireRateCorrection>k__BackingField: 0.5
-  <RecoilForceCorrection>k__BackingField: 0
+  <FootstepAudioClip>k__BackingField: {fileID: 8300000, guid: 21f1fbb5a89b742d68345f1ac0604de8, type: 3}
 --- !u!136 &-6650931224488715257
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -395,7 +393,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 21f1fbb5a89b742d68345f1ac0604de8, type: 3}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 0.4
   m_Pitch: 1
   Loop: 1
@@ -403,9 +401,9 @@ AudioSource:
   Spatialize: 0
   SpatializePostEffects: 0
   Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
+  DopplerLevel: 0
+  MinDistance: 20
+  MaxDistance: 400
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -440,7 +438,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -455,7 +453,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.027777778
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -470,7 +468,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0
       inSlope: 0
       outSlope: 0
       tangentMode: 0

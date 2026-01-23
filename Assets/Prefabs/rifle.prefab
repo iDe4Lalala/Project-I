@@ -191,7 +191,7 @@ GameObject:
   - component: {fileID: 1791490475354592304}
   - component: {fileID: 4002310554103301588}
   m_Layer: 6
-  m_Name: Rifle
+  m_Name: rifle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -247,17 +247,17 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 31882c91d9dab4049933dc7ada618b85, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.55
+  m_Volume: 0.8
   m_Pitch: 1
   Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
   Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
+  DopplerLevel: 0
+  MinDistance: 70
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 0
@@ -272,6 +272,15 @@ AudioSource:
       value: 1
       inSlope: 0
       outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.18151665
+      value: 0.41186833
+      inSlope: -1.1738716
+      outSlope: -1.1738716
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
@@ -293,7 +302,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -308,7 +317,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.11111111
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -323,7 +332,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -346,5 +355,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RifleManager
   _shootingAudioSource: {fileID: 1791490475354592304}
-  _reloadAnimator: {fileID: 1791490474949881074, guid: 4befea8fe4a09479bbcb1eabce2f6270, type: 3}
   <WeaponDataBase>k__BackingField: {fileID: 11400000, guid: a5496b1b01d8c4a42b62ade93dd61ff5, type: 2}

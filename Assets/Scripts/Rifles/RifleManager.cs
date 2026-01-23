@@ -33,7 +33,7 @@ public class RifleManager : MonoBehaviour
                 {
                     _playerComponents = owner.GetComponent<PlayerComponents>();
                     _camera = _playerComponents.Camera;
-                    _opponentHumanType = HumanType.Enemy;   
+                    _opponentHumanType = HumanType.Enemy;
                 }
                 break;
             case HumanType.Enemy:

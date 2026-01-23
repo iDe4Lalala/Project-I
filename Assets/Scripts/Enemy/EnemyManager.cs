@@ -90,7 +90,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
             // 足音を再生
             if (!_enemyComponents.FootstepAudioSource.isPlaying)
             {
-                _enemyComponents.FootstepAudioSource.Play();
+                _enemyComponents.FootstepAudioSource.PlayOneShot(_enemyComponents.FootstepAudioClip);
             }
         }
         else

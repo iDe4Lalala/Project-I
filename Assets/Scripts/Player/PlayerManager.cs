@@ -53,9 +53,13 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _joystickVector = Vector3.right * x + Vector3.up * z;
 
         // 足音を再生
-        if (_joystickVector.magnitude > _footSoundThreshold && !_playerComponents.FootstepAudioSource.isPlaying)
+        if (_joystickVector.magnitude > _footSoundThreshold && !_playerComponents.FootstepAudioSource.isPlaying && _playerComponents.Animator.GetBool("IsGround"))
         {
             _playerComponents.FootstepAudioSource.PlayOneShot(_playerComponents.FootstepAudioClip);
+        }
+        else if (!_playerComponents.Animator.GetBool("IsGround"))
+        {
+            _playerComponents.FootstepAudioSource.Stop();
         }
         else if (_joystickVector.magnitude <= _footSoundThreshold && _playerComponents.FootstepAudioSource.isPlaying)
         {
