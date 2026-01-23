@@ -23,3 +23,4 @@ MonoBehaviour:
   <RecoilApplySpeed>k__BackingField: 25
   <RecoilReturnSpeed>k__BackingField: 15
   <SprintSpeed>k__BackingField: 1.5
+  <LifePoint>k__BackingField: 1

@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: ThirdWaveDataBase
   m_EditorClassIdentifier: Assembly-CSharp::EnemyWaveDataBase
   <BeforeWaveInterval>k__BackingField: 3
+  <AfterWaveInterval>k__BackingField: 5
   <EnemyTotalCount>k__BackingField: 15
   <MaxEnemyAppearanceCount>k__BackingField: 4
   <SpawnInterval>k__BackingField: 2
   <WaveText>k__BackingField: 3rd
+  <WaveTimeLimit>k__BackingField: 90

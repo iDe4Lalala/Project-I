@@ -1430,9 +1430,9 @@ MonoBehaviour:
   _playerKillSentence: You killed an Enemey!
   _enemyKillSentence: An enemy killed You!
   _beforeBattleTimerText: {fileID: 1622929871}
-  _battleStartedText: {fileID: 1076278740}
+  _battleProgressText: {fileID: 1076278740}
   _beforeBattleTimer: 3
-  _startedTextDisplayTime: 1.5
+  _progressTextDisplayTime: 4
   _battleSceneManager: {fileID: 212903799}
   _enemyAppearanceManager: {fileID: 212903800}
 --- !u!1001 &117320326
@@ -3024,7 +3024,7 @@ MonoBehaviour:
   _battleCanvas: {fileID: 1892001366}
   _battleTimer: 180
   <PlayerUIManager>k__BackingField: {fileID: 66335768}
-  _battleUIManager: {fileID: 109883507}
+  <BattleUIManager>k__BackingField: {fileID: 109883507}
   _enemyAppearanceManager: {fileID: 212903800}
   <OnKilled>k__BackingField:
     m_PersistentCalls:
@@ -3041,6 +3041,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _diedCameraPosition: {fileID: 2131710933}
 --- !u!114 &212903800
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3060,6 +3061,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1d4938a7a9d014589acbcb8d482b550f, type: 2}
   _respawnPointParent: {fileID: 1294848366}
   _battleSceneManager: {fileID: 212903799}
+  <InGameDataBase>k__BackingField: {fileID: 11400000, guid: ebadbf212787247b1b75f86167c919de, type: 2}
 --- !u!1001 &213985176
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14020,7 +14022,7 @@ GameObject:
   - component: {fileID: 1076278741}
   - component: {fileID: 1076278740}
   m_Layer: 5
-  m_Name: BattleStartedText
+  m_Name: BattleProgressText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29617,7 +29619,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2017734621}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 21.869831, y: -5.865567, z: 13.58706}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -30782,6 +30784,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4000010230679374, guid: fee6e1da33beae9409089ab8a832464f, type: 3}
   m_PrefabInstance: {fileID: 2122417923}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2131710933
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2131710934}
+  m_Layer: 0
+  m_Name: DiedCamera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2131710934
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2131710933}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 22.68, y: 31.4, z: -16.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!1001 &2147372544
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30862,3 +30895,4 @@ SceneRoots:
   - {fileID: 563581301}
   - {fileID: 1892001367}
   - {fileID: 212903798}
+  - {fileID: 2131710934}

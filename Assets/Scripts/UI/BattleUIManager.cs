@@ -15,9 +15,9 @@ public class BattleUIManager : MonoBehaviour
     [SerializeField] private string _playerKillSentence;   // プレイヤーがキルした時の文章
     [SerializeField] private string _enemyKillSentence;    // 敵がキルした時の文章
     [SerializeField] private TMP_Text _beforeBattleTimerText;   // 戦闘前のタイマーのテキスト
-    [SerializeField] private TMP_Text _battleStartedText;   // 戦闘開始のテキスト
+    [SerializeField] private TMP_Text _battleProgressText;   // 戦闘進行状況のテキスト
     [SerializeField] private float _beforeBattleTimer;   // 戦闘前の待ち時間
-    [SerializeField] private float _startedTextDisplayTime;   // 戦闘開始テキストの表示時間
+    [SerializeField] private float _progressTextDisplayTime;   // 戦闘進行状況テキストの表示時間
     [SerializeField] private BattleSceneManager _battleSceneManager;
     [SerializeField] private EnemyAppearanceManager _enemyAppearanceManager;
 
@@ -29,9 +29,8 @@ public class BattleUIManager : MonoBehaviour
         _battleSceneManager.OnTimerUpdated += SetBattleTimer;
         _enemyAppearanceManager.OnWaveStarted += OnNextWaveStarted;
 
-        // killテキストを非表示
         _killText.gameObject.SetActive(false);
-        _battleStartedText.gameObject.SetActive(false);
+        _battleProgressText.gameObject.SetActive(false);
         _beforeBattleTimerText.gameObject.SetActive(true);
 
         StartCoroutine(ShowBeforeBattleTimerText());
@@ -110,9 +109,9 @@ public class BattleUIManager : MonoBehaviour
         /// 戦闘開始のテキストのアニメーション
         /// </summary>
         
-        _battleStartedText.gameObject.SetActive(true);
-        yield return new WaitForSeconds(_startedTextDisplayTime);
-        _battleStartedText.gameObject.SetActive(false);
+        _battleProgressText.gameObject.SetActive(true);
+        yield return new WaitForSeconds(_progressTextDisplayTime);
+        _battleProgressText.gameObject.SetActive(false);
     }
 
     public void OnNextWaveStarted(string waveText)
@@ -121,7 +120,13 @@ public class BattleUIManager : MonoBehaviour
         /// 次のウェーブ開始時のテキスト表示処理
         /// </summary>
         
-        _battleStartedText.text = $"{waveText} Wave Start";
+        _battleProgressText.text = $"{waveText} Wave Start";
+        StartCoroutine(ShowBattleStartedText());
+    }
+
+    public void OnThisWaveCleared(string waveText)
+    {
+        _battleProgressText.text = $"{waveText} Wave Clear";
         StartCoroutine(ShowBattleStartedText());
     }
 }

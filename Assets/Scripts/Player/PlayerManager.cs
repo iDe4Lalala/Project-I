@@ -139,6 +139,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         /// </summary>
         
         PlayerHP -= damage;
+        PlayerHP = Mathf.Max(PlayerHP, 0);
         OnDamaged?.Invoke();
 
         // 死亡時処理

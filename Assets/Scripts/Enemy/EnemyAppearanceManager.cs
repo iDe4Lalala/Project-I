@@ -19,20 +19,24 @@ public class EnemyAppearanceManager : MonoBehaviour
     [field: SerializeField] public List<EnemyWaveDataBase> EnemyWaveDataBaseList { get; private set; }  // 敵のウェーブデータベースリスト
     [SerializeField] private Transform _respawnPointParent;  // 敵のリスポーンポイントの親オブジェクト
     [SerializeField] private BattleSceneManager _battleSceneManager;
+    [field: SerializeField] public InGameDataBase InGameDataBase { get; private set; }
     
     public EnemyWaveState CurrentWaveState { get; private set; }
     private Transform[] _respawnPoints;
     private List<EnemyComponents> _enemyComponentsList;
-    private int _currentWaveIndex = 0;
+    private int _currentWaveIndex;
     private bool _isLastWave;
     public event Action<string> OnWaveStarted;  // ウェーブが開始された時のイベント
 
     private void OnEnable()
     {
-        CurrentWaveState = EnemyWaveState.Waiting;
+        _currentWaveIndex = 0;
         _enemyComponentsList = new List<EnemyComponents>();
         _isLastWave = false;
+        InGameDataBase.ResetStatus();
+        CurrentWaveState = EnemyWaveState.Waiting;
         GetEnemyRespawnPoints();
+        StartCoroutine(WaitForNextWave(EnemyWaveDataBaseList[_currentWaveIndex].BeforeWaveInterval));
     }
 
     public void SetEnemyWaveState(EnemyWaveState state)
@@ -110,25 +114,29 @@ public class EnemyAppearanceManager : MonoBehaviour
         
         _enemyComponentsList.Remove(enemyComponents);
         Destroy(enemy);
-        CountRemainingEnemies();
         _battleSceneManager.OnKilled?.Invoke(true);
+        StartCoroutine(CountRemainingEnemies());
     }
 
-    private void CountRemainingEnemies()
+    private IEnumerator CountRemainingEnemies()
     {
         if (_isLastWave && _enemyComponentsList.Count <= 0)
         {
             CurrentWaveState = EnemyWaveState.Finished;
+            _battleSceneManager.BattleUIManager.OnThisWaveCleared(EnemyWaveDataBaseList[_currentWaveIndex].WaveText);
+            yield return new WaitForSeconds(EnemyWaveDataBaseList[_currentWaveIndex].AfterWaveInterval);
             _battleSceneManager.PlayerUIManager.DisplayOrHideCursor(true);
+            InGameDataBase.IsGameCleared = true;
             _battleSceneManager.LoadOtherScene();
-            return;
+            yield break;
         }
 
-        if (_enemyComponentsList.Count > 0) return;
+        if (_enemyComponentsList.Count > 0) yield break;
         CurrentWaveState = EnemyWaveState.Cleared;
-        OnWaveStarted?.Invoke(EnemyWaveDataBaseList[_currentWaveIndex].WaveText);
-        
-        StartNextWave();
+        _battleSceneManager.BattleUIManager.OnThisWaveCleared(EnemyWaveDataBaseList[_currentWaveIndex].WaveText);
+        yield return new WaitForSeconds(EnemyWaveDataBaseList[_currentWaveIndex].AfterWaveInterval);
+        _currentWaveIndex++;
+        StartCoroutine(WaitForNextWave(EnemyWaveDataBaseList[_currentWaveIndex].BeforeWaveInterval));
     }
 
     public void StartNextWave()
@@ -137,7 +145,7 @@ public class EnemyAppearanceManager : MonoBehaviour
         /// 次のウェーブを開始する
         /// </summary>
         
-        if (CurrentWaveState != EnemyWaveState.Cleared) return;
+        if (CurrentWaveState != EnemyWaveState.Waiting) return;
         if (_currentWaveIndex == EnemyWaveDataBaseList.Count - 1)
         {
             _isLastWave = true;
@@ -164,7 +172,6 @@ public class EnemyAppearanceManager : MonoBehaviour
             if (spawnedCount <= enemiesPerSpawn)
             {
                 GenerateEnemies(spawnedCount);
-                _currentWaveIndex++;
                 yield break;
             }
 
@@ -175,5 +182,13 @@ public class EnemyAppearanceManager : MonoBehaviour
 
         if (CurrentWaveState == EnemyWaveState.Cleared) yield break;
         CurrentWaveState = EnemyWaveState.InProgress;
+    }
+
+    private IEnumerator WaitForNextWave(float waitTime)
+    {
+        CurrentWaveState = EnemyWaveState.Waiting;
+        yield return new WaitForSeconds(waitTime);
+        OnWaveStarted?.Invoke(EnemyWaveDataBaseList[_currentWaveIndex].WaveText);
+        StartNextWave();
     }
 }
