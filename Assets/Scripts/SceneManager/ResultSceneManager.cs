@@ -5,8 +5,8 @@ using TMPro;
 
 public class ResultSceneManager : MonoBehaviour
 {
-    [SerializeField] private string _nextSceneName;     // 次のシーンの名前
-    [SerializeField] private TextMeshProUGUI _resultText; // 結果表示用テキスト
+    [SerializeField] private string _nextSceneName;
+    [SerializeField] private TextMeshProUGUI _resultText;
     [SerializeField] private InGameDataBase _inGameDataBase;
 
     private void Start()

@@ -3,22 +3,19 @@ using System;
 
 public class PlayerManager : MonoBehaviour, IDamageable
 {
-    /// <summary>
-    /// プレイヤーを管理する
-    /// </summary>
     [SerializeField] private PlayerComponents _playerComponents;
-    [SerializeField] private int _canJumpCount;     // ジャンプ可能回数
-    [SerializeField] private string _groundTagName;     // 地面のタグ名
-    [SerializeField] private float _footSoundThreshold;   // 足音を鳴らす速度の閾値
+    [SerializeField] private int _canJumpCount;
+    [SerializeField] private string _groundTagName;
+    [SerializeField] private float _footSoundThreshold;
     [SerializeField] private float _movementThreshold;
     [SerializeField] private ViewRifleAnimationManager _viewRifleAnimationManager;
 
-    public int PlayerHP { get; private set; }       // プレイヤーの体力
-    private Quaternion _cameraRotation;     // カメラの回転保存用
-    private Quaternion _characterRotation;      // キャラクターの回転保存用
+    public int PlayerHP { get; private set; }
+    private Quaternion _cameraRotation;
+    private Quaternion _characterRotation;
     private Rigidbody _rigidbody;
-    private int _jumpCount;   // 現在のジャンプ回数
-    private Vector3 _joystickVector;    // ジョイスティックの入力保存用
+    private int _jumpCount;
+    private Vector3 _joystickVector;
     private Transform _headRotation;
     private bool _isMoving;
     private int _ammoCount;
@@ -26,12 +23,13 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private Vector2 _recoil;
     private Vector2 _currentRecoil;
     private Vector2 _targetRecoil;
-    public event Action OnDamaged;   // プレイヤーがダメージを受けた時のイベント
-    public event Action<GameObject> OnDied;   // プレイヤーが死亡した時のイベント
+    public event Action OnDamaged;
+    public event Action<GameObject> OnDied;
+    private bool _isReloading;
 
     void Start()
     {
-        // ステータス・コンポーネントの取得
+        _isReloading = false;
         _rigidbody = _playerComponents.Rigidbody;
         PlayerHP = _playerComponents.HumanDataBase.HumanHP;
         _cameraRotation = _playerComponents.Camera.transform.localRotation;
@@ -42,17 +40,12 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void SetMovementInput(float x, float z, float sprintSpeed = 1f)
     {
-        /// <summary>
-        /// 移動処理
-        /// </summary>
-        
+
         _isMoving = Mathf.Abs(x) > _movementThreshold || Mathf.Abs(z) > _movementThreshold;
         _playerComponents.Animator.SetBool("IsMoving", _isMoving);
 
-        // ジョイスティック入力をベクトルに変換
         _joystickVector = Vector3.right * x + Vector3.up * z;
 
-        // 足音を再生
         if (_joystickVector.magnitude > _footSoundThreshold && !_playerComponents.FootstepAudioSource.isPlaying && _playerComponents.Animator.GetBool("IsGround"))
         {
             _playerComponents.FootstepAudioSource.PlayOneShot(_playerComponents.FootstepAudioClip);
@@ -67,7 +60,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
         }
 
         if (_joystickVector == Vector3.zero) return;
-        // カメラの向きに合わせてプレイヤーを移動
         gameObject.transform.position += 
             _playerComponents.HumanDataBase.MovementSpeed * z * _playerComponents.Camera.transform.forward * sprintSpeed + 
             _playerComponents.HumanDataBase.MovementSpeed * x * _playerComponents.Camera.transform.right;
@@ -75,15 +67,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void SetRotationInput(float x, float y, Vector2 recoil = default)
     {
-        /// <summary>
-        /// 回転処理
-        /// </summary>
-
-        // カメラとプレイヤーの回転を検出
         _cameraRotation *= Quaternion.Euler(-y * _playerComponents.HumanDataBase.RotationSpeed - recoil.y, 0, 0);
         _characterRotation *= Quaternion.Euler(0, x * _playerComponents.HumanDataBase.RotationSpeed + recoil.x, 0);
 
-        // 角度制限をつけて回転を適用
         _cameraRotation = ClampRotation(_cameraRotation);
         _playerComponents.Camera.transform.localRotation = _cameraRotation;
         gameObject.transform.localRotation = _characterRotation;
@@ -91,10 +77,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void OnJumpButtonDown()
     {
-        /// <summary>
-        /// ジャンプ処理
-        /// </summary>
-
         if (_jumpCount >= _canJumpCount) return;
         _rigidbody.linearVelocity = new Vector3(0, _playerComponents.HumanDataBase.JumpForce, 0);
         _jumpCount++;
@@ -104,14 +86,34 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _playerComponents.Animator.SetBool("IsGround", false);
     }
 
-    private void OnCollisionEnter(Collision col){
-        /// <summary>
-        /// 地面についたら再度ジャンプ可能に
-        /// </summary>
+    public void TakeDamage(int damage)
+    {
+        PlayerHP -= damage;
+        PlayerHP = Mathf.Max(PlayerHP, 0);
+        OnDamaged?.Invoke();
 
+        if (PlayerHP <= 0)
+        {
+            OnDied?.Invoke(gameObject);
+        }
+    }
+
+    public void Reload()
+    {
+        if (_isReloading) return;
+        _isReloading = true;
+        _viewRifleAnimationManager.PlayReloadAnimation();
+    }
+
+    public void FinishedReload()
+    {
+        _isReloading = false;
+        _ammoCount = _playerComponents.RifleManager.WeaponDataBase.MagazineCapacity;
+    }
+
+    private void OnCollisionEnter(Collision col)
+    {
         if (col == null) return;
-
-        // プレイヤーが接地しているオブジェクトの親の親まで確認
         if (col.gameObject.transform.parent.tag != _groundTagName
             && col.gameObject.transform.parent.parent.tag != _groundTagName) return;
         _jumpCount = 0;
@@ -120,11 +122,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _playerComponents.Animator.SetBool("IsGround", true);
     }
 
-    private Quaternion ClampRotation(Quaternion q){
-        /// <summary>
-        /// 回転の角度制限
-        /// </summary>
-        
+    private Quaternion ClampRotation(Quaternion q)
+    {
         q.x /= q.w;
         q.y /= q.w;
         q.z /= q.w;
@@ -134,23 +133,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
         angleX = Mathf.Clamp(angleX, _playerComponents.HumanDataBase.TurningMinAngle, _playerComponents.HumanDataBase.TurningMaxAngle);
         q.x = Mathf.Tan(angleX * Mathf.Deg2Rad * 0.5f);
         return q;
-    }
-
-    public void TakeDamage(int damage)
-    {
-        /// <summary>
-        /// 被ダメージ処理
-        /// </summary>
-        
-        PlayerHP -= damage;
-        PlayerHP = Mathf.Max(PlayerHP, 0);
-        OnDamaged?.Invoke();
-
-        // 死亡時処理
-        if (PlayerHP <= 0)
-        {
-            OnDied?.Invoke(gameObject);
-        }
     }
 
     private void Update()
@@ -167,15 +149,5 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
         _recoil = _playerComponents.RifleManager.ShootByRifle();
         SetRotationInput(0, 0, _recoil);
-    }
-
-    public void Reload()
-    {
-        _viewRifleAnimationManager.PlayReloadAnimation();
-    }
-
-    public void FinishedReload()
-    {
-        _ammoCount = _playerComponents.RifleManager.WeaponDataBase.MagazineCapacity;
     }
 }

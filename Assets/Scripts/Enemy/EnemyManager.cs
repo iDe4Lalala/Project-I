@@ -6,19 +6,15 @@ using Random = UnityEngine.Random;
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyManager : MonoBehaviour, IDamageable
 {
-    /// <summary>
-    /// 敵を管理する
-    /// </summary>
-
     [SerializeField] private EnemyComponents _enemyComponents;
-    [SerializeField] private float _wanderRange;    // 索敵範囲
-    [SerializeField] private float _attackRange;    // 攻撃範囲
-    [SerializeField] private string _playerCompareTag;    // プレイヤーのタグ名
-    [SerializeField] private float _searchInterval;     // 索敵間隔
+    [SerializeField] private float _wanderRange;
+    [SerializeField] private float _attackRange;
+    [SerializeField] private string _playerCompareTag;
+    [SerializeField] private float _searchInterval;
 
+    public event Action<GameObject, EnemyComponents> OnDied;
+    public event Action OnDamaged;
     private int _enemyHP;
-    public event Action<GameObject, EnemyComponents> OnDied;  // 死亡時イベント
-    public event Action OnDamaged;   // ダメージを受けた時のイベント
     private float _timer;
     private float _deltaTime; 
     private float _shootTimer;
@@ -41,25 +37,27 @@ public class EnemyManager : MonoBehaviour, IDamageable
         
         _enemyComponents.Animator.SetFloat("Speed", _enemyComponents.NavMeshAgent.velocity.magnitude);
 
-        // 一定時間ごとに索敵
         if (_timer <= _searchInterval) return;
 
-        SearchForPlayer();
+        FindAndSearchPlayer();
         _timer = 0;
     }
 
-    private void SearchForPlayer()
+    public void TakeDamage(int damage)
     {
-        /// <summary>
-        /// プレイヤーの位置を取得
-        /// </summary>
+        _enemyHP -= damage;
+        OnDamaged?.Invoke();
 
+        if (_enemyHP > 0) return;
+        OnDied?.Invoke(gameObject, _enemyComponents);
+    }
+
+    private void FindAndSearchPlayer()
+    {
         GameObject player = null;
         
-        // 索敵範囲のhitColliderを作成
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, _wanderRange);
         
-        // hitCollider内のプレイヤーを探す
         foreach (var hitCollider in hitColliders)
         {
             if (hitCollider.CompareTag(_playerCompareTag))
@@ -71,23 +69,19 @@ public class EnemyManager : MonoBehaviour, IDamageable
 
         if (player == null)
         {
-            // 移動をやめて、ランダムな方向を向く
             _enemyComponents.NavMeshAgent.ResetPath();
             var course = new Vector3(0, Random.Range(0, 60), 0);
             transform.localRotation = Quaternion.Euler(course);
             return;
         }
 
-        // プレイヤーとの距離を算出
         float distance = Vector3.Distance(transform.position, player.transform.position);
 
         if (distance > _attackRange)
         {
-            // 追跡
             _enemyComponents.NavMeshAgent.isStopped = false;
             _enemyComponents.NavMeshAgent.SetDestination(player.transform.position);
 
-            // 足音を再生
             if (!_enemyComponents.FootstepAudioSource.isPlaying)
             {
                 _enemyComponents.FootstepAudioSource.PlayOneShot(_enemyComponents.FootstepAudioClip);
@@ -95,7 +89,6 @@ public class EnemyManager : MonoBehaviour, IDamageable
         }
         else
         {
-            // 攻撃
             _enemyComponents.NavMeshAgent.isStopped = true;
             if (_enemyComponents.FootstepAudioSource.isPlaying)
             {
@@ -109,15 +102,5 @@ public class EnemyManager : MonoBehaviour, IDamageable
 
             _ = _enemyComponents.RifleManager.ShootByRifle();
         }
-    }
-
-    public void TakeDamage(int damage)
-    {
-        _enemyHP -= damage;
-        OnDamaged?.Invoke();
-
-        if (_enemyHP > 0) return;
-        // 死亡時処理
-        OnDied?.Invoke(gameObject, _enemyComponents);
     }
 }

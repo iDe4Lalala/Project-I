@@ -15,18 +15,18 @@ public enum EnemyWaveState
 
 public class EnemyAppearanceManager : MonoBehaviour
 {
-    [SerializeField] private HumanDataBase _enemyDataBase;
-    [field: SerializeField] public List<EnemyWaveDataBase> EnemyWaveDataBaseList { get; private set; }  // 敵のウェーブデータベースリスト
-    [SerializeField] private Transform _respawnPointParent;  // 敵のリスポーンポイントの親オブジェクト
-    [SerializeField] private BattleSceneManager _battleSceneManager;
+    [field: SerializeField] public List<EnemyWaveDataBase> EnemyWaveDataBaseList { get; private set; }
     [field: SerializeField] public InGameDataBase InGameDataBase { get; private set; }
+    [SerializeField] private HumanDataBase _enemyDataBase;
+    [SerializeField] private Transform _respawnPointParent;
+    [SerializeField] private BattleSceneManager _battleSceneManager;
     
     public EnemyWaveState CurrentWaveState { get; private set; }
     private Transform[] _respawnPoints;
     private List<EnemyComponents> _enemyComponentsList;
     private int _currentWaveIndex;
     private bool _isLastWave;
-    public event Action<string> OnWaveStarted;  // ウェーブが開始された時のイベント
+    public event Action<string> OnWaveStarted;
 
     private void OnEnable()
     {
@@ -41,19 +41,47 @@ public class EnemyAppearanceManager : MonoBehaviour
 
     public void SetEnemyWaveState(EnemyWaveState state)
     {
-        /// <summary>
-        /// 敵のウェーブ状態を設定する
-        /// </summary>
-        
         CurrentWaveState = state;
     }
 
-    private void GenerateEnemies(int generateCount)
+    public void StartNextWave()
     {
-        /// <summary>
-        /// 敵を生成する
-        /// </summary>
-        
+        if (CurrentWaveState != EnemyWaveState.Waiting) return;
+        if (_currentWaveIndex == EnemyWaveDataBaseList.Count - 1)
+        {
+            _isLastWave = true;
+        }
+
+        StartCoroutine(SpawnEnemiesInWave(EnemyWaveDataBaseList[_currentWaveIndex]));
+    }
+    
+    private IEnumerator SpawnEnemiesInWave(EnemyWaveDataBase waveData)
+    {
+        int spawnedCount = waveData.EnemyTotalCount;
+        int enemiesPerSpawn = waveData.MaxEnemyAppearanceCount;
+
+        yield return new WaitForSeconds(waveData.SpawnInterval);
+        CurrentWaveState = EnemyWaveState.Spawning;
+
+        while (spawnedCount > 0)
+        {   
+            if (spawnedCount <= enemiesPerSpawn)
+            {
+                GenerateEnemies(spawnedCount);
+                yield break;
+            }
+
+            GenerateEnemies(enemiesPerSpawn);
+            spawnedCount -= enemiesPerSpawn;
+            yield return new WaitForSeconds(waveData.SpawnInterval);
+        }
+
+        if (CurrentWaveState == EnemyWaveState.Cleared) yield break;
+        CurrentWaveState = EnemyWaveState.InProgress;
+    }
+
+    private void GenerateEnemies(int generateCount)
+    {   
         for (int i = 0; i < generateCount; i++)
         {
             GameObject enemy = Instantiate(_enemyDataBase.HumanObject);
@@ -71,10 +99,6 @@ public class EnemyAppearanceManager : MonoBehaviour
 
     private void GetEnemyRespawnPoints()
     {
-        /// <summary>
-        /// 敵のリスポーンポイントを取得
-        /// </summary>
-        
         int count = _respawnPointParent.childCount;
         _respawnPoints = new Transform[count];
 
@@ -86,29 +110,17 @@ public class EnemyAppearanceManager : MonoBehaviour
 
     private void SetEnemyRespawnPoint(GameObject human)
     {
-        /// <summary>
-        /// 敵のリスポーンポイントを設定する
-        /// </summary>
-        
         int rand = Random.Range(1, _respawnPoints.Length - 1);
         human.transform.SetPositionAndRotation(_respawnPoints[rand].position, _respawnPoints[rand].rotation);
     }
 
     private void OnEnemyDamaged()
     {
-        /// <summary>
-        /// 敵がダメージを受けた時の処理
-        /// </summary>
-        
         StartCoroutine(_battleSceneManager.PlayerUIManager.ShowHitCrossHair());
     }
 
     private void OnEnemyDied(GameObject enemy, EnemyComponents enemyComponents)
     {
-        /// <summary>
-        /// 敵が死亡した時の処理
-        /// </summary>
-
         enemyComponents.EnemyManager.OnDied -= OnEnemyDied;
         enemyComponents.EnemyManager.OnDamaged -= OnEnemyDamaged;
         
@@ -137,51 +149,6 @@ public class EnemyAppearanceManager : MonoBehaviour
         yield return new WaitForSeconds(EnemyWaveDataBaseList[_currentWaveIndex].AfterWaveInterval);
         _currentWaveIndex++;
         StartCoroutine(WaitForNextWave(EnemyWaveDataBaseList[_currentWaveIndex].BeforeWaveInterval));
-    }
-
-    public void StartNextWave()
-    {
-        /// <summary>
-        /// 次のウェーブを開始する
-        /// </summary>
-        
-        if (CurrentWaveState != EnemyWaveState.Waiting) return;
-        if (_currentWaveIndex == EnemyWaveDataBaseList.Count - 1)
-        {
-            _isLastWave = true;
-        }
-
-        StartCoroutine(SpawnEnemiesInWave(EnemyWaveDataBaseList[_currentWaveIndex]));
-    }
-
-    private IEnumerator SpawnEnemiesInWave(EnemyWaveDataBase waveData)
-    {
-        /// <summary>
-        /// ウェーブ内の敵をスポーンするコルーチン
-        /// </summary>
-
-        int spawnedCount = waveData.EnemyTotalCount;
-        int enemiesPerSpawn = waveData.MaxEnemyAppearanceCount;
-
-        yield return new WaitForSeconds(waveData.SpawnInterval);
-        CurrentWaveState = EnemyWaveState.Spawning;
-
-        while (spawnedCount > 0)
-        {   
-            // 最後のスポーンの時
-            if (spawnedCount <= enemiesPerSpawn)
-            {
-                GenerateEnemies(spawnedCount);
-                yield break;
-            }
-
-            GenerateEnemies(enemiesPerSpawn);
-            spawnedCount -= enemiesPerSpawn;
-            yield return new WaitForSeconds(waveData.SpawnInterval);
-        }
-
-        if (CurrentWaveState == EnemyWaveState.Cleared) yield break;
-        CurrentWaveState = EnemyWaveState.InProgress;
     }
 
     private IEnumerator WaitForNextWave(float waitTime)
