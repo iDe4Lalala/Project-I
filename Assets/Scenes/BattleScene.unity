@@ -713,7 +713,7 @@ MonoBehaviour:
   _hitCrossHair: {fileID: 1072808208}
   _operationButtonParent: {fileID: 2047213598}
   _isUseJoystick: 0
-  _hitCrossHairDisplayTime: 0.4
+  <HitCrossHairDisplayTime>k__BackingField: 0.3
 --- !u!1001 &67500284
 PrefabInstance:
   m_ObjectHideFlags: 0

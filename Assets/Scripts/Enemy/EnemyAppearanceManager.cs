@@ -116,7 +116,7 @@ public class EnemyAppearanceManager : MonoBehaviour
 
     private void OnEnemyDamaged()
     {
-        StartCoroutine(_battleSceneManager.PlayerUIManager.ShowHitCrossHair());
+        StartCoroutine(_battleSceneManager.PlayerUIManager.ShowHitCrossHairForSeconds(_battleSceneManager.PlayerUIManager.HitCrossHairDisplayTime));
     }
 
     private void OnEnemyDied(GameObject enemy, EnemyComponents enemyComponents)

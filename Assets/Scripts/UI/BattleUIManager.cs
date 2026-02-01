@@ -3,7 +3,7 @@ using UnityEngine;
 using TMPro;
 using System;
 
-public class BattleUIManager : MonoBehaviour
+public class BattleUIManager : MonoBehaviour, IBattleUIService
 {
     [SerializeField] private TMP_Text _battleTimerText;
     [SerializeField] private TMP_Text _killText;
@@ -21,23 +21,23 @@ public class BattleUIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        _battleSceneManager.OnTimerUpdated += SetBattleTimer;
+        _battleSceneManager.OnTimerUpdated += UpdateTimer;
         _enemyAppearanceManager.OnWaveStarted += OnNextWaveStarted;
 
         _killText.gameObject.SetActive(false);
         _battleProgressText.gameObject.SetActive(false);
         _beforeBattleTimerText.gameObject.SetActive(true);
 
-        StartCoroutine(ShowBeforeBattleTimerText());
+        StartCoroutine(PlayCountdown(_beforeBattleTimer));
     }
 
     private void OnDisable()
     {
-        _battleSceneManager.OnTimerUpdated -= SetBattleTimer;
+        _battleSceneManager.OnTimerUpdated -= UpdateTimer;
         _enemyAppearanceManager.OnWaveStarted -= OnNextWaveStarted;
     }
 
-    public void SetBattleTimer(float time)
+    public void UpdateTimer(float time)
     {
         int m = (int)(time / 60);
         int s = (int)(time % 60);
@@ -56,34 +56,34 @@ public class BattleUIManager : MonoBehaviour
             _killText.text = _enemyKillSentence;
         }
         
-        StartCoroutine(ShowKillText());
+        StartCoroutine(ShowKillTextForSeconds(_killText.text, _killTextDisplayTime));
     }
 
     public void OnNextWaveStarted(string waveText)
     {
         _battleProgressText.text = $"{waveText} Wave Start";
-        StartCoroutine(ShowBattleStartedText());
+        StartCoroutine(ShowProgressTextForSeconds(_battleProgressText.text, _progressTextDisplayTime));
     }
 
     public void OnThisWaveCleared(string waveText)
     {
         _battleProgressText.text = $"{waveText} Wave Clear";
-        StartCoroutine(ShowBattleStartedText());
+        StartCoroutine(ShowProgressTextForSeconds(_battleProgressText.text, _progressTextDisplayTime));
     }
 
-    private IEnumerator ShowKillText()
+    public IEnumerator ShowKillTextForSeconds(string text, float seconds)
     {
         _killText.gameObject.SetActive(true);
-        yield return new WaitForSeconds(_killTextDisplayTime);
+        yield return new WaitForSeconds(seconds);
         _killText.gameObject.SetActive(false);
     }
 
-    private IEnumerator ShowBeforeBattleTimerText()
+    public IEnumerator PlayCountdown(float countdownTime)
     {
         WaitForSeconds waitForSeconds = new (1f);
         _beforeBattleTimerText.gameObject.SetActive(true);
 
-        for (int i = Mathf.CeilToInt(_beforeBattleTimer); i >= 1; i--)
+        for (int i = Mathf.CeilToInt(countdownTime); i >= 1; i--)
         {
             _beforeBattleTimerText.text = i.ToString();
             yield return waitForSeconds;
@@ -93,10 +93,10 @@ public class BattleUIManager : MonoBehaviour
         OnStartBattle?.Invoke();
     }
 
-    private IEnumerator ShowBattleStartedText()
+    public IEnumerator ShowProgressTextForSeconds(string text, float seconds)
     {
         _battleProgressText.gameObject.SetActive(true);
-        yield return new WaitForSeconds(_progressTextDisplayTime);
+        yield return new WaitForSeconds(seconds);
         _battleProgressText.gameObject.SetActive(false);
     }
 }

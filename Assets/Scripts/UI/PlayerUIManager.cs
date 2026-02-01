@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 
-public class PlayerUIManager : MonoBehaviour
+public class PlayerUIManager : MonoBehaviour, IPlayerUIService
 {
     [SerializeField] private BattleUIManager _battleUIManager; 
     [SerializeField] private TMP_Text _playerCurrentHP;
@@ -10,7 +10,7 @@ public class PlayerUIManager : MonoBehaviour
     [SerializeField] private GameObject _hitCrossHair;
     [SerializeField] private GameObject _operationButtonParent;
     [SerializeField] private bool _isUseJoystick;
-    [SerializeField] private float _hitCrossHairDisplayTime;
+    [field: SerializeField] public float HitCrossHairDisplayTime { get; private set; }
 
     private PlayerComponents _playerComponents;
     private OperationButtonComponents _operationButtonsComponents;
@@ -117,10 +117,10 @@ public class PlayerUIManager : MonoBehaviour
         _playerCurrentHP.text = _playerComponents.HumanDataBase.HumanHP.ToString();
     }
 
-    public IEnumerator ShowHitCrossHair()
+    public IEnumerator ShowHitCrossHairForSeconds(float seconds)
     {
         _hitCrossHair.SetActive(true);
-        yield return new WaitForSeconds(_hitCrossHairDisplayTime);
+        yield return new WaitForSeconds(seconds);
         _hitCrossHair.SetActive(false);
     }
 
@@ -144,5 +144,15 @@ public class PlayerUIManager : MonoBehaviour
             _playerComponents.PlayerManager.OnDamaged -= OnPlayerDamaged;
             _playerComponents = null;
         }
+    }
+
+    public void ShowPlayerHP(float currentHP)
+    {
+
+    }
+
+    public void ShowLeftAmmoCount(int currentAmmoCount)
+    {
+
     }
 }
