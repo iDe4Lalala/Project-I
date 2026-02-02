@@ -1,4 +1,6 @@
+using UnityEngine;
+
 public interface IGenerator<out T>
 {
-    public T Generate();
+    public T Generate(GameObject prefab);
 }

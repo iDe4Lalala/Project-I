@@ -27,6 +27,14 @@ public class EnemyAppearanceManager : MonoBehaviour
     private int _currentWaveIndex;
     private bool _isLastWave;
     public event Action<string> OnWaveStarted;
+    private IGenerator<GameObject> _enemyGenerator;
+    private IWeaponGenerator<GameObject> _weaponGenerator;
+
+    private void Awake()
+    {
+        _enemyGenerator = new EnemyGenerator();
+        _weaponGenerator = new WeaponGenerator();
+    }
 
     private void OnEnable()
     {
@@ -84,7 +92,7 @@ public class EnemyAppearanceManager : MonoBehaviour
     {   
         for (int i = 0; i < generateCount; i++)
         {
-            GameObject enemy = Instantiate(_enemyDataBase.HumanObject);
+            GameObject enemy = _enemyGenerator.Generate(_enemyDataBase.HumanObject);
             SetEnemyRespawnPoint(enemy);
 
             EnemyComponents enemyComponents = enemy.GetComponent<EnemyComponents>();
@@ -92,7 +100,7 @@ public class EnemyAppearanceManager : MonoBehaviour
             enemyComponents.EnemyManager.OnDied += OnEnemyDied;
             enemyComponents.EnemyManager.OnDamaged += OnEnemyDamaged;
 
-            GameObject rifle = Instantiate(_battleSceneManager.RiflePrefab, enemyComponents.RifleSocket.transform);
+            GameObject rifle = _weaponGenerator.Generate(_battleSceneManager.RiflePrefab, enemyComponents.RifleSocket.transform);
             enemyComponents.SetRifleManager(rifle);
         }
     }

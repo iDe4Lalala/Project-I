@@ -21,7 +21,14 @@ public class BattleSceneManager : MonoBehaviour
     private float _currentTimer;
     private PlayerComponents _playerComponents;
     private int _lifePoint;
-    private GameObject _playerCamera;
+    private IGenerator<GameObject> _playerGenerator;
+    private IWeaponGenerator<GameObject> _weaponGenerator;
+    
+    private void Awake()
+    {
+        _playerGenerator = new PlayerGenerator();
+        _weaponGenerator = new WeaponGenerator();
+    }
 
     private void OnEnable()
     {
@@ -70,14 +77,14 @@ public class BattleSceneManager : MonoBehaviour
     private void GeneratePlayer()
     {
         if (_playerComponents != null) return;
-        GameObject player = Instantiate(_playerDataBase.HumanObject);
+        GameObject player = _playerGenerator.Generate(_playerDataBase.HumanObject);
         SetPlayerRespawnPoint(player);
 
         _playerComponents = player.GetComponent<PlayerComponents>();
         _playerComponents.AspectRatioManager.SetCanvas(_battleCanvas);
         _playerComponents.PlayerManager.OnDied += OnPlayerDied;
 
-        GameObject rifle = Instantiate(RiflePrefab, _playerComponents.RifleSocket.transform);
+        GameObject rifle = _weaponGenerator.Generate(RiflePrefab, _playerComponents.RifleSocket.transform);
         _playerComponents.SetRifleManager(rifle);
 
         PlayerUIManager.SetPlayer(player);
