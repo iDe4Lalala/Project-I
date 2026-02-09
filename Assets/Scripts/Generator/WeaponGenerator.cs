@@ -2,8 +2,15 @@ using UnityEngine;
 
 public class WeaponGenerator : IWeaponGenerator<GameObject>
 {
-    public GameObject Generate(GameObject weaponPrefab, Transform parent)
+    private WeaponDataBase _weaponDataBase;
+
+    public WeaponGenerator(WeaponDataBase weaponDataBase)
     {
-        return Object.Instantiate(weaponPrefab, parent);
+        _weaponDataBase = weaponDataBase;
+    }
+
+    public GameObject Generate(Transform parent)
+    {
+        return Object.Instantiate(_weaponDataBase.WeaponObject, parent);
     }
 }

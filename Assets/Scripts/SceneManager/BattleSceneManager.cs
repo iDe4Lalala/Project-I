@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 public class BattleSceneManager : MonoBehaviour
 {
-    [field: SerializeField] public GameObject RiflePrefab { get; private set; }
+    [field: SerializeField] public WeaponDataBase WeaponDataBase { get; private set; }
     [field: SerializeField] public PlayerUIManager PlayerUIManager { get; private set; }
     [field: SerializeField] public BattleUIManager BattleUIManager { get; private set; }
     [field: SerializeField] public UnityEvent<bool> OnKilled { get; private set; }
@@ -26,13 +26,13 @@ public class BattleSceneManager : MonoBehaviour
     
     private void Awake()
     {
-        _playerGenerator = new PlayerGenerator();
-        _weaponGenerator = new WeaponGenerator();
+        _playerGenerator = new PlayerGenerator(_playerDataBase);
+        _weaponGenerator = new WeaponGenerator(WeaponDataBase);
     }
 
     private void OnEnable()
     {
-        BattleUIManager.OnStartBattle += OnStartBattle;
+        BattleUIManager.OnStartingBattle += OnStartBattle;
         _currentTimer = _battleTimer;
         _lifePoint = _playerDataBase.LifePoint;
 
@@ -42,7 +42,7 @@ public class BattleSceneManager : MonoBehaviour
 
     private void OnDisable()
     {
-        BattleUIManager.OnStartBattle -= OnStartBattle;
+        BattleUIManager.OnStartingBattle -= OnStartBattle;
     }
     
     private void Update()
@@ -77,14 +77,14 @@ public class BattleSceneManager : MonoBehaviour
     private void GeneratePlayer()
     {
         if (_playerComponents != null) return;
-        GameObject player = _playerGenerator.Generate(_playerDataBase.HumanObject);
+        GameObject player = _playerGenerator.Generate();
         SetPlayerRespawnPoint(player);
 
         _playerComponents = player.GetComponent<PlayerComponents>();
         _playerComponents.AspectRatioManager.SetCanvas(_battleCanvas);
         _playerComponents.PlayerManager.OnDied += OnPlayerDied;
 
-        GameObject rifle = _weaponGenerator.Generate(RiflePrefab, _playerComponents.RifleSocket.transform);
+        GameObject rifle = _weaponGenerator.Generate(_playerComponents.RifleSocket.transform);
         _playerComponents.SetRifleManager(rifle);
 
         PlayerUIManager.SetPlayer(player);

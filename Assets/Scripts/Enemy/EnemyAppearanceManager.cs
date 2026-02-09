@@ -32,8 +32,8 @@ public class EnemyAppearanceManager : MonoBehaviour
 
     private void Awake()
     {
-        _enemyGenerator = new EnemyGenerator();
-        _weaponGenerator = new WeaponGenerator();
+        _enemyGenerator = new EnemyGenerator(_enemyDataBase);
+        _weaponGenerator = new WeaponGenerator(_battleSceneManager.WeaponDataBase);
     }
 
     private void OnEnable()
@@ -92,7 +92,7 @@ public class EnemyAppearanceManager : MonoBehaviour
     {   
         for (int i = 0; i < generateCount; i++)
         {
-            GameObject enemy = _enemyGenerator.Generate(_enemyDataBase.HumanObject);
+            GameObject enemy = _enemyGenerator.Generate();
             SetEnemyRespawnPoint(enemy);
 
             EnemyComponents enemyComponents = enemy.GetComponent<EnemyComponents>();
@@ -100,7 +100,7 @@ public class EnemyAppearanceManager : MonoBehaviour
             enemyComponents.EnemyManager.OnDied += OnEnemyDied;
             enemyComponents.EnemyManager.OnDamaged += OnEnemyDamaged;
 
-            GameObject rifle = _weaponGenerator.Generate(_battleSceneManager.RiflePrefab, enemyComponents.RifleSocket.transform);
+            GameObject rifle = _weaponGenerator.Generate(enemyComponents.RifleSocket.transform);
             enemyComponents.SetRifleManager(rifle);
         }
     }

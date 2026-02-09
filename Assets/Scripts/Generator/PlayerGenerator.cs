@@ -2,8 +2,15 @@ using UnityEngine;
 
 public class PlayerGenerator : IGenerator<GameObject>
 {
-    public GameObject Generate(GameObject playerPrefab)
+    private HumanDataBase _playerDataBase;
+
+    public PlayerGenerator(HumanDataBase playerDataBase)
     {
-        return Object.Instantiate(playerPrefab);
+        _playerDataBase = playerDataBase;
+    }
+
+    public GameObject Generate()
+    {
+        return Object.Instantiate(_playerDataBase.HumanObject);
     }
 }

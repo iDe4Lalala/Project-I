@@ -2,8 +2,15 @@ using UnityEngine;
 
 public class EnemyGenerator : IGenerator<GameObject>
 {
-    public GameObject Generate(GameObject enemyPrefab)
+    private HumanDataBase _enemyDataBase;
+
+    public EnemyGenerator(HumanDataBase enemyDataBase)
     {
-        return Object.Instantiate(enemyPrefab);
+        _enemyDataBase = enemyDataBase;
+    }
+
+    public GameObject Generate()
+    {
+        return Object.Instantiate(_enemyDataBase.HumanObject);
     }
 }

@@ -24,12 +24,12 @@ public class PlayerUIManager : MonoBehaviour, IPlayerUIService
     {
         _hitCrossHair.SetActive(false);
         _isWaiting = true;
-        _battleUIManager.OnStartBattle += () => _isWaiting = false;
+        _battleUIManager.OnStartingBattle += () => _isWaiting = false;
     }
 
     private void OnDisable()
     {
-        _battleUIManager.OnStartBattle -= () => _isWaiting = false;
+        _battleUIManager.OnStartingBattle -= () => _isWaiting = false;
     }
 
     private void Start()

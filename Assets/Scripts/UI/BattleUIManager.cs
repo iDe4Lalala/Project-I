@@ -17,7 +17,7 @@ public class BattleUIManager : MonoBehaviour, IBattleUIService
     [SerializeField] private BattleSceneManager _battleSceneManager;
     [SerializeField] private EnemyAppearanceManager _enemyAppearanceManager;
 
-    public event Action OnStartBattle;
+    public event Action OnStartingBattle;
 
     private void OnEnable()
     {
@@ -90,7 +90,7 @@ public class BattleUIManager : MonoBehaviour, IBattleUIService
         }
 
         _beforeBattleTimerText.gameObject.SetActive(false);
-        OnStartBattle?.Invoke();
+        OnStartingBattle?.Invoke();
     }
 
     public IEnumerator ShowProgressTextForSeconds(string text, float seconds)

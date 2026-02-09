@@ -3,6 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "WeaponDataBase", menuName = "ScriptableObjects/WeaponDataBase")]
 public class WeaponDataBase : ScriptableObject
 {
+    [field: SerializeField] public GameObject WeaponObject { get; private set; }
     [field: SerializeField] public float MaximumBallisticDistance { get; private set; }
     [field: SerializeField] public int Damage { get; private set; }
     [field: SerializeField] public int MagazineCapacity { get; private set; }
