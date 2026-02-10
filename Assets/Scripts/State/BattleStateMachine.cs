@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,8 +36,8 @@ public class BattleStateMachine : MonoBehaviour
         {
             { BattleStateType.Countdown, new BattleCountdownState(_playerGenerator, _weaponGenerator, _battleUIService) },
             { BattleStateType.Wave, new WaveState(_enemyGenerator, _weaponGenerator, _battleUIService) },
-            { BattleStateType.Clear, new WaveClearState(_battleUIService) },
-            { BattleStateType.End, new BattleEndState(_battleUIService) }
+            { BattleStateType.Clear, new WaveClearState(_battleUIService, this) },
+            { BattleStateType.End, new BattleEndState(_battleUIService, this) }
         };
 
         InitializeEvents();
@@ -63,5 +64,15 @@ public class BattleStateMachine : MonoBehaviour
     private void Update()
     {
         _currentState.Execute();
+    }
+
+    public void RunCoroutine(IEnumerator coroutine)
+    {
+        StartCoroutine(coroutine);
+    }
+
+    public IEnumerator WaitForSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
     }
 }
