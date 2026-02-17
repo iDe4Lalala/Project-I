@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IGenerator<out T>
+public interface IGenerator
 {
-    public T Generate();
+    public GameObject Generate(Transform spawnPoint);
 }

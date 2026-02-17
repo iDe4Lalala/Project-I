@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class WeaponGenerator : IWeaponGenerator<GameObject>
+public class WeaponGenerator : IGenerator
 {
     private WeaponDataBase _weaponDataBase;
 

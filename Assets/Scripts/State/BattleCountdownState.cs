@@ -1,32 +1,34 @@
-using UnityEngine;
 using System;
+using System.Collections;
+using UnityEngine;
 
 public class BattleCountdownState : IBattleState
-{
-    private PlayerGenerator _playerGenerator;
-    private WeaponGenerator _weaponGenerator;
-    private IBattleUIService _battleUIService;
-    public event Action<int> OnChangingState;
-
-    public BattleCountdownState(PlayerGenerator playerGenerator, WeaponGenerator weaponGenerator, IBattleUIService battleUIManager)
     {
-        _playerGenerator = playerGenerator;
-        _weaponGenerator = weaponGenerator;
-        _battleUIService = battleUIManager;
-    }
+    private IGenerator _playerGenerator;
+    private ISpawnPointProvider _playerSpawnPointProvider;
+    private IGenerator _weaponGenerator;
+    private IBattleUIService _battleUIService;
+    public event Action<BattleStateType> OnChangingState;
 
-    public void Enter()
+        public BattleCountdownState(IGenerator playerGenerator, ISpawnPointProvider playerSpawnPointProvider,
+            IGenerator weaponGenerator, IBattleUIService battleUIManager)
+        {
+            _playerGenerator = playerGenerator;
+            _playerSpawnPointProvider = playerSpawnPointProvider;
+            _weaponGenerator = weaponGenerator;
+            _battleUIService = battleUIManager;
+        }
+
+    public IEnumerator Enter()
     {
         _battleUIService.OnStartingBattle += OnStartingBattle;
 
         // プレイヤー、武器(、Map)の生成
-        GameObject player = _playerGenerator.Generate();
-        PlayerComponents playerComponents = player.GetComponent<PlayerComponents>();
-        GameObject rifle = _weaponGenerator.Generate(playerComponents.RifleSocket.transform);
-        // playerComponents.SetRifleManager(rifle);
+        Transform playerSpawnPoint = _playerSpawnPointProvider.GetSpawnPoint();
+        GameObject player = _playerGenerator.Generate(playerSpawnPoint);
 
         // 3カウント
-        _battleUIService.PlayCountdown(3f);
+        yield return _battleUIService.PlayCountdown(3f);
     }
 
     public void Execute() { }
@@ -39,6 +41,6 @@ public class BattleCountdownState : IBattleState
     public void OnStartingBattle()
     {
         // WaveStateへ遷移
-        OnChangingState?.Invoke(1);
+        OnChangingState?.Invoke(BattleStateType.Wave);
     }
 }

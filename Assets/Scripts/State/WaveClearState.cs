@@ -1,8 +1,9 @@
 using System;
+using System.Collections;
 
 public class WaveClearState : IBattleState
 {
-    public event Action<int> OnChangingState;
+    public event Action<BattleStateType> OnChangingState;
     private IBattleUIService _battleUIService;
     private BattleStateMachine _battleStateMachine;
 
@@ -12,13 +13,13 @@ public class WaveClearState : IBattleState
         _battleStateMachine = battleStateMachine;
     }
 
-    public void Enter()
+    public IEnumerator Enter()
     {
         // "WaveClear"表示
-        _battleStateMachine.RunCoroutine(_battleUIService.ShowProgressTextForSeconds("Wave Clear!", 2f));
+        yield return _battleUIService.ShowProgressTextForSeconds("Wave Clear!", 2f);
 
         // 一定時間待つ
-        _battleStateMachine.RunCoroutine(_battleStateMachine.WaitForSeconds(2f));
+        yield return _battleStateMachine.WaitForSeconds(2f);
     }
 
     public void Execute() { }
@@ -26,6 +27,6 @@ public class WaveClearState : IBattleState
     public void Exit()
     {
         // 次のWaveStateへ遷移
-        OnChangingState?.Invoke(1);
+        OnChangingState?.Invoke(BattleStateType.Wave);
     }
 }

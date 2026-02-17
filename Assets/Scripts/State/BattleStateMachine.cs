@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,69 +11,78 @@ public enum BattleStateType
     End = 3
 }
 
+public enum BattleResultType
+{
+    GameClear = 0,
+    GameOver = 1
+}
+
 public class BattleStateMachine : MonoBehaviour
 {
-    [SerializeField] private HumanDataBase _playerDataBase;
-    [SerializeField] private HumanDataBase _enemyDataBase;
-    [SerializeField] private WeaponDataBase _weaponDataBase;
-    private IBattleUIService _battleUIService;
+    public event Action<BattleResultType> OnChangingScene;
     private Dictionary<BattleStateType, IBattleState> _battleStates;
     private IBattleState _currentState;
-    private PlayerGenerator _playerGenerator;
-    private EnemyGenerator _enemyGenerator;
-    private WeaponGenerator _weaponGenerator;
-
-    private void Awake()
-    {
-        _playerGenerator = new PlayerGenerator(_playerDataBase);
-        _enemyGenerator = new EnemyGenerator(_enemyDataBase);
-        _weaponGenerator = new WeaponGenerator(_weaponDataBase);
-        InitializeStates();
-    }
-
-    private void InitializeStates()
-    {
-        _battleStates = new Dictionary<BattleStateType, IBattleState>()
-        {
-            { BattleStateType.Countdown, new BattleCountdownState(_playerGenerator, _weaponGenerator, _battleUIService) },
-            { BattleStateType.Wave, new WaveState(_enemyGenerator, _weaponGenerator, _battleUIService) },
-            { BattleStateType.Clear, new WaveClearState(_battleUIService, this) },
-            { BattleStateType.End, new BattleEndState(_battleUIService, this) }
-        };
-
-        InitializeEvents();
-        _currentState = _battleStates[BattleStateType.Countdown];
-    }
-
-    private void InitializeEvents()
-    {
-        foreach (var state in _battleStates.Values)
-        {
-            state.OnChangingState += ChangeState;
-        }
-    }
-
-    private void ChangeState(int newStateTypeNumber)
-    {
-        BattleStateType newStateType = (BattleStateType)newStateTypeNumber;
-
-        _currentState.Exit();
-        _currentState = _battleStates[newStateType];
-        _currentState.Enter();
-    }
+    private BattleContext _battleContext;
 
     private void Update()
     {
+        if(_currentState == null) return;
         _currentState.Execute();
     }
 
-    public void RunCoroutine(IEnumerator coroutine)
-    {
-        StartCoroutine(coroutine);
+    public void Initialize(BattleContext battleContext)
+     {
+        _battleContext = battleContext;
+        InitializeStates();
+        InitializeEvents();
+
+        StartCoroutine(_currentState.Enter());
     }
 
     public IEnumerator WaitForSeconds(float seconds)
     {
         yield return new WaitForSeconds(seconds);
+    }
+
+    private void InitializeStates()
+    {
+        // Stateの生成をinterfaceにするのを検討
+        _battleStates = new Dictionary<BattleStateType, IBattleState>()
+        {
+            { BattleStateType.Countdown, new BattleCountdownState(
+                _battleContext.PlayerGenerator, _battleContext.PlayerSpawnPointProvider, _battleContext.WeaponGenerator, _battleContext.BattleUIService) },
+            { BattleStateType.Wave, new WaveState(_battleContext.EnemyGenerator, _battleContext.EnemySpawnPointProvider, _battleContext.WeaponGenerator, _battleContext.BattleUIService) },
+            { BattleStateType.Clear, new WaveClearState(_battleContext.BattleUIService, this) },
+            { BattleStateType.End, new BattleEndState(_battleContext.BattleUIService, this) }
+        };
+
+        _currentState = _battleStates[BattleStateType.Countdown];
+    }
+
+    private void InitializeEvents()
+    {
+        foreach (var battleState in _battleStates.Values)
+        {
+            battleState.OnChangingState += ChangeState;
+        }
+
+        if (!_battleStates.TryGetValue(BattleStateType.End, out var state)) return;
+        if (state is BattleEndState endState) 
+        {
+            endState.OnBattleEnded += OnBattleEnded;
+        }
+    }
+
+    private void ChangeState(BattleStateType newStateType)
+    {
+        // すでにこのコルーチンが動いている時の処理を書く
+        _currentState.Exit();
+        _currentState = _battleStates[newStateType];
+        StartCoroutine(_currentState.Enter());
+    }
+
+    public void OnBattleEnded(BattleResultType result)
+    {
+        OnChangingScene?.Invoke(result);
     }
 }

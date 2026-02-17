@@ -9,25 +9,45 @@ public class BattleSceneManager : MonoBehaviour
     [field: SerializeField] public PlayerUIManager PlayerUIManager { get; private set; }
     [field: SerializeField] public BattleUIManager BattleUIManager { get; private set; }
     [field: SerializeField] public UnityEvent<bool> OnKilled { get; private set; }
+
+    [SerializeField] private BattleStateMachine _battleStateMachine;
+    [SerializeField] private Transform _playerSpawnPoint;
+    [SerializeField] private Transform[] _enemySpawnPoints;
     [SerializeField] private HumanDataBase _playerDataBase;
-    [SerializeField] private Transform _playerRespawnPoint;
+    [SerializeField] private HumanDataBase _enemyDataBase;
+    [SerializeField] private WeaponDataBase _weaponDataBase;
     [SerializeField] private string _nextSceneName;
     [SerializeField] private Canvas _battleCanvas;
     [SerializeField] private float _battleTimer;
     [SerializeField] private EnemyAppearanceManager _enemyAppearanceManager;
     [SerializeField] private GameObject _diedCameraPosition;
-    
+
     public event Action<float> OnTimerUpdated;
     private float _currentTimer;
     private PlayerComponents _playerComponents;
     private int _lifePoint;
-    private IGenerator<GameObject> _playerGenerator;
-    private IWeaponGenerator<GameObject> _weaponGenerator;
+    private IGenerator _playerGenerator;
+    private IGenerator _enemyGenerator;
+    private IGenerator _weaponGenerator;
+    private BattleContext _battleContext;
+    private ISpawnPointProvider _playerSpawnPointProvider;
+    private ISpawnPointProvider _enemySpawnPointProvider;
     
     private void Awake()
     {
-        _playerGenerator = new PlayerGenerator(_playerDataBase);
+        _playerSpawnPointProvider = new PlayerSpawnPointProvider(_playerSpawnPoint);
+        _enemySpawnPointProvider = new EnemySpawnPointProvider(_enemySpawnPoints);
         _weaponGenerator = new WeaponGenerator(WeaponDataBase);
+        _playerGenerator = new PlayerGenerator(_playerDataBase, _weaponGenerator);
+        _enemyGenerator = new EnemyGenerator(_enemyDataBase, _weaponGenerator);
+        // BattleContextの受け取りをinterfaceに
+        _battleContext = new BattleContext(
+            _battleStateMachine, _playerGenerator, _enemyGenerator, _weaponGenerator,
+            BattleUIManager, _playerSpawnPointProvider, _enemySpawnPointProvider,
+            _playerDataBase, _enemyDataBase, WeaponDataBase, _playerSpawnPoint, _enemySpawnPoints
+        );
+        _battleStateMachine.OnChangingScene += OnBattleEnded;
+        _battleStateMachine.Initialize(_battleContext);
     }
 
     private void OnEnable()
@@ -77,23 +97,16 @@ public class BattleSceneManager : MonoBehaviour
     private void GeneratePlayer()
     {
         if (_playerComponents != null) return;
-        GameObject player = _playerGenerator.Generate();
-        SetPlayerRespawnPoint(player);
+        GameObject player = _playerGenerator.Generate(_playerSpawnPoint);
 
         _playerComponents = player.GetComponent<PlayerComponents>();
         _playerComponents.AspectRatioManager.SetCanvas(_battleCanvas);
         _playerComponents.PlayerManager.OnDied += OnPlayerDied;
 
-        GameObject rifle = _weaponGenerator.Generate(_playerComponents.RifleSocket.transform);
+        GameObject rifle = _weaponGenerator.Generate(_playerComponents.WeaponSocket.transform);
         _playerComponents.SetRifleManager(rifle);
 
         PlayerUIManager.SetPlayer(player);
-    }
-
-    private void SetPlayerRespawnPoint(GameObject human)
-    {
-        human.transform.SetPositionAndRotation(_playerRespawnPoint.position, _playerRespawnPoint.rotation);
-        return;
     }
 
     private void OnPlayerDied(GameObject player)
@@ -124,5 +137,15 @@ public class BattleSceneManager : MonoBehaviour
             Destroy(cameraTransform.GetChild(i).gameObject);
         }
         PlayerUIManager.gameObject.SetActive(false);
+    }
+
+    public void OnBattleEnded(BattleResultType result)
+    {
+        if (result == BattleResultType.GameClear)
+        {
+            // 結果を保持しつつシーン遷移
+        }
+        PlayerUIManager.DisplayOrHideCursor(true);
+        LoadOtherScene();
     }
 }

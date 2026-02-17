@@ -27,12 +27,13 @@ public class EnemyAppearanceManager : MonoBehaviour
     private int _currentWaveIndex;
     private bool _isLastWave;
     public event Action<string> OnWaveStarted;
-    private IGenerator<GameObject> _enemyGenerator;
-    private IWeaponGenerator<GameObject> _weaponGenerator;
+    private EnemyGenerator _enemyGenerator;
+    private WeaponGenerator _weaponGenerator;
 
     private void Awake()
     {
-        _enemyGenerator = new EnemyGenerator(_enemyDataBase);
+        GetEnemyRespawnPoints();
+        _enemyGenerator = new EnemyGenerator(_enemyDataBase, _weaponGenerator);
         _weaponGenerator = new WeaponGenerator(_battleSceneManager.WeaponDataBase);
     }
 
@@ -43,7 +44,6 @@ public class EnemyAppearanceManager : MonoBehaviour
         _isLastWave = false;
         InGameDataBase.ResetStatus();
         CurrentWaveState = EnemyWaveState.Waiting;
-        GetEnemyRespawnPoints();
         StartCoroutine(WaitForNextWave(EnemyWaveDataBaseList[_currentWaveIndex].BeforeWaveInterval));
     }
 
@@ -92,7 +92,7 @@ public class EnemyAppearanceManager : MonoBehaviour
     {   
         for (int i = 0; i < generateCount; i++)
         {
-            GameObject enemy = _enemyGenerator.Generate();
+            GameObject enemy = _enemyGenerator.Generate(_respawnPointParent);
             SetEnemyRespawnPoint(enemy);
 
             EnemyComponents enemyComponents = enemy.GetComponent<EnemyComponents>();
@@ -100,7 +100,7 @@ public class EnemyAppearanceManager : MonoBehaviour
             enemyComponents.EnemyManager.OnDied += OnEnemyDied;
             enemyComponents.EnemyManager.OnDamaged += OnEnemyDamaged;
 
-            GameObject rifle = _weaponGenerator.Generate(enemyComponents.RifleSocket.transform);
+            GameObject rifle = _weaponGenerator.Generate(enemyComponents.WeaponSocket.transform);
             enemyComponents.SetRifleManager(rifle);
         }
     }

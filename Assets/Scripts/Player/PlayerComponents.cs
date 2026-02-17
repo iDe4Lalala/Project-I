@@ -8,7 +8,7 @@ public class PlayerComponents : MonoBehaviour
     [field: SerializeField] public AspectRatioManager AspectRatioManager { get; private set; }
     [field: SerializeField] public Animator Animator { get; private set; }
     [field: SerializeField] public HumanDataBase HumanDataBase { get; private set; }
-    [field: SerializeField] public GameObject RifleSocket { get; private set; }
+    [field: SerializeField] public GameObject WeaponSocket { get; private set; }
     [field: SerializeField] public Camera Camera { get; private set; }
     [field: SerializeField] public AudioSource FootstepAudioSource { get; private set; }
     [field: SerializeField] public AudioClip FootstepAudioClip { get; private set; }

@@ -1,30 +1,32 @@
 using UnityEngine;
+using System.Collections;
 using System;
 
 public class WaveState : IBattleState
 {
-    public event Action<int> OnChangingState;
-    private EnemyGenerator _enemyGenerator;
-    private WeaponGenerator _weaponGenerator;
+    public event Action<BattleStateType> OnChangingState;
+    private IGenerator _enemyGenerator;
+    private ISpawnPointProvider _enemySpawnPointProvider;
+    private IGenerator _weaponGenerator;
     private IBattleUIService _battleUIService;
 
-    public WaveState(EnemyGenerator enemyGenerator, WeaponGenerator weaponGenerator, IBattleUIService battleUIManager)
+    public WaveState(IGenerator enemyGenerator, ISpawnPointProvider enemySpawnPointProvider, 
+        IGenerator weaponGenerator, IBattleUIService battleUIManager)
     {
         _enemyGenerator = enemyGenerator;
+        _enemySpawnPointProvider = enemySpawnPointProvider;
         _weaponGenerator = weaponGenerator;
         _battleUIService = battleUIManager;
     }
 
-    public void Enter()
+    public IEnumerator Enter()
     {
         // 敵、武器の生成
-        GameObject enemy = _enemyGenerator.Generate();
-        EnemyComponents enemyComponents = enemy.GetComponent<EnemyComponents>();
-        GameObject rifle = _weaponGenerator.Generate(enemyComponents.RifleSocket.transform);
-        // enemyComponents.SetRifleManager(rifle);
+        Transform enemySpawnPoint = _enemySpawnPointProvider.GetSpawnPoint();
+        GameObject enemy = _enemyGenerator.Generate(enemySpawnPoint);
 
         // "Wave開始"表示
-        _battleUIService.ShowProgressTextForSeconds("Wave Start!", 2f);
+        yield return _battleUIService.ShowProgressTextForSeconds("Wave Start!", 2f);
     }
 
     public void Execute()
@@ -37,6 +39,6 @@ public class WaveState : IBattleState
     public void Exit()
     {
         // WaveClearStateまたはBattleEndStateへ遷移
-        OnChangingState?.Invoke(2);
+        OnChangingState?.Invoke(BattleStateType.Clear);
     }
 }
