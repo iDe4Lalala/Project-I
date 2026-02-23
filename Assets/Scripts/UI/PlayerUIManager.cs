@@ -13,84 +13,17 @@ public class PlayerUIManager : MonoBehaviour, IPlayerUIService
     [field: SerializeField] public float HitCrossHairDisplayTime { get; private set; }
 
     private PlayerComponents _playerComponents;
-    private OperationButtonComponents _operationButtonsComponents;
-    private float _xMovement;
-    private float _zMovement;
-    private float _xRotation;
-    private float _yRotation;
-    private bool _isWaiting;
+
 
     private void OnEnable()
     {
         _hitCrossHair.SetActive(false);
-        _isWaiting = true;
-        _battleUIManager.OnStartingBattle += () => _isWaiting = false;
-    }
-
-    private void OnDisable()
-    {
-        _battleUIManager.OnStartingBattle -= () => _isWaiting = false;
     }
 
     private void Start()
     {
-        _operationButtonsComponents = _operationButtonParent.GetComponent<OperationButtonComponents>();
-
-        if(_isUseJoystick)
-        {
-            SetMethods();
-        }
-        else
-        {
-            SwitchOperationButtonsDisplay(false);
-            DisplayOrHideCursor(false);
-        }
-    }
-
-    private void Update()
-    {
-        if (_playerComponents == null) return;
-        if (_isWaiting) return;
-        
-        if(_isUseJoystick)
-        {
-            _xMovement = _operationButtonsComponents.FixedJoystick.Horizontal;
-            _zMovement = _operationButtonsComponents.FixedJoystick.Vertical;
-            _xRotation = _operationButtonsComponents.FloatingJoystick.Horizontal;
-            _yRotation = _operationButtonsComponents.FloatingJoystick.Vertical;
-        }
-        else
-        {
-            _xMovement = Input.GetAxis("Horizontal");
-            _zMovement = Input.GetAxis("Vertical");
-            _xRotation = Input.GetAxis("Mouse X");
-            _yRotation = Input.GetAxis("Mouse Y");
-        }
-
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            _playerComponents.PlayerManager.SetMovementInput(
-                _xMovement, _zMovement, _playerComponents.HumanDataBase.SprintSpeed);
-        }
-        else
-        {
-            _playerComponents.PlayerManager.SetMovementInput(_xMovement, _zMovement);
-        }
-        _playerComponents.PlayerManager.SetRotationInput(_xRotation, _yRotation);
-
-        if(_isUseJoystick) return;
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            _playerComponents.PlayerManager.OnJumpButtonDown();
-        }
-        if (Input.GetKey(KeyCode.Mouse0))
-        {
-            _playerComponents.PlayerManager.CheckCanShoot();
-        }
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            _playerComponents.PlayerManager.Reload();
-        }
+        SwitchOperationButtonsDisplay(false);
+        DisplayOrHideCursor(false);
     }
 
     public void DisplayOrHideCursor(bool isDisplay)
@@ -127,12 +60,6 @@ public class PlayerUIManager : MonoBehaviour, IPlayerUIService
     private void SwitchOperationButtonsDisplay(bool isDisplay)
     {
         _operationButtonParent.SetActive(isDisplay);
-    }
-
-    private void SetMethods()
-    {
-        _operationButtonsComponents.JumpButton.onClick.AddListener(() => _playerComponents.PlayerManager.OnJumpButtonDown());
-        _operationButtonsComponents.ShootingButton.onClick.AddListener(() => _playerComponents.RifleManager.ShootByRifle());
     }
 
     private void OnPlayerDamaged()
