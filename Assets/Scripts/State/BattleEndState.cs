@@ -3,8 +3,8 @@ using System.Collections;
 
 public class BattleEndState : IBattleState
 {
-    public event Action<BattleStateType> OnChangingState;
-    public event Action<BattleResultType> OnBattleEnded;
+    public event Action<BattleStateType> ChangingState;
+    public event Action<BattleResultType> BattleEnded;
     private IBattleUIService _battleUIService;
     private BattleStateMachine _battleStateMachine;
 
@@ -16,18 +16,22 @@ public class BattleEndState : IBattleState
 
     public IEnumerator Enter()
     {
-        // "Game Over"なら表示
-        yield return _battleUIService.ShowProgressTextForSeconds("Game Over", 2f);
+        switch (_battleStateMachine.BattleResult)
+        {
+            case BattleResultType.GameClear:
+                yield return _battleUIService.ShowProgressTextForSeconds("Game Clear!", 2f);
+                break;
+            case BattleResultType.GameOver:
+                yield return _battleUIService.ShowProgressTextForSeconds("Game Over", 2f);
+                break;
+            default:
+                break;
+        }
 
         // フェードアウトもしくは一定時間まつ
         yield return _battleStateMachine.WaitForSeconds(2f);
-    }
 
-    public void Execute() { }
-
-    public void Exit()
-    {
         // ResultSceneへ遷移呼び出し
-        OnBattleEnded?.Invoke(BattleResultType.GameClear);
+        BattleEnded?.Invoke(_battleStateMachine.BattleResult);
     }
 }

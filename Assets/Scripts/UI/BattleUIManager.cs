@@ -21,7 +21,7 @@ public class BattleUIManager : MonoBehaviour, IBattleUIService
 
     private void OnEnable()
     {
-        _battleSceneManager.OnTimerUpdated += UpdateTimer;
+        _battleSceneManager.TimerUpdated += UpdateTimer;
         _enemyAppearanceManager.OnWaveStarted += OnNextWaveStarted;
 
         _killText.gameObject.SetActive(false);
@@ -33,7 +33,7 @@ public class BattleUIManager : MonoBehaviour, IBattleUIService
 
     private void OnDisable()
     {
-        _battleSceneManager.OnTimerUpdated -= UpdateTimer;
+        _battleSceneManager.TimerUpdated -= UpdateTimer;
         _enemyAppearanceManager.OnWaveStarted -= OnNextWaveStarted;
     }
 
@@ -90,7 +90,6 @@ public class BattleUIManager : MonoBehaviour, IBattleUIService
         }
 
         _beforeBattleTimerText.gameObject.SetActive(false);
-        OnStartingBattle?.Invoke();
     }
 
     public IEnumerator ShowProgressTextForSeconds(string text, float seconds)

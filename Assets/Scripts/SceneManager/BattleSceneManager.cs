@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 using System;
 using UnityEngine.Events;
 
@@ -8,6 +9,7 @@ public class BattleSceneManager : MonoBehaviour
     [field: SerializeField] public WeaponDataBase WeaponDataBase { get; private set; }
     [field: SerializeField] public PlayerUIManager PlayerUIManager { get; private set; }
     [field: SerializeField] public BattleUIManager BattleUIManager { get; private set; }
+    [field: SerializeField] public List<EnemyWaveDataBase> EnemyWaveDataBaseList { get; private set; }
     [field: SerializeField] public UnityEvent<bool> OnKilled { get; private set; }
 
     [SerializeField] private BattleStateMachine _battleStateMachine;
@@ -22,7 +24,7 @@ public class BattleSceneManager : MonoBehaviour
     [SerializeField] private EnemyAppearanceManager _enemyAppearanceManager;
     [SerializeField] private GameObject _diedCameraPosition;
 
-    public event Action<float> OnTimerUpdated;
+    public event Action<float> TimerUpdated;
     private float _currentTimer;
     private PlayerComponents _playerComponents;
     private int _lifePoint;
@@ -43,10 +45,10 @@ public class BattleSceneManager : MonoBehaviour
         // BattleContextの受け取りをinterfaceに
         _battleContext = new BattleContext(
             _battleStateMachine, _playerGenerator, _enemyGenerator, _weaponGenerator,
-            BattleUIManager, _playerSpawnPointProvider, _enemySpawnPointProvider,
-            _playerDataBase, _enemyDataBase, WeaponDataBase, _playerSpawnPoint, _enemySpawnPoints
+            BattleUIManager, _playerSpawnPointProvider, _enemySpawnPointProvider, _playerDataBase,
+            _enemyDataBase, WeaponDataBase, _playerSpawnPoint, _enemySpawnPoints, EnemyWaveDataBaseList
         );
-        _battleStateMachine.OnChangingScene += OnBattleEnded;
+        _battleStateMachine.ChangingScene += OnBattleEnded;
         _battleStateMachine.Initialize(_battleContext);
     }
 
@@ -56,7 +58,7 @@ public class BattleSceneManager : MonoBehaviour
         _currentTimer = _battleTimer;
         _lifePoint = _playerDataBase.LifePoint;
 
-        OnTimerUpdated?.Invoke(_battleTimer);
+        TimerUpdated?.Invoke(_battleTimer);
         GeneratePlayer();
     }
 
@@ -73,7 +75,7 @@ public class BattleSceneManager : MonoBehaviour
         {
             _currentTimer -= Time.deltaTime;
             _currentTimer = Mathf.Max(0, _currentTimer);
-            OnTimerUpdated?.Invoke(_currentTimer);
+            TimerUpdated?.Invoke(_currentTimer);
         }
         else
         {

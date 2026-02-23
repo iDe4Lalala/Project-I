@@ -19,19 +19,18 @@ public enum BattleResultType
 
 public class BattleStateMachine : MonoBehaviour
 {
-    public event Action<BattleResultType> OnChangingScene;
+    public event Action<BattleResultType> ChangingScene;
+    public BattleResultType BattleResult { get; private set; }
+    public int CurrentWave { get; private set; }
+    public int TotalWaves { get; private set; }
+    public EnemyWaveDataBase CurrentWaveDataBase { get; private set; }
     private Dictionary<BattleStateType, IBattleState> _battleStates;
     private IBattleState _currentState;
     private BattleContext _battleContext;
 
-    private void Update()
-    {
-        if(_currentState == null) return;
-        _currentState.Execute();
-    }
-
     public void Initialize(BattleContext battleContext)
      {
+        TotalWaves = battleContext.EnemyWaveDataBaseList.Count;
         _battleContext = battleContext;
         InitializeStates();
         InitializeEvents();
@@ -49,9 +48,10 @@ public class BattleStateMachine : MonoBehaviour
         // Stateの生成をinterfaceにするのを検討
         _battleStates = new Dictionary<BattleStateType, IBattleState>()
         {
-            { BattleStateType.Countdown, new BattleCountdownState(
-                _battleContext.PlayerGenerator, _battleContext.PlayerSpawnPointProvider, _battleContext.WeaponGenerator, _battleContext.BattleUIService) },
-            { BattleStateType.Wave, new WaveState(_battleContext.EnemyGenerator, _battleContext.EnemySpawnPointProvider, _battleContext.WeaponGenerator, _battleContext.BattleUIService) },
+            { BattleStateType.Countdown, new BattleCountdownState(_battleContext.PlayerGenerator, 
+                _battleContext.PlayerSpawnPointProvider, _battleContext.BattleUIService) },
+            { BattleStateType.Wave, new WaveState(_battleContext.EnemyGenerator, 
+                _battleContext.EnemySpawnPointProvider, _battleContext.BattleUIService, this) },
             { BattleStateType.Clear, new WaveClearState(_battleContext.BattleUIService, this) },
             { BattleStateType.End, new BattleEndState(_battleContext.BattleUIService, this) }
         };
@@ -63,26 +63,55 @@ public class BattleStateMachine : MonoBehaviour
     {
         foreach (var battleState in _battleStates.Values)
         {
-            battleState.OnChangingState += ChangeState;
+            battleState.ChangingState += OnChangeState;
         }
 
         if (!_battleStates.TryGetValue(BattleStateType.End, out var state)) return;
-        if (state is BattleEndState endState) 
+        if (state is BattleCountdownState countdownState)
         {
-            endState.OnBattleEnded += OnBattleEnded;
+            countdownState.StartingBattle += OnStartingBattle;
+        }
+        else if (state is WaveState waveState)
+        {
+            waveState.SettingBattleResult += OnSettingBattleResult;
+        }
+        else if (state is WaveClearState clearState)
+        {
+            clearState.IncreasingWaveCount += OnAdvancingWaveCount;
+            clearState.SettingBattleResult += OnSettingBattleResult;
+        }
+        else if (state is BattleEndState endState) 
+        {
+            endState.BattleEnded += OnBattleEnded;
         }
     }
 
-    private void ChangeState(BattleStateType newStateType)
+    private void OnChangeState(BattleStateType newStateType)
     {
-        // すでにこのコルーチンが動いている時の処理を書く
-        _currentState.Exit();
+        // すでにこのコルーチンが動いている時の処理を書く(Coroutine型の変数追加)
         _currentState = _battleStates[newStateType];
         StartCoroutine(_currentState.Enter());
     }
 
-    public void OnBattleEnded(BattleResultType result)
+    private void OnBattleEnded(BattleResultType result)
     {
-        OnChangingScene?.Invoke(result);
+        ChangingScene?.Invoke(result);
+    }
+
+    private void OnSettingBattleResult(BattleResultType result)
+    {
+        BattleResult = result;
+    }
+
+    private void OnAdvancingWaveCount()
+    {
+        CurrentWaveDataBase = _battleContext.EnemyWaveDataBaseList[CurrentWave];
+        CurrentWave++;
+    }
+
+    private void OnStartingBattle()
+    {
+        CurrentWave = 0;
+        OnAdvancingWaveCount();
     }
 }

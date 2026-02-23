@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BattleContext
@@ -9,18 +10,19 @@ public class BattleContext
     public IBattleUIService BattleUIService { get; private set; }
     public ISpawnPointProvider PlayerSpawnPointProvider { get; private set; }
     public ISpawnPointProvider EnemySpawnPointProvider { get; private set; }
-    public HumanDataBase PlayerDataBase { get; private set; }
-    public HumanDataBase EnemyDataBase { get; private set; }
-    public WeaponDataBase WeaponDataBase { get; private set; }
-    public Transform PlayerSpawnPoint { get; private set; }
-    public Transform[] EnemySpawnPoints { get; private set; }
+    public HumanDataBase PlayerDataBase { get; }
+    public HumanDataBase EnemyDataBase { get; }
+    public WeaponDataBase WeaponDataBase { get; }
+    public Transform PlayerSpawnPoint { get; }
+    public Transform[] EnemySpawnPoints { get; }
+    public List<EnemyWaveDataBase> EnemyWaveDataBaseList { get; }
 
     public BattleContext(
         BattleStateMachine battleStateMachine, IGenerator playerGenerator,
         IGenerator enemyGenerator, IGenerator weaponGenerator,IBattleUIService battleUIService,
         ISpawnPointProvider playerSpawnPointProvider, ISpawnPointProvider enemySpawnPointProvider,
         HumanDataBase playerDataBase, HumanDataBase enemyDataBase, WeaponDataBase weaponDataBase,
-        Transform playerSpawnPoint, Transform[] enemySpawnPoints
+        Transform playerSpawnPoint, Transform[] enemySpawnPoints, List<EnemyWaveDataBase> enemyWaveDataBaseList
     )
     {
         BattleStateMachine = battleStateMachine;
@@ -35,5 +37,6 @@ public class BattleContext
         WeaponDataBase = weaponDataBase;
         PlayerSpawnPoint = playerSpawnPoint;
         EnemySpawnPoints = enemySpawnPoints;
+        EnemyWaveDataBaseList = enemyWaveDataBaseList;
     }
 }

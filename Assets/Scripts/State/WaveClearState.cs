@@ -3,9 +3,12 @@ using System.Collections;
 
 public class WaveClearState : IBattleState
 {
-    public event Action<BattleStateType> OnChangingState;
+    public event Action IncreasingWaveCount;
+    public event Action<BattleResultType> SettingBattleResult;
+    public event Action<BattleStateType> ChangingState;
     private IBattleUIService _battleUIService;
     private BattleStateMachine _battleStateMachine;
+    private EnemyWaveDataBase _currentWaveDataBase;
 
     public WaveClearState(IBattleUIService battleUIManager, BattleStateMachine battleStateMachine)
     {
@@ -14,19 +17,24 @@ public class WaveClearState : IBattleState
     }
 
     public IEnumerator Enter()
-    {
+    {   
+        _currentWaveDataBase = _battleStateMachine.CurrentWaveDataBase;
+
         // "WaveClear"表示
-        yield return _battleUIService.ShowProgressTextForSeconds("Wave Clear!", 2f);
+        yield return _battleUIService.ShowProgressTextForSeconds($"{_currentWaveDataBase.WaveText} Clear!", 2f);
 
         // 一定時間待つ
-        yield return _battleStateMachine.WaitForSeconds(2f);
-    }
+        yield return _battleStateMachine.WaitForSeconds(_currentWaveDataBase.AfterWaveInterval);
 
-    public void Execute() { }
+        if (_battleStateMachine.CurrentWave >= _battleStateMachine.TotalWaves)
+        {
+            SettingBattleResult?.Invoke(BattleResultType.GameClear);
+            ChangingState?.Invoke(BattleStateType.End);
+            yield break;
+        }
 
-    public void Exit()
-    {
         // 次のWaveStateへ遷移
-        OnChangingState?.Invoke(BattleStateType.Wave);
+        IncreasingWaveCount?.Invoke();
+        ChangingState?.Invoke(BattleStateType.Wave);
     }
 }
