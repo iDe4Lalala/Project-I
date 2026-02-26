@@ -11,14 +11,9 @@ public enum PlayerState
 public class PlayerManager : MonoBehaviour, IDamageable
 {
     [SerializeField] private string _groundTagName;
-    [SerializeField] private float _footSoundThreshold;
-    [SerializeField] private float _movementThreshold;
     [SerializeField] private ViewRifleAnimationManager _viewRifleAnimationManager;
 
     public int PlayerHP { get; private set; }
-    public int JumpCount { get; private set; }
-    private Vector3 _joystickVector;
-    private bool _isMoving;
     private int _ammoCount;
     private float _shootTimer;
     private Vector2 _recoil;
@@ -27,53 +22,37 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private bool _isReloading;
 
     [SerializeField] private PlayerComponents _playerComponents;
+    [SerializeField] private PlayerInputController _playerInputController;
+    [SerializeField] private PlayerAnimationContoller _playerAnimationController;
+    [SerializeField] private PlayerAudioController _playerAudioController;
     [field: SerializeField] public int CanJumpCount { get; private set; }
+    public int JumpCount { get; private set; }
     private PlayerState _playerState;
+    private PlayerInputHandler _playerInputHandler;
     private IPlayerInput _playerInput;
     private IWeaponCommand _weaponCommand;
 
-    void Start()
+    private void Start()
     {
-        _playerState = PlayerState.PreBattle;
         _isReloading = false;
         PlayerHP = _playerComponents.HumanDataBase.HumanHP;
         _ammoCount = _playerComponents.RifleManager.WeaponDataBase.MagazineCapacity;
+
+        _playerInputController.LandedGround += OnLandedGround;
+        _playerState = PlayerState.PreBattle;
+        _playerInputController.Initialize(_playerComponents);
+        _playerAnimationController.Initialize(_playerComponents);
+        _playerAudioController.Initialize(_playerComponents);
     }
 
-    public void SetMovementInput(float x, float z, float sprintSpeed = 1f)
+    public void SetInputHandler(PlayerInputHandler inputHandler)
     {
-        // アニメーションは別クラスで
-        _isMoving = Mathf.Abs(x) > _movementThreshold || Mathf.Abs(z) > _movementThreshold;
-        _playerComponents.Animator.SetBool("IsMoving", _isMoving);
-
-        // _joystickVector = Vector3.right * x + Vector3.up * z;
-
-        // 音の再生は別クラスで
-        if (_joystickVector.magnitude > _footSoundThreshold && !_playerComponents.FootstepAudioSource.isPlaying && _playerComponents.Animator.GetBool("IsGround"))
-        {
-            _playerComponents.FootstepAudioSource.PlayOneShot(_playerComponents.FootstepAudioClip);
-        }
-        else if (!_playerComponents.Animator.GetBool("IsGround"))
-        {
-            _playerComponents.FootstepAudioSource.Stop();
-        }
-        else if (_joystickVector.magnitude <= _footSoundThreshold && _playerComponents.FootstepAudioSource.isPlaying)
-        {
-            _playerComponents.FootstepAudioSource.Stop();
-        }
-
-        // if (_joystickVector == Vector3.zero) return;
-        // gameObject.transform.position += 
-        //     _playerComponents.HumanDataBase.MovementSpeed * z * _playerComponents.Camera.transform.forward * sprintSpeed + 
-        //     _playerComponents.HumanDataBase.MovementSpeed * x * _playerComponents.Camera.transform.right;
+        _playerInputHandler = inputHandler;
     }
 
-    public void OnJumpButtonDown()
+    private void OnDestroy()
     {
-        // アニメーションは別クラスで
-        _playerComponents.Animator.SetTrigger("Jump");
-        if (!_playerComponents.Animator.GetBool("IsGround")) return;
-        _playerComponents.Animator.SetBool("IsGround", false);
+        _playerInputController.LandedGround -= OnLandedGround;
     }
 
     public void TakeDamage(int damage)
@@ -103,21 +82,10 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _ammoCount = _playerComponents.RifleManager.WeaponDataBase.MagazineCapacity;
     }
 
-    private void OnCollisionEnter(Collision col)
-    {
-        if (col == null) return;
-        if (col.gameObject.transform.parent.tag != _groundTagName
-            && col.gameObject.transform.parent.parent.tag != _groundTagName) return;
-        JumpCount = 0;
-
-        // アニメーションは別クラスで
-        if (_playerComponents.Animator.GetBool("IsGround")) return;
-        _playerComponents.Animator.SetBool("IsGround", true);
-    }
-
     private void Update()
     {
         _shootTimer += Time.deltaTime;
+        _playerInputHandler.ConsumePerFrameInput();
     }
 
     public void CheckCanShoot()
@@ -141,6 +109,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
     {
         if(!CanControl()) return;
         _playerInput.SetMove(move);
+        _playerAnimationController.SetMove(_playerInputController.IsMoving);
+        _playerAudioController.UpdateFootstep(_playerInputController.IsGround, move.magnitude);
+        _playerAnimationController.SetIsGround(_playerInputController.IsGround);
     }
 
     public void RequestLook(Vector2 delta)
@@ -152,7 +123,11 @@ public class PlayerManager : MonoBehaviour, IDamageable
     public void RequestJump()
     {
         if(!CanControl()) return;
+        if(!CanJump()) return;
+
+        JumpCount++;
         _playerInput.Jump();
+        _playerAnimationController.SetJump();
     }
 
     public void RequestStartSprint()
@@ -183,5 +158,16 @@ public class PlayerManager : MonoBehaviour, IDamageable
     {
         if(!CanControl()) return;
         _weaponCommand.Reload();
+    }
+
+    private bool CanJump()
+    {
+        return JumpCount < CanJumpCount;
+    }
+
+    private void OnLandedGround()
+    {
+        JumpCount = 0;
+        _playerAnimationController.SetIsGround(_playerInputController.IsGround);
     }
 }

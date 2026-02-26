@@ -3,10 +3,12 @@ using UnityEngine.InputSystem;
 
 public class PlayerInputHandler
 {
+    public Vector2 MoveInput { get; private set; }
+    public Vector2 LookDelta { get; private set; }
     private PlayerManager _playerManager;
     private InputSystem_Actions _inputSystemActions;
 
-    private void Initialize(PlayerManager playerManager, InputSystem_Actions inputActions)
+    public void Initialize(PlayerManager playerManager, InputSystem_Actions inputActions)
     {
         _playerManager = playerManager;
         _inputSystemActions = inputActions;
@@ -14,7 +16,7 @@ public class PlayerInputHandler
         _inputSystemActions.Enable();
     }
 
-    private void Dispose()
+    public void Dispose()
     {
         _inputSystemActions.Disable();
         DisposeEvents();
@@ -48,27 +50,17 @@ public class PlayerInputHandler
         _inputSystemActions.Player.Reload.performed -= OnReloadPerformed;
     }
 
-    private void OnMovePerformed(InputAction.CallbackContext context)
-    {
-        Vector2 move = context.ReadValue<Vector2>();
-        _playerManager.RequestMove(move);
-    }
+    private void OnMovePerformed(InputAction.CallbackContext context) 
+        => MoveInput = context.ReadValue<Vector2>();
 
     private void OnMoveCanceled(InputAction.CallbackContext context)
-    {
-        _playerManager.RequestMove(Vector2.zero);
-    }
+        => MoveInput = Vector2.zero;
 
     private void OnLookPerformed(InputAction.CallbackContext context)
-    {
-        Vector2 delta = context.ReadValue<Vector2>();
-        _playerManager.RequestLook(delta);
-    }
+        => LookDelta = context.ReadValue<Vector2>();
 
     private void OnLookCanceled(InputAction.CallbackContext context)
-    {
-        _playerManager.RequestLook(Vector2.zero);
-    }
+        => LookDelta = Vector2.zero;
 
     private void OnJumpPerformed(InputAction.CallbackContext context)
     {
@@ -98,5 +90,14 @@ public class PlayerInputHandler
     private void OnReloadPerformed(InputAction.CallbackContext context)
     {
         _playerManager.RequestReload();
+    }
+
+    public void ConsumePerFrameInput()
+    {
+        _playerManager.RequestMove(MoveInput);
+        _playerManager.RequestLook(LookDelta);
+        
+        if(LookDelta == Vector2.zero) return;
+        LookDelta = Vector2.zero;
     }
 }

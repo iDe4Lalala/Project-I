@@ -1,52 +1,74 @@
+using System;
 using UnityEngine;
 
 public class PlayerInputController : MonoBehaviour, IPlayerInput
 {
-    private PlayerManager _playerManager;
+    [SerializeField] private float _movementThreshold;
+    [SerializeField] private LayerMask _groundLayer;
+    [SerializeField] private float _minWorkableNormalY;
+    public bool IsMoving { get; private set; }
+    public bool IsGround { get; private set; }
+    public event Action LandedGround;
     private PlayerComponents _playerComponents;
     private Rigidbody _rigidbody;
     private HumanDataBase _playerData;
-    private Vector2 _recoilDelta;
     private float _sprintSpeed;
+    private Vector2 _pendingRecoil;
     private Quaternion _cameraRotation;
     private Quaternion _characterRotation;
 
-    private void Initialize(PlayerManager playerManager, PlayerComponents playerComponents)
+    public void Initialize(PlayerComponents playerComponents)
     {
-        _playerManager = playerManager;
-        _playerData = playerComponents.HumanDataBase;
+        _sprintSpeed = 1f;
         _playerComponents = playerComponents;
-
+        _playerData = playerComponents.HumanDataBase;
         _rigidbody = _playerComponents.Rigidbody;
         _cameraRotation = _playerComponents.Camera.transform.localRotation;
         _characterRotation = gameObject.transform.localRotation;
     }
 
+    public void AddRecoil(Vector2 recoil)
+    {
+        _pendingRecoil += recoil;
+    }
+
     public void SetMove(Vector2 direction)
     {
-        if (direction == Vector2.zero) return;
-        gameObject.transform.position += 
-            _playerData.MovementSpeed * direction.y * _playerComponents.Camera.transform.forward * _sprintSpeed + 
-            _playerData.MovementSpeed * direction.x * _playerComponents.Camera.transform.right;
+        Vector3 forward = _playerComponents.Camera.transform.forward;
+        Vector3 right = _playerComponents.Camera.transform.right;
+        forward.y = 0f;
+        right.y = 0f;
+        forward.Normalize();
+        right.Normalize();
+
+        Vector3 move = 
+            _playerData.MovementSpeed * direction.y * forward * _sprintSpeed + 
+            _playerData.MovementSpeed * direction.x * right;
+        transform.position += move * Time.fixedDeltaTime;
+        
+        IsMoving = direction.magnitude > _movementThreshold;
     }
 
     public void SetLookDelta(Vector2 delta)
     {
-        if(delta == Vector2.zero) return;
-        _cameraRotation *= Quaternion.Euler(-delta.y * _playerData.RotationSpeed - _recoilDelta.y, 0, 0);
-        _characterRotation *= Quaternion.Euler(0, delta.x * _playerData.RotationSpeed + _recoilDelta.x, 0);
+        Vector2 total = delta + _pendingRecoil;
+        
+        if(total == Vector2.zero) return;
+        _cameraRotation *= Quaternion.Euler(-total.y * _playerData.RotationSpeed, 0, 0);
+        _characterRotation *= Quaternion.Euler(0, total.x * _playerData.RotationSpeed, 0);
 
         _cameraRotation = ClampRotation(_cameraRotation);
         _playerComponents.Camera.transform.localRotation = _cameraRotation;
         gameObject.transform.localRotation = _characterRotation;
 
-        _recoilDelta = Vector2.zero;
+        _pendingRecoil = Vector2.zero;
     }
 
     public void Jump()
     {
-        if(_playerManager.JumpCount >= _playerManager.CanJumpCount) return;
-        _rigidbody.linearVelocity = new Vector3(0, _playerData.JumpForce, 0);
+        var velocity = _rigidbody.linearVelocity;
+        velocity.y = _playerData.JumpForce;
+        _rigidbody.linearVelocity = velocity;
     }
 
     public void StartSprint()
@@ -59,21 +81,38 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
         _sprintSpeed = 1f;
     }
 
-    public void ReceiveRecoil(Vector2 recoil)
+    private void OnCollisionEnter(Collision collision)
     {
-        _recoilDelta = recoil;
+        if(((1 << collision.gameObject.layer) & _groundLayer) == 0) return;
+
+        for (int i = 0; i < collision.contactCount; i++)
+        {
+            if (collision.GetContact(i).normal.y >= _minWorkableNormalY)
+            {
+                if (IsGround) return;
+                IsGround = true;
+                LandedGround?.Invoke();
+                return;
+            }
+        }
     }
 
-    private Quaternion ClampRotation(Quaternion q)
+    public void OnCollisionExit(Collision collision)
     {
-        q.x /= q.w;
-        q.y /= q.w;
-        q.z /= q.w;
-        q.w = 1f;
+        if(((1 << collision.gameObject.layer) & _groundLayer) == 0) return;
+        IsGround = false;
+    }
+
+    private Quaternion ClampRotation(Quaternion quaternion)
+    {
+        quaternion.x /= quaternion.w;
+        quaternion.y /= quaternion.w;
+        quaternion.z /= quaternion.w;
+        quaternion.w = 1f;
         
-        float angleX = Mathf.Atan(q.x) * Mathf.Rad2Deg * 2f;
+        float angleX = Mathf.Atan(quaternion.x) * Mathf.Rad2Deg * 2f;
         angleX = Mathf.Clamp(angleX, _playerData.TurningMinAngle, _playerData.TurningMaxAngle);
-        q.x = Mathf.Tan(angleX * Mathf.Deg2Rad * 0.5f);
-        return q;
+        quaternion.x = Mathf.Tan(angleX * Mathf.Deg2Rad * 0.5f);
+        return quaternion;
     }
 }
