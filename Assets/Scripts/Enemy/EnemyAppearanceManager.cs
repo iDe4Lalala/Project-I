@@ -101,7 +101,7 @@ public class EnemyAppearanceManager : MonoBehaviour
             enemyComponents.EnemyManager.OnDamaged += OnEnemyDamaged;
 
             GameObject rifle = _weaponGenerator.Generate(enemyComponents.WeaponSocket.transform);
-            enemyComponents.SetRifleManager(rifle);
+            // enemyComponents.SetRifleManager(rifle);
         }
     }
 

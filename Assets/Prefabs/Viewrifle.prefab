@@ -88,6 +88,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1791490474942619442
 GameObject:
@@ -177,6 +178,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1791490474942619446
 GameObject:
@@ -188,7 +190,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1791490474942710550}
   - component: {fileID: 1791490474949881074}
-  - component: {fileID: 3984400572308073805}
   m_Layer: 0
   m_Name: Viewrifle
   m_TagString: Untagged
@@ -235,17 +236,3 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &3984400572308073805
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1791490474942619446}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cd91b35ff0104d529eddcdcd5602ca5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ViewRifleAnimationManager
-  _playerManager: {fileID: 5603421663110265246, guid: fe59073eea8cf4ddcbac01897659e934, type: 3}
-  _reloadAnimator: {fileID: 1791490474949881074}

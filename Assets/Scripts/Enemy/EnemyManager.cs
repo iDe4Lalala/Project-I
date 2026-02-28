@@ -100,7 +100,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
             direction.y = 0;
             transform.rotation = Quaternion.LookRotation(direction) * rand;
 
-            _ = _enemyComponents.RifleManager.ShootByRifle();
+            // _ = _enemyComponents.RifleManager.ShootByRifle();
         }
     }
 }

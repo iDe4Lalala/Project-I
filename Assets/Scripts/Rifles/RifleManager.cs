@@ -1,64 +1,94 @@
 using UnityEngine;
 
-public class RifleManager : MonoBehaviour
+public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReloadRuntime
 {
     [field: SerializeField] public WeaponDataBase WeaponDataBase { get; private set; }
+    [SerializeField] private Animator _reloadAnimator;
     [SerializeField] private AudioSource _shootingAudioSource;
 
-    private Camera _camera;
-    private HumanType _opponentHumanType;
-    private IDamageable _opponentHuman;
-    private Vector3 _rayStartPosition;
-    private Vector3 _rayDirection;
-    private bool _isHitSomething;
-    private PlayerComponents _playerComponents;
-    private EnemyComponents _enemyComponents;
-    private float _recoilX;
-    private float _recoilY;
-    private Vector2 _recoil;
+    private ViewRifleAnimationManager _viewRifleAnimationManager;
+    private LayerMask _targetMask;
+    private bool _isFiring;
+    private float _fireCooldown;
+    private int _currentAmmo;
+    private bool _isReloading;
+    private float _reloadTimer;
 
-    public void GetOwnerInfo(HumanType humanType, GameObject owner)
+
+    private void Start()
     {
-        switch (humanType)
-        {
-            case HumanType.Player:
-                {
-                    _playerComponents = owner.GetComponent<PlayerComponents>();
-                    _camera = _playerComponents.Camera;
-                    _opponentHumanType = HumanType.Enemy;
-                }
-                break;
-            case HumanType.Enemy:
-                {
-                    _enemyComponents = owner.GetComponent<EnemyComponents>();
-                    _camera = _enemyComponents.Camera;
-                    _opponentHumanType = HumanType.Player;
-                }
-                break;
-        }
+        _viewRifleAnimationManager = new ViewRifleAnimationManager(_reloadAnimator);
+        _isFiring = false;
+        _fireCooldown = 0f;
+        _currentAmmo = WeaponDataBase.MagazineCapacity;
     }
 
-    public Vector2 ShootByRifle()
+    public void Initialize(LayerMask layerMask)
     {
-        _recoilX = Random.Range(WeaponDataBase.RecoilMinX, WeaponDataBase.RecoilMaxX);
-        _recoilY = Random.Range(WeaponDataBase.RecoilMinY, WeaponDataBase.RecoilMaxY);
-        _recoil = new Vector2(_recoilX, _recoilY);
+        _targetMask = layerMask;
+    }
 
-        _rayStartPosition = _camera.transform.position;
-        _rayDirection = _camera.transform.forward.normalized;
-        _isHitSomething = Physics.Raycast(
-            _rayStartPosition, _rayDirection, out RaycastHit raycastHit, WeaponDataBase.MaximumBallisticDistance);
-        
+    public Vector2 TryFire(float deltaTime, Vector3 position, Vector3 direction)
+    {
+        if (CanFireNow(deltaTime)) return Vector2.zero;
+
+        _fireCooldown = 1f / WeaponDataBase.FireRate;
+        _currentAmmo--;
+        return Shoot(position, direction);
+    }
+
+    private bool CanFireNow(float deltaTime)
+    {
+        if(_isReloading) return false;
+        if(!_isFiring) return false;
+        if(_currentAmmo <= 0) return false;
+
+        _fireCooldown -= deltaTime;
+        if (_fireCooldown > 0f) return false;
+
+        return true;
+    }
+
+    private Vector2 Shoot(Vector3 position, Vector3 direction)
+    {
+        float recoilX = Random.Range(WeaponDataBase.RecoilMinX, WeaponDataBase.RecoilMaxX);
+        float recoilY = Random.Range(WeaponDataBase.RecoilMinY, WeaponDataBase.RecoilMaxY);
+        var recoil = new Vector2(recoilX, recoilY);
+
         _shootingAudioSource.PlayOneShot(WeaponDataBase.ShootingAudioClip);
 
-        if (!_isHitSomething) return _recoil;
+        if (Physics.Raycast(position, direction.normalized, 
+            out RaycastHit hit, WeaponDataBase.MaximumBallisticDistance, _targetMask))
+        {
+            var damageable = hit.collider.GetComponentInParent<IDamageable>();
+            damageable?.TakeDamage(WeaponDataBase.Damage);
+        }
 
-        if (!raycastHit.collider.gameObject.name.Contains(_opponentHumanType.ToString())) return _recoil;
+        return recoil;
+    }
+    
+    public void StartFire() => _isFiring = true;
 
-        _opponentHuman = raycastHit.collider.gameObject.GetComponent<IDamageable>();
-        if(_opponentHuman == null) return _recoil;
-        _opponentHuman.TakeDamage(WeaponDataBase.Damage);
+    public void StopFire()  => _isFiring = false;
 
-        return _recoil;
+    public void Reload()
+    {
+        if(_isReloading) return;
+        if(_currentAmmo >= WeaponDataBase.MagazineCapacity) return;
+
+        _isReloading = true;
+        _reloadTimer = WeaponDataBase.ReloadTime;
+        _viewRifleAnimationManager.SetReload();
+    }
+
+    public void UpdateReload(float deltaTime)
+    {
+        if (!_isReloading) return;
+
+        _reloadTimer -= deltaTime;
+        if (_reloadTimer > 0f) return;
+
+        _isReloading = false;
+        _currentAmmo = WeaponDataBase.MagazineCapacity;
     }
 }

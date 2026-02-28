@@ -13,10 +13,4 @@ public class EnemyComponents : MonoBehaviour
     [field: SerializeField] public AudioSource FootstepAudioSource { get; private set; }
     [field: SerializeField] public AudioClip FootstepAudioClip { get; private set; }
     public RifleManager RifleManager { get; private set; }
-
-    public void SetRifleManager(GameObject rifle)
-    {
-        RifleManager = rifle.GetComponent<RifleManager>();
-        RifleManager.GetOwnerInfo(HumanType.Enemy, gameObject);
-    }
 }

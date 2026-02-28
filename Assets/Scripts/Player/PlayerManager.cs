@@ -10,33 +10,27 @@ public enum PlayerState
 
 public class PlayerManager : MonoBehaviour, IDamageable
 {
-    [SerializeField] private string _groundTagName;
-    [SerializeField] private ViewRifleAnimationManager _viewRifleAnimationManager;
-
     public int PlayerHP { get; private set; }
-    private int _ammoCount;
-    private float _shootTimer;
-    private Vector2 _recoil;
     public event Action OnDamaged;
     public event Action<GameObject> OnDied;
-    private bool _isReloading;
 
     [SerializeField] private PlayerComponents _playerComponents;
-    [SerializeField] private PlayerInputController _playerInputController;
+    [SerializeField] private PlayerInputController _playerInputController;  // IPlayerInputと統一する？
     [SerializeField] private PlayerAnimationContoller _playerAnimationController;
     [SerializeField] private PlayerAudioController _playerAudioController;
+    [SerializeField] private LayerMask _targetMask;
     [field: SerializeField] public int CanJumpCount { get; private set; }
     public int JumpCount { get; private set; }
     private PlayerState _playerState;
     private PlayerInputHandler _playerInputHandler;
     private IPlayerInput _playerInput;
     private IWeaponCommand _weaponCommand;
+    private IFireRuntime _fireRuntime;
+    private IReloadRuntime _reloadRuntime;
 
     private void Start()
     {
-        _isReloading = false;
         PlayerHP = _playerComponents.HumanDataBase.HumanHP;
-        _ammoCount = _playerComponents.RifleManager.WeaponDataBase.MagazineCapacity;
 
         _playerInputController.LandedGround += OnLandedGround;
         _playerState = PlayerState.PreBattle;
@@ -45,14 +39,21 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _playerAudioController.Initialize(_playerComponents);
     }
 
-    public void SetInputHandler(PlayerInputHandler inputHandler)
-    {
-        _playerInputHandler = inputHandler;
-    }
-
     private void OnDestroy()
     {
         _playerInputController.LandedGround -= OnLandedGround;
+    }
+
+    public void Initialize(PlayerInputHandler playerInputHandler, RifleManager rifleManager)
+    {
+        if(playerInputHandler == null || rifleManager == null) return;
+        _playerInput = _playerInputController;
+        _playerInputHandler = playerInputHandler;
+        _weaponCommand = rifleManager;
+        _fireRuntime = rifleManager;
+        _reloadRuntime = rifleManager;
+
+        rifleManager.Initialize(_targetMask);
     }
 
     public void TakeDamage(int damage)
@@ -61,43 +62,18 @@ public class PlayerManager : MonoBehaviour, IDamageable
         PlayerHP = Mathf.Max(PlayerHP, 0);
         OnDamaged?.Invoke();
 
-        if (PlayerHP <= 0)
-        {
-            OnDied?.Invoke(gameObject);
-        }
-    }
-
-    public void Reload()
-    {
-        // Weapon側で処理する
-        if (_isReloading) return;
-        _isReloading = true;
-        _viewRifleAnimationManager.PlayReloadAnimation();
-    }
-
-    public void FinishedReload()
-    {
-        // Weapon側で処理する
-        _isReloading = false;
-        _ammoCount = _playerComponents.RifleManager.WeaponDataBase.MagazineCapacity;
+        if (PlayerHP > 0) return;
+        OnDied?.Invoke(gameObject);
     }
 
     private void Update()
     {
-        _shootTimer += Time.deltaTime;
+        if(!CanControl()) return;
+        if(_playerInputHandler == null || _fireRuntime == null || _reloadRuntime == null) return;
         _playerInputHandler.ConsumePerFrameInput();
-    }
-
-    public void CheckCanShoot()
-    {
-        // Weapon側で処理する
-        if (_shootTimer <= 1f / _playerComponents.RifleManager.WeaponDataBase.FireRate) return;
-        _shootTimer = 0;
-        if (_ammoCount <= 0) return;
-        _ammoCount--;
-
-        _recoil = _playerComponents.RifleManager.ShootByRifle();
-        // SetRotationInput(0, 0, _recoil);
+        _fireRuntime.TryFire(
+            Time.deltaTime, _playerComponents.Camera.transform.position, _playerComponents.Camera.transform.forward);
+        _reloadRuntime.UpdateReload(Time.deltaTime);
     }
 
     private bool CanControl()
@@ -108,6 +84,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
     public void RequestMove(Vector2 move)
     {
         if(!CanControl()) return;
+        if(_playerInput == null) return;
         _playerInput.SetMove(move);
         _playerAnimationController.SetMove(_playerInputController.IsMoving);
         _playerAudioController.UpdateFootstep(_playerInputController.IsGround, move.magnitude);
@@ -117,6 +94,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
     public void RequestLook(Vector2 delta)
     {
         if(!CanControl()) return;
+        if(_playerInput == null) return;
         _playerInput.SetLookDelta(delta);
     }
 
@@ -124,6 +102,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
     {
         if(!CanControl()) return;
         if(!CanJump()) return;
+        if(_playerInput == null) return;
 
         JumpCount++;
         _playerInput.Jump();
@@ -133,6 +112,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
     public void RequestStartSprint()
     {
         if(!CanControl()) return;
+        if(_playerInput == null) return;
         _playerInput.StartSprint();
     }
 
@@ -145,18 +125,21 @@ public class PlayerManager : MonoBehaviour, IDamageable
     public void RequestStartFire()
     {
         if(!CanControl()) return;
+        if(_playerInput == null) return;
         _weaponCommand.StartFire();
     }
 
     public void RequestStopFire()
     {
         if(!CanControl()) return;
+        if(_playerInput == null) return;
         _weaponCommand.StopFire();
     }
 
     public void RequestReload()
     {
         if(!CanControl()) return;
+        if(_playerInput == null) return;
         _weaponCommand.Reload();
     }
 

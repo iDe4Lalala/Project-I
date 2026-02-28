@@ -1,17 +1,16 @@
 using UnityEngine;
 
-public class ViewRifleAnimationManager : MonoBehaviour
+public class ViewRifleAnimationManager
 {
-    [SerializeField] private PlayerManager _playerManager;
-    [SerializeField] private Animator _reloadAnimator;
+    private Animator _reloadAnimator;
 
-    public void PlayReloadAnimation()
+    public ViewRifleAnimationManager(Animator reloadAnimator)
     {
-        _reloadAnimator.SetTrigger("Reload");
+        _reloadAnimator = reloadAnimator;
     }
 
-    public void FinishedReload()
+    public void SetReload()
     {
-        _playerManager.FinishedReload();
+        _reloadAnimator.SetTrigger("Reload");
     }
 }

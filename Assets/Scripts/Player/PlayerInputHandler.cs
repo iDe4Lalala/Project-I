@@ -8,9 +8,13 @@ public class PlayerInputHandler
     private PlayerManager _playerManager;
     private InputSystem_Actions _inputSystemActions;
 
-    public void Initialize(PlayerManager playerManager, InputSystem_Actions inputActions)
+    public void InitializeManager(PlayerManager playerManager)
     {
         _playerManager = playerManager;
+    }
+
+    public void InitializeInputSystem(InputSystem_Actions inputActions)
+    {
         _inputSystemActions = inputActions;
         InitializeEvents();
         _inputSystemActions.Enable();

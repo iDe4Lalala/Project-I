@@ -10,13 +10,13 @@ public class BattleCountdownState : IBattleState
     private ISpawnPointProvider _playerSpawnPointProvider;
     private IBattleUIService _battleUIService;
 
-        public BattleCountdownState(IGenerator playerGenerator, ISpawnPointProvider playerSpawnPointProvider,
-            IBattleUIService battleUIManager)
-        {
-            _playerGenerator = playerGenerator;
-            _playerSpawnPointProvider = playerSpawnPointProvider;
-            _battleUIService = battleUIManager;
-        }
+    public BattleCountdownState(IGenerator playerGenerator, ISpawnPointProvider playerSpawnPointProvider,
+        IBattleUIService battleUIManager)
+    {
+        _playerGenerator = playerGenerator;
+        _playerSpawnPointProvider = playerSpawnPointProvider;
+        _battleUIService = battleUIManager;
+    }
 
     public IEnumerator Enter()
     {

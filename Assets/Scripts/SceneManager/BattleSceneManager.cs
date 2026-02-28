@@ -34,13 +34,17 @@ public class BattleSceneManager : MonoBehaviour
     private BattleContext _battleContext;
     private ISpawnPointProvider _playerSpawnPointProvider;
     private ISpawnPointProvider _enemySpawnPointProvider;
+    private InputSystem_Actions _inputSystemActions;
+    private PlayerInputHandler _playerInputHandler;
     
     private void Awake()
     {
+        _inputSystemActions = new InputSystem_Actions();
+        _playerInputHandler = new PlayerInputHandler();
         _playerSpawnPointProvider = new PlayerSpawnPointProvider(_playerSpawnPoint);
         _enemySpawnPointProvider = new EnemySpawnPointProvider(_enemySpawnPoints);
         _weaponGenerator = new WeaponGenerator(WeaponDataBase);
-        _playerGenerator = new PlayerGenerator(_playerDataBase, _weaponGenerator);
+        _playerGenerator = new PlayerGenerator(_playerDataBase, _weaponGenerator, _playerInputHandler);
         _enemyGenerator = new EnemyGenerator(_enemyDataBase, _weaponGenerator);
         // BattleContextの受け取りをinterfaceに
         _battleContext = new BattleContext(
@@ -49,6 +53,7 @@ public class BattleSceneManager : MonoBehaviour
             _enemyDataBase, WeaponDataBase, _playerSpawnPoint, _enemySpawnPoints, EnemyWaveDataBaseList
         );
         _battleStateMachine.ChangingScene += OnBattleEnded;
+        _playerInputHandler.InitializeInputSystem(_inputSystemActions);
         _battleStateMachine.Initialize(_battleContext);
     }
 
@@ -59,12 +64,12 @@ public class BattleSceneManager : MonoBehaviour
         _lifePoint = _playerDataBase.LifePoint;
 
         TimerUpdated?.Invoke(_battleTimer);
-        GeneratePlayer();
     }
 
     private void OnDisable()
     {
         BattleUIManager.OnStartingBattle -= OnStartBattle;
+        _playerInputHandler.Dispose();
     }
     
     private void Update()
@@ -96,21 +101,6 @@ public class BattleSceneManager : MonoBehaviour
         SceneManager.LoadScene(_nextSceneName);
     }
 
-    private void GeneratePlayer()
-    {
-        if (_playerComponents != null) return;
-        GameObject player = _playerGenerator.Generate(_playerSpawnPoint);
-
-        _playerComponents = player.GetComponent<PlayerComponents>();
-        _playerComponents.AspectRatioManager.SetCanvas(_battleCanvas);
-        _playerComponents.PlayerManager.OnDied += OnPlayerDied;
-
-        GameObject rifle = _weaponGenerator.Generate(_playerComponents.WeaponSocket.transform);
-        _playerComponents.SetRifleManager(rifle);
-
-        PlayerUIManager.SetPlayer(player);
-    }
-
     private void OnPlayerDied(GameObject player)
     {
         ChangeCameraPosition(_playerComponents.Camera.transform);
@@ -122,7 +112,6 @@ public class BattleSceneManager : MonoBehaviour
         _lifePoint--;
         if (_lifePoint > 0)
         {
-            GeneratePlayer();
             return;
         }
         PlayerUIManager.DisplayOrHideCursor(true);
