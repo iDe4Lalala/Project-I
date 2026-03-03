@@ -13,12 +13,14 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
     private int _currentAmmo;
     private bool _isReloading;
     private float _reloadTimer;
+    private bool _hasInfiniteAmmo;
 
 
     private void Start()
     {
         _viewRifleAnimationManager = new ViewRifleAnimationManager(_reloadAnimator);
         _isFiring = false;
+        _hasInfiniteAmmo = false;
         _fireCooldown = 0f;
         _currentAmmo = WeaponDataBase.MagazineCapacity;
     }
@@ -32,8 +34,12 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
     {
         if (CanFireNow(deltaTime)) return Vector2.zero;
 
+        if(!_hasInfiniteAmmo)
+        {
+            _currentAmmo--;
+        }
+
         _fireCooldown = 1f / WeaponDataBase.FireRate;
-        _currentAmmo--;
         return Shoot(position, direction);
     }
 
@@ -41,7 +47,7 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
     {
         if(_isReloading) return false;
         if(!_isFiring) return false;
-        if(_currentAmmo <= 0) return false;
+        if(_currentAmmo <= 0 && !_hasInfiniteAmmo) return false;
 
         _fireCooldown -= deltaTime;
         if (_fireCooldown > 0f) return false;
@@ -65,6 +71,11 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
         }
 
         return recoil;
+    }
+
+    public void SetInfiniteAmmo()
+    {
+        _hasInfiniteAmmo = true;
     }
     
     public void StartFire() => _isFiring = true;

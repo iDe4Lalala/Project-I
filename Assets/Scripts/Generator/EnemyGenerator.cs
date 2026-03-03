@@ -15,7 +15,17 @@ public class EnemyGenerator : IGenerator
     {
         GameObject enemy = Object.Instantiate(_enemyDataBase.HumanObject, spawnPoint);
         var enemyComponents = enemy.GetComponent<EnemyComponents>();
-        _weaponGenerator.Generate(enemyComponents.WeaponSocket.transform);
+        GameObject weapon = _weaponGenerator.Generate(enemyComponents.WeaponSocket.transform);
+
+        InitializeEnemyParameter(enemy, weapon);
         return enemy;
+    }
+
+    private void InitializeEnemyParameter(GameObject enemy, GameObject weapon)
+    {
+        var enemyManager = enemy.GetComponent<EnemyManager>();
+        var rifleManager = weapon.GetComponent<RifleManager>();
+
+        enemyManager.Initialize(rifleManager);
     }
 }
