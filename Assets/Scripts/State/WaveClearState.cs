@@ -21,7 +21,7 @@ public class WaveClearState : IBattleState
         _currentWaveDataBase = _battleStateMachine.CurrentWaveDataBase;
 
         // "WaveClear"表示
-        yield return _battleUIService.ShowProgressTextForSeconds($"{_currentWaveDataBase.WaveText} Clear!", 2f);
+        yield return _battleUIService.OnThisWaveCleared(_currentWaveDataBase.WaveText);
 
         // 一定時間待つ
         yield return _battleStateMachine.WaitForSeconds(_currentWaveDataBase.AfterWaveInterval);

@@ -88,6 +88,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1791490474942619442
 GameObject:
@@ -177,6 +178,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1791490474942619446
 GameObject:
@@ -187,7 +189,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1791490474942710550}
-  - component: {fileID: 1791490474949881074}
   - component: {fileID: 1791490475354592304}
   - component: {fileID: 4002310554103301588}
   m_Layer: 6
@@ -214,28 +215,6 @@ Transform:
   - {fileID: 1791490474942710546}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &1791490474949881074
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1791490474942619446}
-  m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: c21fd8055cc8cdc4da37c1254275f767, type: 3}
-  m_Controller: {fileID: 0}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 1
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!82 &1791490475354592304
 AudioSource:
   m_ObjectHideFlags: 0
@@ -354,5 +333,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dac413140784a4aabb6455d523b313e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RifleManager
-  _shootingAudioSource: {fileID: 1791490475354592304}
   <WeaponDataBase>k__BackingField: {fileID: 11400000, guid: a5496b1b01d8c4a42b62ade93dd61ff5, type: 2}
+  _reloadAnimator: {fileID: 1791490474949881074, guid: 4befea8fe4a09479bbcb1eabce2f6270, type: 3}
+  _shootingAudioSource: {fileID: 1791490475354592304}

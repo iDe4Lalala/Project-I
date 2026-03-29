@@ -10,17 +10,17 @@ public enum PlayerState
 
 public class PlayerManager : MonoBehaviour, IDamageable
 {
-    public int PlayerHP { get; private set; }
-    public event Action OnDamaged;
-    public event Action<GameObject> OnDied;
-
     [SerializeField] private PlayerComponents _playerComponents;
     [SerializeField] private PlayerInputController _playerInputController;  // IPlayerInputと統一する？
     [SerializeField] private PlayerAnimationContoller _playerAnimationController;
     [SerializeField] private PlayerAudioController _playerAudioController;
     [SerializeField] private LayerMask _targetMask;
-    [field: SerializeField] public int CanJumpCount { get; private set; }
-    public int JumpCount { get; private set; }
+    [SerializeField] private int _canJumpCount;
+
+    public int PlayerHP { get; private set; }
+    public event Action OnDied;
+    public event Action<int> PlayerHPUpdated;
+    private int _jumpCount;
     private PlayerState _playerState;
     private PlayerInputHandler _playerInputHandler;
     private IPlayerInput _playerInput;
@@ -30,13 +30,14 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     private void Start()
     {
-        PlayerHP = _playerComponents.HumanDataBase.HumanHP;
-
         _playerInputController.LandedGround += OnLandedGround;
         _playerState = PlayerState.PreBattle;
         _playerInputController.Initialize(_playerComponents);
         _playerAnimationController.Initialize(_playerComponents);
         _playerAudioController.Initialize(_playerComponents);
+
+        PlayerHP = _playerComponents.HumanDataBase.HumanHP;
+        PlayerHPUpdated?.Invoke(PlayerHP);
     }
 
     private void OnDestroy()
@@ -44,26 +45,32 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _playerInputController.LandedGround -= OnLandedGround;
     }
 
-    public void Initialize(PlayerInputHandler playerInputHandler, RifleManager rifleManager)
+    public void Initialize(PlayerInputHandler playerInputHandler)
     {
-        if(playerInputHandler == null || rifleManager == null) return;
+        if(playerInputHandler == null) return;
         _playerInput = _playerInputController;
         _playerInputHandler = playerInputHandler;
-        _weaponCommand = rifleManager;
-        _fireRuntime = rifleManager;
-        _reloadRuntime = rifleManager;
+        _weaponCommand = _playerComponents.RifleManager;
+        _fireRuntime = _playerComponents.RifleManager;
+        _reloadRuntime = _playerComponents.RifleManager;
 
-        rifleManager.Initialize(_targetMask);
+        _playerComponents.RifleManager.Initialize(_targetMask);
+    }
+
+    public void SetAliveState()
+    {
+        _playerState = PlayerState.Alive;
     }
 
     public void TakeDamage(int damage)
     {
         PlayerHP -= damage;
         PlayerHP = Mathf.Max(PlayerHP, 0);
-        OnDamaged?.Invoke();
+        PlayerHPUpdated?.Invoke(PlayerHP);
 
         if (PlayerHP > 0) return;
-        OnDied?.Invoke(gameObject);
+        _playerState = PlayerState.Dead;
+        OnDied?.Invoke();
     }
 
     private void Update()
@@ -71,8 +78,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
         if(!CanControl()) return;
         if(_playerInputHandler == null || _fireRuntime == null || _reloadRuntime == null) return;
         _playerInputHandler.ConsumePerFrameInput();
-        _fireRuntime.TryFire(
-            Time.deltaTime, _playerComponents.Camera.transform.position, _playerComponents.Camera.transform.forward);
+        Vector2 recoil = _fireRuntime.TryFire(Time.deltaTime, 
+            _playerComponents.Camera.transform.position, _playerComponents.Camera.transform.forward);
+        _playerInputController.AddRecoil(recoil);
         _reloadRuntime.UpdateReload(Time.deltaTime);
     }
 
@@ -104,7 +112,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         if(!CanJump()) return;
         if(_playerInput == null) return;
 
-        JumpCount++;
+        _jumpCount++;
         _playerInput.Jump();
         _playerAnimationController.SetJump();
     }
@@ -145,12 +153,12 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     private bool CanJump()
     {
-        return JumpCount < CanJumpCount;
+        return _jumpCount < _canJumpCount;
     }
 
     private void OnLandedGround()
     {
-        JumpCount = 0;
+        _jumpCount = 0;
         _playerAnimationController.SetIsGround(_playerInputController.IsGround);
     }
 }

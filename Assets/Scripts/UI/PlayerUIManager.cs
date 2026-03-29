@@ -4,26 +4,43 @@ using System.Collections;
 
 public class PlayerUIManager : MonoBehaviour, IPlayerUIService
 {
-    [SerializeField] private BattleUIManager _battleUIManager; 
-    [SerializeField] private TMP_Text _playerCurrentHP;
-    [SerializeField] private TMP_Text _playerMaxHP;
-    [SerializeField] private GameObject _hitCrossHair;
-    [SerializeField] private GameObject _operationButtonParent;
-    [SerializeField] private bool _isUseJoystick;
+    // HPとAmmo表示用Textはそれぞれ1つに
     [field: SerializeField] public float HitCrossHairDisplayTime { get; private set; }
+    [SerializeField] private TMP_Text _playerHPText;
+    [SerializeField] private TMP_Text _playerAmmoText;
+    [SerializeField] private GameObject _hitCrossHair;
 
     private PlayerComponents _playerComponents;
+    private float _hitCrossHairTimer;
+    private bool _isHitCrossHairTimerRunning;
+    private int _playerMaxHP;
 
 
     private void OnEnable()
     {
+        if (_hitCrossHair == null) return;
         _hitCrossHair.SetActive(false);
+        _hitCrossHairTimer = 0f;
+        _isHitCrossHairTimerRunning = false;
+        DisplayOrHideCursor(false);
     }
 
-    private void Start()
+    private void OnDisable()
     {
-        SwitchOperationButtonsDisplay(false);
-        DisplayOrHideCursor(false);
+        UnbindPlayerEvents();
+    }
+
+    public void SetVisible(bool isVisible)
+    {
+        gameObject.SetActive(isVisible);
+    }
+
+    public void Initialize(PlayerComponents playerComponents)
+    {
+        UnbindPlayerEvents();
+        _playerComponents = playerComponents;
+        _playerMaxHP = _playerComponents.HumanDataBase.HumanHP;
+        BindPlayerEvents();
     }
 
     public void DisplayOrHideCursor(bool isDisplay)
@@ -39,47 +56,57 @@ public class PlayerUIManager : MonoBehaviour, IPlayerUIService
         Cursor.visible = isDisplay;
     }
 
-    public void SetPlayer(GameObject player)
+    private void BindPlayerEvents()
     {
-        if(player == null) return;
+        if (_playerComponents == null) return;
+        _playerComponents.PlayerManager.OnDied += OnPlayerDead;
+        _playerComponents.RifleManager.AmmoCountUpdated += ShowLeftAmmoCount;
+        _playerComponents.PlayerManager.PlayerHPUpdated += ShowPlayerHP;
+    }
 
-        _playerComponents = player.GetComponent<PlayerComponents>();
-        
-        _playerComponents.PlayerManager.OnDamaged += OnPlayerDamaged;
-        _playerMaxHP.text = _playerComponents.HumanDataBase.HumanHP.ToString();
-        _playerCurrentHP.text = _playerComponents.HumanDataBase.HumanHP.ToString();
+    private void UnbindPlayerEvents()
+    {
+        if (_playerComponents == null) return;
+        _playerComponents.PlayerManager.OnDied -= OnPlayerDead;
+        _playerComponents.RifleManager.AmmoCountUpdated -= ShowLeftAmmoCount;
+        _playerComponents.PlayerManager.PlayerHPUpdated -= ShowPlayerHP;
     }
 
     public IEnumerator ShowHitCrossHairForSeconds(float seconds)
     {
-        _hitCrossHair.SetActive(true);
-        yield return new WaitForSeconds(seconds);
-        _hitCrossHair.SetActive(false);
+    if (_hitCrossHair == null) yield break;
+    _hitCrossHairTimer = Mathf.Max(_hitCrossHairTimer, seconds);
+    if (_isHitCrossHairTimerRunning) yield break;
+
+    _isHitCrossHairTimerRunning = true;
+    _hitCrossHair.SetActive(true);
+    while (_hitCrossHairTimer > 0f)
+    {
+        _hitCrossHairTimer -= Time.deltaTime;
+        yield return null;
     }
 
-    private void SwitchOperationButtonsDisplay(bool isDisplay)
-    {
-        _operationButtonParent.SetActive(isDisplay);
+    _hitCrossHair.SetActive(false);
+    _isHitCrossHairTimerRunning = false;
     }
 
-    private void OnPlayerDamaged()
+    private void OnPlayerDead()
     {
-        _playerCurrentHP.text = _playerComponents.PlayerManager.PlayerHP.ToString();
-
-        if (_playerComponents.PlayerManager.PlayerHP <= 0)
-        {
-            _playerComponents.PlayerManager.OnDamaged -= OnPlayerDamaged;
-            _playerComponents = null;
-        }
+        UnbindPlayerEvents();
+        _playerComponents = null;
     }
 
-    public void ShowPlayerHP(float currentHP)
+    public void ShowPlayerHP(int currentHP)
     {
-
+        if (_playerHPText == null) return;
+        currentHP = Mathf.Max(0, currentHP);
+        _playerHPText.text = $"HP: {currentHP} / {_playerMaxHP}";
     }
 
     public void ShowLeftAmmoCount(int currentAmmoCount)
     {
-
+        if (_playerAmmoText == null) return;
+        currentAmmoCount = Mathf.Max(0, currentAmmoCount);
+        _playerAmmoText.text = $"Ammo: {currentAmmoCount}";
     }
 }

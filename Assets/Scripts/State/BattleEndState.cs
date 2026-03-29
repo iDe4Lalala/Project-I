@@ -4,7 +4,7 @@ using System.Collections;
 public class BattleEndState : IBattleState
 {
     public event Action<BattleStateType> ChangingState;
-    public event Action<BattleResultType> BattleEnded;
+    public event Action BattleEnded;
     private IBattleUIService _battleUIService;
     private BattleStateMachine _battleStateMachine;
 
@@ -19,10 +19,10 @@ public class BattleEndState : IBattleState
         switch (_battleStateMachine.BattleResult)
         {
             case BattleResultType.GameClear:
-                yield return _battleUIService.ShowProgressTextForSeconds("Game Clear!", 2f);
+                yield return _battleUIService.OnGameCleared();
                 break;
             case BattleResultType.GameOver:
-                yield return _battleUIService.ShowProgressTextForSeconds("Game Over", 2f);
+                yield return _battleUIService.OnGameOvered();
                 break;
             default:
                 break;
@@ -32,6 +32,6 @@ public class BattleEndState : IBattleState
         yield return _battleStateMachine.WaitForSeconds(2f);
 
         // ResultSceneへ遷移呼び出し
-        BattleEnded?.Invoke(_battleStateMachine.BattleResult);
+        BattleEnded?.Invoke();
     }
 }

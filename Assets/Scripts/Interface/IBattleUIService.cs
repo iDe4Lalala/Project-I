@@ -1,10 +1,14 @@
 using System.Collections;
-using System;
 
 public interface IBattleUIService
 {
+    public void Initialize(BattleSceneManager battleSceneManager);
     public void UpdateTimer(float time);
-    public IEnumerator ShowKillTextForSeconds(string text, float seconds);
-    public IEnumerator ShowProgressTextForSeconds(string text, float seconds);
+    public void OnPlayerKilled();
+    public void OnEnemyKilled();
+    public IEnumerator OnNextWaveStarted(string text);
+    public IEnumerator OnThisWaveCleared(string text);
+    public IEnumerator OnGameCleared();
+    public IEnumerator OnGameOvered();
     public IEnumerator PlayCountdown(float countdownTime);
 }

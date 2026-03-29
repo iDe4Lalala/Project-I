@@ -13,7 +13,8 @@ public class EnemyGenerator : IGenerator
 
     public GameObject Generate(Transform spawnPoint)
     {
-        GameObject enemy = Object.Instantiate(_enemyDataBase.HumanObject, spawnPoint);
+        GameObject enemy = Object.Instantiate(
+            _enemyDataBase.HumanObject, spawnPoint.position, spawnPoint.rotation);
         var enemyComponents = enemy.GetComponent<EnemyComponents>();
         GameObject weapon = _weaponGenerator.Generate(enemyComponents.WeaponSocket.transform);
 

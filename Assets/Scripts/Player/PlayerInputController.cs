@@ -20,6 +20,7 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
     public void Initialize(PlayerComponents playerComponents)
     {
         _sprintSpeed = 1f;
+        _pendingRecoil = Vector2.zero;
         _playerComponents = playerComponents;
         _playerData = playerComponents.HumanDataBase;
         _rigidbody = _playerComponents.Rigidbody;

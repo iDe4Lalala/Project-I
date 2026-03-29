@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System;
-using UnityEngine.Events;
+using System.Collections;
 
 public class BattleSceneManager : MonoBehaviour
 {
@@ -10,35 +10,39 @@ public class BattleSceneManager : MonoBehaviour
     [field: SerializeField] public PlayerUIManager PlayerUIManager { get; private set; }
     [field: SerializeField] public BattleUIManager BattleUIManager { get; private set; }
     [field: SerializeField] public List<EnemyWaveDataBase> EnemyWaveDataBaseList { get; private set; }
-    [field: SerializeField] public UnityEvent<bool> OnKilled { get; private set; }
-
     [SerializeField] private BattleStateMachine _battleStateMachine;
     [SerializeField] private Transform _playerSpawnPoint;
     [SerializeField] private Transform[] _enemySpawnPoints;
     [SerializeField] private HumanDataBase _playerDataBase;
     [SerializeField] private HumanDataBase _enemyDataBase;
-    [SerializeField] private WeaponDataBase _weaponDataBase;
     [SerializeField] private string _nextSceneName;
-    [SerializeField] private Canvas _battleCanvas;
     [SerializeField] private float _battleTimer;
-    [SerializeField] private EnemyAppearanceManager _enemyAppearanceManager;
-    [SerializeField] private GameObject _diedCameraPosition;
+    [SerializeField] private Camera _diedCamera;
 
     public event Action<float> TimerUpdated;
+    public event Action PlayerLifePointBecameZero;
+    public event Action TimeExpired;
     private float _currentTimer;
+    private GameObject _player;
     private PlayerComponents _playerComponents;
-    private int _lifePoint;
+    private int _currentLifePoint;
     private IGenerator _playerGenerator;
     private IGenerator _enemyGenerator;
-    private IGenerator _weaponGenerator;
+    private IWeaponGenerator _weaponGenerator;
     private BattleContext _battleContext;
     private ISpawnPointProvider _playerSpawnPointProvider;
     private ISpawnPointProvider _enemySpawnPointProvider;
     private InputSystem_Actions _inputSystemActions;
     private PlayerInputHandler _playerInputHandler;
-    
+    private IBattleUIService _battleUIService;
+    private IPlayerUIService _playerUIService;
+    private AudioListener _diedCameraAudioListener;
+    private bool _isTimerRunning;
+
     private void Awake()
     {
+        _battleUIService = BattleUIManager;
+        _playerUIService = PlayerUIManager;
         _inputSystemActions = new InputSystem_Actions();
         _playerInputHandler = new PlayerInputHandler();
         _playerSpawnPointProvider = new PlayerSpawnPointProvider(_playerSpawnPoint);
@@ -48,52 +52,52 @@ public class BattleSceneManager : MonoBehaviour
         _enemyGenerator = new EnemyGenerator(_enemyDataBase, _weaponGenerator);
         // BattleContextの受け取りをinterfaceに
         _battleContext = new BattleContext(
-            _battleStateMachine, _playerGenerator, _enemyGenerator, _weaponGenerator,
-            BattleUIManager, _playerSpawnPointProvider, _enemySpawnPointProvider, _playerDataBase,
+            _battleStateMachine, this, _playerGenerator, _enemyGenerator, _weaponGenerator,
+            _battleUIService, _playerUIService, _playerSpawnPointProvider, _enemySpawnPointProvider, _playerDataBase,
             _enemyDataBase, WeaponDataBase, _playerSpawnPoint, _enemySpawnPoints, EnemyWaveDataBaseList
         );
+
+        _diedCameraAudioListener = _diedCamera.GetComponent<AudioListener>();
+
         _battleStateMachine.ChangingScene += OnBattleEnded;
+        _battleStateMachine.PlayerGenerated += OnPlayerGenerated;
+        _battleStateMachine.BattleStarted += OnBattleStarted;
         _playerInputHandler.InitializeInputSystem(_inputSystemActions);
         _battleStateMachine.Initialize(_battleContext);
+        _battleUIService.Initialize(this);
     }
 
     private void OnEnable()
     {
-        BattleUIManager.OnStartingBattle += OnStartBattle;
+        _isTimerRunning = false;
         _currentTimer = _battleTimer;
-        _lifePoint = _playerDataBase.LifePoint;
-
+        _currentLifePoint = _playerDataBase.LifePoint;
         TimerUpdated?.Invoke(_battleTimer);
     }
 
     private void OnDisable()
     {
-        BattleUIManager.OnStartingBattle -= OnStartBattle;
+        _battleStateMachine.ChangingScene -= OnBattleEnded;
+        _battleStateMachine.PlayerGenerated -= OnPlayerGenerated;
+        _battleStateMachine.BattleStarted -= OnBattleStarted;
         _playerInputHandler.Dispose();
     }
     
     private void Update()
     {
-        if(_enemyAppearanceManager.CurrentWaveState == EnemyWaveState.Waiting) return;
+        if (!_isTimerRunning) return;
 
-        if (_currentTimer >= 0)
+        // バトル前はタイマー動かさないように
+        if (_currentTimer < 0)
         {
-            _currentTimer -= Time.deltaTime;
-            _currentTimer = Mathf.Max(0, _currentTimer);
-            TimerUpdated?.Invoke(_currentTimer);
-        }
-        else
-        {
-            _enemyAppearanceManager.SetEnemyWaveState(EnemyWaveState.Finished);
+            TimeExpired?.Invoke();
             LoadOtherScene();
+            return;
         }
-    }
 
-    public void OnStartBattle()
-    {
-        _enemyAppearanceManager.SetEnemyWaveState(EnemyWaveState.Cleared);
-        _enemyAppearanceManager.StartNextWave();
-        BattleUIManager.OnNextWaveStarted(_enemyAppearanceManager.EnemyWaveDataBaseList[0].WaveText);
+        _currentTimer -= Time.deltaTime;
+        _currentTimer = Mathf.Max(0, _currentTimer);
+        TimerUpdated?.Invoke(_currentTimer);
     }
 
     public void LoadOtherScene()
@@ -101,33 +105,56 @@ public class BattleSceneManager : MonoBehaviour
         SceneManager.LoadScene(_nextSceneName);
     }
 
-    private void OnPlayerDied(GameObject player)
+    private void OnPlayerGenerated(GameObject player)
     {
-        ChangeCameraPosition(_playerComponents.Camera.transform);
+        if(_player != null || _playerComponents != null) return;
+        _player = player;
+        _playerComponents = _player.GetComponent<PlayerComponents>();
+        _playerComponents.PlayerManager.OnDied += OnPlayerDied;
 
-        Destroy(player);
-        _playerComponents = null;
-        OnKilled?.Invoke(false);
-
-        _lifePoint--;
-        if (_lifePoint > 0)
-        {
-            return;
-        }
-        PlayerUIManager.DisplayOrHideCursor(true);
-        LoadOtherScene();
+        _playerComponents.Camera.enabled = true;
+        _diedCameraAudioListener.enabled = false;
+        _diedCamera.enabled = false;
     }
 
-    private void ChangeCameraPosition(Transform cameraTransform)
+    private void OnPlayerDied()
     {
-        cameraTransform.SetParent(null);
-        cameraTransform.position = _diedCameraPosition.transform.position;
-        cameraTransform.rotation = _diedCameraPosition.transform.rotation;
-        for (int i = cameraTransform.childCount - 1; i >= 0; i--)
+        _isTimerRunning = false;
+        StartCoroutine(PlayerDiedRoutine());
+    }
+
+    private IEnumerator PlayerDiedRoutine()
+    {
+        _diedCamera.enabled = true;
+        _diedCameraAudioListener.enabled = true;
+        _playerComponents.Camera.enabled = false;
+
+        _playerComponents.PlayerManager.OnDied -= OnPlayerDied;
+        Destroy(_player);
+        _player = null;
+        _playerComponents = null;
+
+        _battleUIService.OnPlayerKilled();
+
+        if (_currentLifePoint <= 0)
         {
-            Destroy(cameraTransform.GetChild(i).gameObject);
+            _playerUIService.DisplayOrHideCursor(true);
+            PlayerLifePointBecameZero?.Invoke();
+            LoadOtherScene();
+            yield break;
         }
-        PlayerUIManager.gameObject.SetActive(false);
+
+        _currentLifePoint--;
+        yield return _battleUIService.PlayCountdown(3f);
+        _battleStateMachine.GeneratePlayer();
+        yield return null;
+        _battleStateMachine.EnterAliveState();
+        _isTimerRunning = true;
+    }
+
+    private void OnBattleStarted()
+    {
+        _isTimerRunning = true;
     }
 
     public void OnBattleEnded(BattleResultType result)
@@ -136,7 +163,8 @@ public class BattleSceneManager : MonoBehaviour
         {
             // 結果を保持しつつシーン遷移
         }
-        PlayerUIManager.DisplayOrHideCursor(true);
+
+        _playerUIService.DisplayOrHideCursor(true);
         LoadOtherScene();
     }
 }

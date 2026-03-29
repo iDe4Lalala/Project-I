@@ -19,14 +19,26 @@ public enum BattleResultType
 
 public class BattleStateMachine : MonoBehaviour
 {
-    public event Action<BattleResultType> ChangingScene;
     public BattleResultType BattleResult { get; private set; }
     public int CurrentWave { get; private set; }
     public int TotalWaves { get; private set; }
     public EnemyWaveDataBase CurrentWaveDataBase { get; private set; }
     private Dictionary<BattleStateType, IBattleState> _battleStates;
+    public event Action<BattleResultType> ChangingScene;
+    public event Action<GameObject> PlayerGenerated;
+    public event Action BattleStarted;
     private IBattleState _currentState;
+    private PlayerComponents _playerComponents;
     private BattleContext _battleContext;
+    private BattleCountdownState _battleCountdownState;
+    private WaveState _waveState;
+    private WaveClearState _waveClearState;
+    private BattleEndState _battleEndState;
+
+    private void OnDisable()
+    {
+        DisposeEvents();
+    }
 
     public void Initialize(BattleContext battleContext)
      {
@@ -34,8 +46,7 @@ public class BattleStateMachine : MonoBehaviour
         _battleContext = battleContext;
         InitializeStates();
         InitializeEvents();
-
-        StartCoroutine(_currentState.Enter());
+        OnChangeState(BattleStateType.Countdown);
     }
 
     public IEnumerator WaitForSeconds(float seconds)
@@ -45,18 +56,20 @@ public class BattleStateMachine : MonoBehaviour
 
     private void InitializeStates()
     {
+        _battleCountdownState = new BattleCountdownState(_battleContext.BattleUIService, this);
+        _waveState = new WaveState(_battleContext.EnemyGenerator, 
+                _battleContext.EnemySpawnPointProvider, _battleContext.BattleUIService, this);
+        _waveClearState = new WaveClearState(_battleContext.BattleUIService, this);
+        _battleEndState = new BattleEndState(_battleContext.BattleUIService, this);
+
         // Stateの生成をinterfaceにするのを検討
         _battleStates = new Dictionary<BattleStateType, IBattleState>()
         {
-            { BattleStateType.Countdown, new BattleCountdownState(_battleContext.PlayerGenerator, 
-                _battleContext.PlayerSpawnPointProvider, _battleContext.BattleUIService) },
-            { BattleStateType.Wave, new WaveState(_battleContext.EnemyGenerator, 
-                _battleContext.EnemySpawnPointProvider, _battleContext.BattleUIService, this) },
-            { BattleStateType.Clear, new WaveClearState(_battleContext.BattleUIService, this) },
-            { BattleStateType.End, new BattleEndState(_battleContext.BattleUIService, this) }
+            { BattleStateType.Countdown, _battleCountdownState },
+            { BattleStateType.Wave, _waveState },
+            { BattleStateType.Clear, _waveClearState },
+            { BattleStateType.End, _battleEndState }
         };
-
-        _currentState = _battleStates[BattleStateType.Countdown];
     }
 
     private void InitializeEvents()
@@ -66,36 +79,56 @@ public class BattleStateMachine : MonoBehaviour
             battleState.ChangingState += OnChangeState;
         }
 
-        if (!_battleStates.TryGetValue(BattleStateType.End, out var state)) return;
-        if (state is BattleCountdownState countdownState)
+        _battleCountdownState.StartingBattle += OnStartingBattle;
+        _waveState.SettingBattleResult += OnSettingBattleResult;
+        _battleContext.BattleSceneManager.TimeExpired += _waveState.OnTimeExpired;
+        _battleContext.BattleSceneManager.PlayerLifePointBecameZero += _waveState.OnPlayerLifePointBecameZero;
+        _waveClearState.IncreasingWaveCount += OnAdvancingWaveCount;
+        _waveClearState.SettingBattleResult += OnSettingBattleResult;
+        _battleEndState.BattleEnded += OnBattleEnded;
+    }
+
+    private void DisposeEvents()
+    {
+        foreach (var battleState in _battleStates.Values)
         {
-            countdownState.StartingBattle += OnStartingBattle;
+            battleState.ChangingState -= OnChangeState;
         }
-        else if (state is WaveState waveState)
-        {
-            waveState.SettingBattleResult += OnSettingBattleResult;
-        }
-        else if (state is WaveClearState clearState)
-        {
-            clearState.IncreasingWaveCount += OnAdvancingWaveCount;
-            clearState.SettingBattleResult += OnSettingBattleResult;
-        }
-        else if (state is BattleEndState endState) 
-        {
-            endState.BattleEnded += OnBattleEnded;
-        }
+
+        _battleCountdownState.StartingBattle -= OnStartingBattle;
+        _waveState.SettingBattleResult -= OnSettingBattleResult;
+        _battleContext.BattleSceneManager.TimeExpired -= _waveState.OnTimeExpired;
+        _battleContext.BattleSceneManager.PlayerLifePointBecameZero -= _waveState.OnPlayerLifePointBecameZero;
+        _waveClearState.IncreasingWaveCount -= OnAdvancingWaveCount;
+        _waveClearState.SettingBattleResult -= OnSettingBattleResult;
+        _battleEndState.BattleEnded -= OnBattleEnded;
+    }
+
+    public void GeneratePlayer()
+    {
+        Transform playerSpawnPoint = _battleContext.PlayerSpawnPointProvider.GetSpawnPoint();
+        GameObject player = _battleContext.PlayerGenerator.Generate(playerSpawnPoint);
+        _playerComponents = player.GetComponent<PlayerComponents>();
+        _battleContext.PlayerUIService.Initialize(_playerComponents);
+        PlayerGenerated?.Invoke(player);
+    }
+
+    public void EnterAliveState()
+    {
+        _playerComponents.PlayerManager.SetAliveState();
     }
 
     private void OnChangeState(BattleStateType newStateType)
     {
         // すでにこのコルーチンが動いている時の処理を書く(Coroutine型の変数追加)
         _currentState = _battleStates[newStateType];
+        Debug.Log($"current state: {_currentState}");
         StartCoroutine(_currentState.Enter());
     }
 
-    private void OnBattleEnded(BattleResultType result)
+    private void OnBattleEnded()
     {
-        ChangingScene?.Invoke(result);
+        ChangingScene?.Invoke(BattleResult);
     }
 
     private void OnSettingBattleResult(BattleResultType result)
@@ -113,5 +146,6 @@ public class BattleStateMachine : MonoBehaviour
     {
         CurrentWave = 0;
         OnAdvancingWaveCount();
+        BattleStarted?.Invoke();
     }
 }

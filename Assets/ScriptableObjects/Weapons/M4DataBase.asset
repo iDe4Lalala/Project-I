@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e612791cb45f4168b2d1aae67f1f389, type: 3}
   m_Name: M4DataBase
   m_EditorClassIdentifier: Assembly-CSharp::WeaponDataBase
+  <WeaponObject>k__BackingField: {fileID: 1791490474942619446, guid: a9655ae40638940eaa7d34fa6596f947, type: 3}
+  <ViewWeaponObject>k__BackingField: {fileID: 1791490474942619446, guid: 4befea8fe4a09479bbcb1eabce2f6270, type: 3}
   <MaximumBallisticDistance>k__BackingField: 30
   <Damage>k__BackingField: 30
   <MagazineCapacity>k__BackingField: 31

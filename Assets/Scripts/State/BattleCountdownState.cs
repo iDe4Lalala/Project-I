@@ -1,33 +1,26 @@
 using System;
 using System.Collections;
-using UnityEngine;
 
 public class BattleCountdownState : IBattleState
 {
     public event Action<BattleStateType> ChangingState;
     public event Action StartingBattle;
-    private IGenerator _playerGenerator;
-    private ISpawnPointProvider _playerSpawnPointProvider;
+    private BattleStateMachine _battleStateMachine;
     private IBattleUIService _battleUIService;
 
-    public BattleCountdownState(IGenerator playerGenerator, ISpawnPointProvider playerSpawnPointProvider,
-        IBattleUIService battleUIManager)
+    public BattleCountdownState(IBattleUIService battleUIManager, BattleStateMachine battleStateMachine)
     {
-        _playerGenerator = playerGenerator;
-        _playerSpawnPointProvider = playerSpawnPointProvider;
         _battleUIService = battleUIManager;
+        _battleStateMachine = battleStateMachine;
     }
 
     public IEnumerator Enter()
     {
-        // プレイヤー、武器(、Map)の生成
-        Transform playerSpawnPoint = _playerSpawnPointProvider.GetSpawnPoint();
-        GameObject player = _playerGenerator.Generate(playerSpawnPoint);
+        _battleStateMachine.GeneratePlayer();
 
-        // 3カウント
         yield return _battleUIService.PlayCountdown(3f);
 
-        // WaveStateへ遷移
+        _battleStateMachine.EnterAliveState();
         StartingBattle?.Invoke();
         ChangingState?.Invoke(BattleStateType.Wave);
     }

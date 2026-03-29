@@ -22,23 +22,27 @@ public class EnemyManager : MonoBehaviour, IDamageable
     [SerializeField] private LayerMask _targetLayer;
     [SerializeField] private float _searchInterval;
     [SerializeField] private float _fireThreshold = 0.0001f;
+    [SerializeField] private float _attackShotInterval;
     [SerializeField] private float _wanderRadius = 8f;
     [SerializeField] private float _wanderArrivalDistance = 0.5f;
     [SerializeField] private int _maxTargetColliders = 16;
 
-    public event Action<GameObject, EnemyComponents> OnDied;
+    public event Action<EnemyComponents> OnDied;
     public event Action OnDamaged;
     private IFireRuntime _fireRuntime;
+    private IWeaponCommand _weaponCommand;
     private EnemyState _currentState;
     private int _enemyHP;
     private Transform _currentTarget;
     private float _searchTimer;
+    private float _shotCooldownTimer;
     private Collider[] _targetColliders;
 
     private void Start()
     {
         SetState(EnemyState.Wander);
         _enemyComponents.NavMeshAgent.avoidancePriority = Random.Range(0, 100);
+        _shotCooldownTimer = _attackShotInterval;
         _enemyHP = _enemyComponents.HumanDataBase.HumanHP;
         _targetColliders = new Collider[_maxTargetColliders];
 
@@ -50,6 +54,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
     private void Update()
     {
         if (_currentState == EnemyState.Dead) return;
+        _shotCooldownTimer = Mathf.Max(0f, _shotCooldownTimer - Time.deltaTime);
 
         UpdateTargetSearch(Time.deltaTime);
         if (!HasTarget())
@@ -64,12 +69,16 @@ public class EnemyManager : MonoBehaviour, IDamageable
 
     public void Initialize(RifleManager rifleManager)
     {
+        if(rifleManager == null) return;
+        _fireRuntime = rifleManager;
+        _weaponCommand = rifleManager;
+
+        rifleManager.Initialize(_targetLayer);
+        rifleManager.SetInfiniteAmmo();
         _enemyAudioController.Initialize(_enemyComponents);
         _enemyAnimationController.Initialize(_enemyComponents);
 
-        if(rifleManager == null) return;
-        _fireRuntime = rifleManager;
-        rifleManager.SetInfiniteAmmo();
+        SetState(EnemyState.Wander);
     }
 
     public void TakeDamage(int damage)
@@ -80,10 +89,11 @@ public class EnemyManager : MonoBehaviour, IDamageable
 
         if (_enemyHP > 0) return;
         SetState(EnemyState.Dead);
+        _weaponCommand.StopFire();
         _enemyComponents.NavMeshAgent.isStopped = true;
         _enemyComponents.NavMeshAgent.ResetPath();
         UpdateFootstepPresentation(false);
-        OnDied?.Invoke(gameObject, _enemyComponents);
+        OnDied?.Invoke(_enemyComponents);
     }
 
     private Transform FindNearestTarget()
@@ -132,6 +142,8 @@ public class EnemyManager : MonoBehaviour, IDamageable
         if (!_enemyComponents.NavMeshAgent.hasPath ||
             _enemyComponents.NavMeshAgent.remainingDistance <= _wanderArrivalDistance)
         {
+            SetState(EnemyState.Wander);
+            _weaponCommand.StopFire();
             SetRandomWanderDestination();
         }
 
@@ -146,6 +158,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
         if (distance > _attackRange)
         {
             SetState(EnemyState.Chase);
+            _weaponCommand.StopFire();
             UpdateFootstepPresentation(true);
             _enemyComponents.NavMeshAgent.isStopped = false;
             _enemyComponents.NavMeshAgent.SetDestination(currentTarget.position);
@@ -163,7 +176,23 @@ public class EnemyManager : MonoBehaviour, IDamageable
 
             if (_fireRuntime == null) return;
             direction.Normalize();
-                _fireRuntime.TryFire(Time.deltaTime, _enemyComponents.Camera.transform.position, direction);
+            TrySingleShot(direction);
+        }
+    }
+
+    private void TrySingleShot(Vector3 direction)
+    {
+        if (_shotCooldownTimer > 0f) return;
+        if (_weaponCommand == null || _fireRuntime == null) return;
+
+        _weaponCommand.StartFire();
+        Vector2 recoil = _fireRuntime.TryFire(
+            Time.deltaTime, _enemyComponents.Camera.transform.position, direction);
+        _weaponCommand.StopFire();
+
+        if (recoil != Vector2.zero)
+        {
+            _shotCooldownTimer = _attackShotInterval;
         }
     }
 

@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
+using Object = UnityEngine.Object;
 
 public class WaveState : IBattleState
 {
@@ -11,6 +13,7 @@ public class WaveState : IBattleState
     private IBattleUIService _battleUIService;
     private BattleStateMachine _battleStateMachine;
     private EnemyWaveDataBase _currentWaveDataBase;
+    private List<GameObject> _enemyList;
 
     public WaveState(IGenerator enemyGenerator, ISpawnPointProvider enemySpawnPointProvider, 
         IBattleUIService battleUIManager , BattleStateMachine battleStateMachine)
@@ -23,11 +26,12 @@ public class WaveState : IBattleState
 
     public IEnumerator Enter()
     {
+        _enemyList = new ();
         _currentWaveDataBase = _battleStateMachine.CurrentWaveDataBase;
 
         // "Wave開始"表示
         yield return 
-            _battleUIService.ShowProgressTextForSeconds($"{_currentWaveDataBase.WaveText} Wave Start!", 2f);
+            _battleUIService.OnNextWaveStarted(_currentWaveDataBase.WaveText);
 
         GenerateEnemies(_currentWaveDataBase.MaxEnemyAppearanceCount, _currentWaveDataBase.EnemyTotalCount);
     }
@@ -60,8 +64,26 @@ public class WaveState : IBattleState
                 // 敵、武器の生成
                 Transform enemySpawnPoint = _enemySpawnPointProvider.GetSpawnPoint();
                 GameObject enemy = _enemyGenerator.Generate(enemySpawnPoint);
+                var enemyManager = enemy.GetComponent<EnemyManager>();
+
+                enemyManager.OnDied += OnEnemyDied;
+                _enemyList.Add(enemy);
             }
+
             remainingSpawnCount -= currentBatchSize;
         }
+    }
+
+    public void OnEnemyDied(EnemyComponents enemyComponents)
+    {
+        var enemy = enemyComponents.gameObject;
+        enemyComponents.EnemyManager.OnDied -= OnEnemyDied;
+        _enemyList.Remove(enemyComponents.gameObject);
+        Object.Destroy(enemy);
+
+        _battleUIService.OnEnemyKilled();
+
+        if(_enemyList.Count > 0) return;
+        OnAllEnemiesDead();        
     }
 }

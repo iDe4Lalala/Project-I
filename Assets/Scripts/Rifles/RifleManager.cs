@@ -1,12 +1,15 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReloadRuntime
 {
     [field: SerializeField] public WeaponDataBase WeaponDataBase { get; private set; }
-    [SerializeField] private Animator _reloadAnimator;
     [SerializeField] private AudioSource _shootingAudioSource;
 
+    public event Action<int> AmmoCountUpdated;
     private ViewRifleAnimationManager _viewRifleAnimationManager;
+    private Animator _reloadAnimator;
     private LayerMask _targetMask;
     private bool _isFiring;
     private float _fireCooldown;
@@ -15,14 +18,13 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
     private float _reloadTimer;
     private bool _hasInfiniteAmmo;
 
-
     private void Start()
     {
-        _viewRifleAnimationManager = new ViewRifleAnimationManager(_reloadAnimator);
         _isFiring = false;
         _hasInfiniteAmmo = false;
         _fireCooldown = 0f;
         _currentAmmo = WeaponDataBase.MagazineCapacity;
+        AmmoCountUpdated?.Invoke(_currentAmmo);
     }
 
     public void Initialize(LayerMask layerMask)
@@ -30,13 +32,20 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
         _targetMask = layerMask;
     }
 
+    public void InitializeAnimator(Animator animator)
+    {
+        _reloadAnimator = animator;
+        _viewRifleAnimationManager = new ViewRifleAnimationManager(_reloadAnimator);
+    }
+
     public Vector2 TryFire(float deltaTime, Vector3 position, Vector3 direction)
     {
-        if (CanFireNow(deltaTime)) return Vector2.zero;
+        if (!CanFireNow(deltaTime)) return Vector2.zero;
 
         if(!_hasInfiniteAmmo)
         {
             _currentAmmo--;
+            AmmoCountUpdated?.Invoke(_currentAmmo);
         }
 
         _fireCooldown = 1f / WeaponDataBase.FireRate;
@@ -88,6 +97,7 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
         if(_currentAmmo >= WeaponDataBase.MagazineCapacity) return;
 
         _isReloading = true;
+        Debug.Log("Start Reloading");
         _reloadTimer = WeaponDataBase.ReloadTime;
         _viewRifleAnimationManager.SetReload();
     }
@@ -101,5 +111,6 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
 
         _isReloading = false;
         _currentAmmo = WeaponDataBase.MagazineCapacity;
+        AmmoCountUpdated?.Invoke(_currentAmmo);
     }
 }
