@@ -6,6 +6,7 @@ public class PlayerUIManager : MonoBehaviour, IPlayerUIService
 {
     [SerializeField] private TMP_Text _playerHPText;
     [SerializeField] private TMP_Text _playerAmmoText;
+    [SerializeField] private TMP_Text _playerLifePointText;
     [SerializeField] private GameObject _hitCrossHair;
     [SerializeField] private float _hitCrossHairDisplayTime;
     private PlayerComponents _playerComponents;
@@ -39,6 +40,12 @@ public class PlayerUIManager : MonoBehaviour, IPlayerUIService
         _playerComponents = playerComponents;
         _playerMaxHP = _playerComponents.HumanDataBase.HumanHP;
         BindPlayerEvents();
+    }
+
+    private void OnPlayerDead()
+    {
+        UnbindPlayerEvents();
+        _playerComponents = null;
     }
 
     public void DisplayOrHideCursor(bool isDisplay)
@@ -92,12 +99,6 @@ public class PlayerUIManager : MonoBehaviour, IPlayerUIService
     _isHitCrossHairTimerRunning = false;
     }
 
-    private void OnPlayerDead()
-    {
-        UnbindPlayerEvents();
-        _playerComponents = null;
-    }
-
     public void ShowPlayerHP(int currentHP)
     {
         if (_playerHPText == null) return;
@@ -110,5 +111,12 @@ public class PlayerUIManager : MonoBehaviour, IPlayerUIService
         if (_playerAmmoText == null) return;
         currentAmmoCount = Mathf.Max(0, currentAmmoCount);
         _playerAmmoText.text = $"Ammo: {currentAmmoCount}";
+    }
+
+    public void ShowPlayerLifePoint(int currentLifePoint)
+    {
+        if (_playerLifePointText == null) return;
+        currentLifePoint = Mathf.Max(0, currentLifePoint);
+        _playerLifePointText.text = $"LP: {currentLifePoint}";
     }
 }

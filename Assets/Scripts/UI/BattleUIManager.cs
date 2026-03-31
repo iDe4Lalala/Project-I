@@ -44,7 +44,7 @@ public class BattleUIManager : MonoBehaviour, IBattleUIService
 
     public void OnEnemyKilled()
     {
-        _killText.text = _playerKilledSentence;
+        _killText.text = _enemyKilledSentence;
         StartCoroutine(ShowKillTextForSeconds(_killTextDisplayTime));
     }
 

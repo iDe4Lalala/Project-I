@@ -228,7 +228,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 31882c91d9dab4049933dc7ada618b85, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.8
+  m_Volume: 0.05
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -311,7 +311,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -333,6 +333,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dac413140784a4aabb6455d523b313e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RifleManager
-  <WeaponDataBase>k__BackingField: {fileID: 11400000, guid: a5496b1b01d8c4a42b62ade93dd61ff5, type: 2}
-  _reloadAnimator: {fileID: 1791490474949881074, guid: 4befea8fe4a09479bbcb1eabce2f6270, type: 3}
+  _weaponDataBase: {fileID: 11400000, guid: a5496b1b01d8c4a42b62ade93dd61ff5, type: 2}
   _shootingAudioSource: {fileID: 1791490475354592304}

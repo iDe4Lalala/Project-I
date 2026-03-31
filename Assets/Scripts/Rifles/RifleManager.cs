@@ -56,7 +56,10 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
     {
         if(_isReloading) return false;
         if(!_isFiring) return false;
-        if(_currentAmmo <= 0 && !_hasInfiniteAmmo) return false;
+        if(!_hasInfiniteAmmo)
+        {
+            if(_currentAmmo <= 0) return false;
+        }
 
         _fireCooldown -= deltaTime;
         if (_fireCooldown > 0f) return false;

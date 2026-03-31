@@ -288,10 +288,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.3442963
-  m_Height: 1.8668733
+  m_Radius: 0.25812012
+  m_Height: 1.8511524
   m_Direction: 1
-  m_Center: {x: -0.007287413, y: 0.85261416, z: 0}
+  m_Center: {x: -0.0008942485, y: 0.8604746, z: 0.023056328}
 --- !u!54 &5603421663110265241
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -317,7 +317,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!114 &5603421663110265246
 MonoBehaviour:
@@ -386,7 +386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25e4ddc2f108146f7a0537997ad9300a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAudioController
-  _footSoundThreshold: 0.001
+  _footSoundThreshold: 0.15
 --- !u!114 &3426221625764323985
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -399,11 +399,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a3c7c5554b8124499124f852349bc0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInputController
-  _movementThreshold: 0.001
+  _movementThreshold: 0.1
   _groundLayer:
     serializedVersion: 2
     m_Bits: 256
-  _minWorkableNormalY: 0
+  _minWorkableNormalY: 0.5
 --- !u!1001 &5603421662218080644
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -770,7 +770,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 21f1fbb5a89b742d68345f1ac0604de8, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.4
+  m_Volume: 0.1
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -829,7 +829,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.027777778
+      value: 0.024388889
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -844,7 +844,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

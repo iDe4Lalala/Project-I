@@ -26,6 +26,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
     [SerializeField] private float _wanderRadius;
     [SerializeField] private float _wanderArrivalDistance;
     [SerializeField] private int _maxTargetColliders;
+    [SerializeField] private float _aimSpreadDegrees;
     public event Action<EnemyComponents> OnDied;
     public event Action OnDamaged;
     private IFireRuntime _fireRuntime;
@@ -115,7 +116,6 @@ public class EnemyManager : MonoBehaviour, IDamageable
             }
         }
 
-        // hitCount == _targetColliders.Lengthが成り立つようなら、バッファ不足なので_maxTargetCollidersを増やす必要があり
         return nearestTarget;
     }
 
@@ -137,7 +137,6 @@ public class EnemyManager : MonoBehaviour, IDamageable
     {
         _enemyComponents.NavMeshAgent.isStopped = false;
 
-        // 目的地がない or 到着済みなら次の放浪先を作る
         if (!_enemyComponents.NavMeshAgent.hasPath ||
             _enemyComponents.NavMeshAgent.remainingDistance <= _wanderArrivalDistance)
         {
@@ -185,6 +184,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
         if (_weaponCommand == null || _fireRuntime == null) return;
 
         _weaponCommand.StartFire();
+        direction = ApplyAimSpreed(direction);
         Vector2 recoil = _fireRuntime.TryFire(
             Time.deltaTime, _enemyComponents.Camera.transform.position, direction);
         _weaponCommand.StopFire();
@@ -193,6 +193,13 @@ public class EnemyManager : MonoBehaviour, IDamageable
         {
             _shotCooldownTimer = _attackShotInterval;
         }
+    }
+
+    private Vector3 ApplyAimSpreed(Vector3 direction)
+    {
+        float yaw = Random.Range(-_aimSpreadDegrees, _aimSpreadDegrees);
+        float pitch = Random.Range(-_aimSpreadDegrees, _aimSpreadDegrees);
+        return Quaternion.Euler(pitch, yaw, 0f) * direction;
     }
 
     private void UpdateFootstepPresentation(bool isMoving)

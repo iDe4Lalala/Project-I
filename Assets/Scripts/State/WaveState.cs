@@ -30,7 +30,7 @@ public class WaveState : IBattleState
         _enemyList = new ();
         _currentWaveDataBase = _battleStateMachine.CurrentWaveDataBase;
 
-        yield return 
+        yield return
             _battleUIService.OnNextWaveStarted(_currentWaveDataBase.WaveText);
 
         GenerateEnemies(_currentWaveDataBase.MaxEnemyAppearanceCount, _currentWaveDataBase.EnemyTotalCount);

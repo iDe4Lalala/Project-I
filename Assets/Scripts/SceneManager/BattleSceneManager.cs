@@ -42,6 +42,8 @@ public class BattleSceneManager : MonoBehaviour
 
     private void Awake()
     {
+        _currentLifePoint = _playerDataBase.LifePoint;
+
         _battleUIService = BattleUIManager;
         _playerUIService = PlayerUIManager;
         _inputSystemActions = new InputSystem_Actions();
@@ -51,7 +53,7 @@ public class BattleSceneManager : MonoBehaviour
         _weaponGenerator = new WeaponGenerator(WeaponDataBase);
         _playerGenerator = new PlayerGenerator(_playerDataBase, _weaponGenerator, _playerInputHandler);
         _enemyGenerator = new EnemyGenerator(_enemyDataBase, _weaponGenerator);
-        // BattleContextの受け取りをinterfaceに
+
         _battleContext = new BattleContext(
             _battleStateMachine, this, _playerGenerator, _enemyGenerator, _weaponGenerator,
             _battleUIService, _playerUIService, _playerSpawnPointProvider, _enemySpawnPointProvider, _playerDataBase,
@@ -72,7 +74,6 @@ public class BattleSceneManager : MonoBehaviour
     {
         _isTimerRunning = false;
         _currentTimer = _battleTimer;
-        _currentLifePoint = _playerDataBase.LifePoint;
         TimerUpdated?.Invoke(_battleTimer);
     }
 
@@ -115,6 +116,8 @@ public class BattleSceneManager : MonoBehaviour
         _playerComponents.Camera.enabled = true;
         _diedCameraAudioListener.enabled = false;
         _diedCamera.enabled = false;
+
+        _playerUIService.ShowPlayerLifePoint(_currentLifePoint);
     }
 
     private void OnPlayerDied()
@@ -145,6 +148,7 @@ public class BattleSceneManager : MonoBehaviour
         _currentLifePoint--;
 
         yield return _battleUIService.PlayCountdown(3f);
+        _playerUIService.ShowPlayerLifePoint(_currentLifePoint);
 
         _battleStateMachine.GeneratePlayer();
         yield return null;
