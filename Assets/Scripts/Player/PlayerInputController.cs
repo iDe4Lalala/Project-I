@@ -22,6 +22,7 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
     {
         _sprintSpeed = 1f;
         _pendingRecoil = Vector2.zero;
+
         _playerComponents = playerComponents;
         _playerData = playerComponents.HumanDataBase;
         _rigidbody = _playerComponents.Rigidbody;
@@ -56,12 +57,15 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
         Vector2 total = delta + _pendingRecoil;
         
         if(total == Vector2.zero) return;
-        _cameraRotation *= Quaternion.Euler(-total.y * _playerData.RotationSpeed, 0, 0);
-        _characterRotation *= Quaternion.Euler(0, total.x * _playerData.RotationSpeed, 0);
 
-        _cameraRotation = ClampRotation(_cameraRotation);
-        _playerComponents.Camera.transform.localRotation = _cameraRotation;
-        gameObject.transform.localRotation = _characterRotation;
+        float verticalInput = total.x * _playerData.RotationSpeed;
+        float horizontalInput = -total.y * _playerData.RotationSpeed;
+
+        horizontalInput = 
+            Mathf.Clamp(horizontalInput, _playerData.TurningMinAngle, _playerData.TurningMaxAngle);
+
+        _playerComponents.Camera.transform.localRotation *=  Quaternion.Euler(horizontalInput, 0, 0);
+        gameObject.transform.localRotation *= Quaternion.Euler(0, verticalInput, 0);
 
         _pendingRecoil = Vector2.zero;
     }
@@ -111,18 +115,5 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
         {
             IsGround = false;
         }
-    }
-
-    private Quaternion ClampRotation(Quaternion quaternion)
-    {
-        quaternion.x /= quaternion.w;
-        quaternion.y /= quaternion.w;
-        quaternion.z /= quaternion.w;
-        quaternion.w = 1f;
-        
-        float angleX = Mathf.Atan(quaternion.x) * Mathf.Rad2Deg * 2f;
-        angleX = Mathf.Clamp(angleX, _playerData.TurningMinAngle, _playerData.TurningMaxAngle);
-        quaternion.x = Mathf.Tan(angleX * Mathf.Deg2Rad * 0.5f);
-        return quaternion;
     }
 }
