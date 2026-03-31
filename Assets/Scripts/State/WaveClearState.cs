@@ -20,10 +20,8 @@ public class WaveClearState : IBattleState
     {   
         _currentWaveDataBase = _battleStateMachine.CurrentWaveDataBase;
 
-        // "WaveClear"表示
         yield return _battleUIService.OnThisWaveCleared(_currentWaveDataBase.WaveText);
 
-        // 一定時間待つ
         yield return _battleStateMachine.WaitForSeconds(_currentWaveDataBase.AfterWaveInterval);
 
         if (_battleStateMachine.CurrentWave >= _battleStateMachine.TotalWaves)
@@ -33,7 +31,6 @@ public class WaveClearState : IBattleState
             yield break;
         }
 
-        // 次のWaveStateへ遷移
         IncreasingWaveCount?.Invoke();
         ChangingState?.Invoke(BattleStateType.Wave);
     }

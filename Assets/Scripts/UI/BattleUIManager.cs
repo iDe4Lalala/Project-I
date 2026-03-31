@@ -12,12 +12,8 @@ public class BattleUIManager : MonoBehaviour, IBattleUIService
     [SerializeField] private string _enemyKilledSentence;
     [SerializeField] private TMP_Text _beforeBattleTimerText;
     [SerializeField] private TMP_Text _battleProgressText;
-    [SerializeField] private float _beforeBattleTimer;
     [SerializeField] private float _progressTextDisplayTime;
-
     private BattleSceneManager _battleSceneManager;
-    private PlayerManager _playerManager;
-    public event Action OnStartingBattle;
 
     public void Initialize(BattleSceneManager battleSceneManager)
     {
@@ -27,12 +23,6 @@ public class BattleUIManager : MonoBehaviour, IBattleUIService
         _killText.gameObject.SetActive(false);
         _battleProgressText.gameObject.SetActive(false);
         _beforeBattleTimerText.gameObject.SetActive(true);
-    }
-
-    public void SetPlayerKilledEvent(PlayerManager playerManager)
-    {
-        _playerManager = playerManager;
-        _playerManager.OnDied += OnPlayerKilled;
     }
 
     private void OnDisable()

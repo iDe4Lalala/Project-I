@@ -266,7 +266,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '           /'
+  m_text: 'Ammo:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -868,10 +868,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f94d169d28345dead3d70fec994dc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <HitCrossHairDisplayTime>k__BackingField: 0.3
   _playerHPText: {fileID: 1062731226}
   _playerAmmoText: {fileID: 16492360}
   _hitCrossHair: {fileID: 1072808208}
+  _hitCrossHairDisplayTime: 0.5
 --- !u!1001 &67500284
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1627,7 +1627,6 @@ MonoBehaviour:
   _enemyKilledSentence: You killed an Enemy!
   _beforeBattleTimerText: {fileID: 1622929871}
   _battleProgressText: {fileID: 1076278740}
-  _beforeBattleTimer: 3
   _progressTextDisplayTime: 4
 --- !u!1001 &117320326
 PrefabInstance:
@@ -3291,6 +3290,7 @@ MonoBehaviour:
   _nextSceneName: ResultScene
   _battleTimer: 180
   _diedCamera: {fileID: 1893889127}
+  _inGameDataBase: {fileID: 11400000, guid: ebadbf212787247b1b75f86167c919de, type: 2}
 --- !u!114 &212903800
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14049,7 +14049,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -512}
+  m_AnchoredPosition: {x: 812, y: -404}
   m_SizeDelta: {x: 300, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1062731226
@@ -14072,7 +14072,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'HP:           /'
+  m_text: 'HP:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -14081,8 +14081,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

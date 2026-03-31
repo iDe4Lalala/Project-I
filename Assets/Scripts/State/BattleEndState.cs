@@ -28,10 +28,8 @@ public class BattleEndState : IBattleState
                 break;
         }
 
-        // フェードアウトもしくは一定時間まつ
         yield return _battleStateMachine.WaitForSeconds(2f);
 
-        // ResultSceneへ遷移呼び出し
         BattleEnded?.Invoke();
     }
 }

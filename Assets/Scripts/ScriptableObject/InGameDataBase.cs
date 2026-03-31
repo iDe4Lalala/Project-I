@@ -3,10 +3,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "InGameDataBase", menuName = "ScriptableObjects/InGameDataBase")]
 public class InGameDataBase : ScriptableObject
 {
-    public bool IsGameCleared;
+    public BattleResultType BattleResult;
 
-    public void ResetStatus()
+    public void SetBattleResult(BattleResultType battleResult)
     {
-        IsGameCleared = false;
+        BattleResult = battleResult;
     }
 }

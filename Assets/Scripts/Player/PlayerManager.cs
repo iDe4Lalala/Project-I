@@ -11,15 +11,14 @@ public enum PlayerState
 public class PlayerManager : MonoBehaviour, IDamageable
 {
     [SerializeField] private PlayerComponents _playerComponents;
-    [SerializeField] private PlayerInputController _playerInputController;  // IPlayerInputと統一する？
+    [SerializeField] private PlayerInputController _playerInputController;
     [SerializeField] private PlayerAnimationContoller _playerAnimationController;
     [SerializeField] private PlayerAudioController _playerAudioController;
     [SerializeField] private LayerMask _targetMask;
     [SerializeField] private int _canJumpCount;
-
-    public int PlayerHP { get; private set; }
     public event Action OnDied;
     public event Action<int> PlayerHPUpdated;
+    private int _playerHP;
     private int _jumpCount;
     private PlayerState _playerState;
     private PlayerInputHandler _playerInputHandler;
@@ -36,8 +35,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _playerAnimationController.Initialize(_playerComponents);
         _playerAudioController.Initialize(_playerComponents);
 
-        PlayerHP = _playerComponents.HumanDataBase.HumanHP;
-        PlayerHPUpdated?.Invoke(PlayerHP);
+        _playerHP = _playerComponents.HumanDataBase.HumanHP;
+        PlayerHPUpdated?.Invoke(_playerHP);
     }
 
     private void OnDestroy()
@@ -64,11 +63,11 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void TakeDamage(int damage)
     {
-        PlayerHP -= damage;
-        PlayerHP = Mathf.Max(PlayerHP, 0);
-        PlayerHPUpdated?.Invoke(PlayerHP);
+        _playerHP -= damage;
+        _playerHP = Mathf.Max(_playerHP, 0);
+        PlayerHPUpdated?.Invoke(_playerHP);
 
-        if (PlayerHP > 0) return;
+        if (_playerHP > 0) return;
         _playerState = PlayerState.Dead;
         OnDied?.Invoke();
     }

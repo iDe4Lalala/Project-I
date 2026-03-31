@@ -23,10 +23,10 @@ public class BattleStateMachine : MonoBehaviour
     public int CurrentWave { get; private set; }
     public int TotalWaves { get; private set; }
     public EnemyWaveDataBase CurrentWaveDataBase { get; private set; }
-    private Dictionary<BattleStateType, IBattleState> _battleStates;
     public event Action<BattleResultType> ChangingScene;
     public event Action<GameObject> PlayerGenerated;
     public event Action BattleStarted;
+    private Dictionary<BattleStateType, IBattleState> _battleStates;
     private IBattleState _currentState;
     private PlayerComponents _playerComponents;
     private BattleContext _battleContext;
@@ -79,6 +79,7 @@ public class BattleStateMachine : MonoBehaviour
             battleState.ChangingState += OnChangeState;
         }
 
+        _battleContext.BattleSceneManager.PlayerRespawning += _waveState.OnPlayerRespawning;
         _battleCountdownState.StartingBattle += OnStartingBattle;
         _waveState.SettingBattleResult += OnSettingBattleResult;
         _battleContext.BattleSceneManager.TimeExpired += _waveState.OnTimeExpired;
@@ -95,6 +96,7 @@ public class BattleStateMachine : MonoBehaviour
             battleState.ChangingState -= OnChangeState;
         }
 
+        _battleContext.BattleSceneManager.PlayerRespawning -= _waveState.OnPlayerRespawning;
         _battleCountdownState.StartingBattle -= OnStartingBattle;
         _waveState.SettingBattleResult -= OnSettingBattleResult;
         _battleContext.BattleSceneManager.TimeExpired -= _waveState.OnTimeExpired;

@@ -10,22 +10,16 @@ public class ResultSceneManager : MonoBehaviour
 
     private void Start()
     {
-        if (_inGameDataBase.IsGameCleared)
+        _resultText.text = _inGameDataBase.BattleResult switch
         {
-            _resultText.text = "Game Clear";
-        }
-        else
-        {
-            _resultText.text = "Game Over";
-        }
+            BattleResultType.GameClear => "Game Clear",
+            BattleResultType.GameOver => "Game Over",
+            _ => "Game Over",
+        };
     }
 
     public void LoadOtherScene()
     {
-        /// <summary>
-        /// スタートシーンへ移動する
-        /// </summary>
-        
         SceneManager.LoadScene(_nextSceneName);
     }
 }

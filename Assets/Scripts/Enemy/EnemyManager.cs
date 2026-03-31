@@ -17,16 +17,15 @@ public class EnemyManager : MonoBehaviour, IDamageable
     [SerializeField] private EnemyComponents _enemyComponents;
     [SerializeField] private EnemyAudioController _enemyAudioController;
     [SerializeField] private EnemyAnimationContoller _enemyAnimationController;
-    [SerializeField] private float _searchRange = 35f;
+    [SerializeField] private float _searchRange;
     [SerializeField] private float _attackRange;
     [SerializeField] private LayerMask _targetLayer;
     [SerializeField] private float _searchInterval;
-    [SerializeField] private float _fireThreshold = 0.0001f;
+    [SerializeField] private float _fireThreshold;
     [SerializeField] private float _attackShotInterval;
-    [SerializeField] private float _wanderRadius = 8f;
-    [SerializeField] private float _wanderArrivalDistance = 0.5f;
-    [SerializeField] private int _maxTargetColliders = 16;
-
+    [SerializeField] private float _wanderRadius;
+    [SerializeField] private float _wanderArrivalDistance;
+    [SerializeField] private int _maxTargetColliders;
     public event Action<EnemyComponents> OnDied;
     public event Action OnDamaged;
     private IFireRuntime _fireRuntime;

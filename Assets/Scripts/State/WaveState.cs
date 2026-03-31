@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using Object = UnityEngine.Object;
+using UnityEngine.AI;
 
 public class WaveState : IBattleState
 {
@@ -29,7 +30,6 @@ public class WaveState : IBattleState
         _enemyList = new ();
         _currentWaveDataBase = _battleStateMachine.CurrentWaveDataBase;
 
-        // "Wave開始"表示
         yield return 
             _battleUIService.OnNextWaveStarted(_currentWaveDataBase.WaveText);
 
@@ -61,7 +61,6 @@ public class WaveState : IBattleState
             int currentBatchSize = Mathf.Min(spawnBatchSize, remainingSpawnCount);
             for (int i = 0; i < currentBatchSize; i++)
             {
-                // 敵、武器の生成
                 Transform enemySpawnPoint = _enemySpawnPointProvider.GetSpawnPoint();
                 GameObject enemy = _enemyGenerator.Generate(enemySpawnPoint);
                 var enemyManager = enemy.GetComponent<EnemyManager>();
@@ -85,5 +84,19 @@ public class WaveState : IBattleState
 
         if(_enemyList.Count > 0) return;
         OnAllEnemiesDead();        
+    }
+
+    public void OnPlayerRespawning()
+    {
+        foreach (var enemy in _enemyList)
+        {
+            if (enemy == null) continue;
+            var agent = enemy.GetComponent<NavMeshAgent>();
+            var spawn = _enemySpawnPointProvider.GetSpawnPoint();
+
+            agent.ResetPath();
+            agent.Warp(spawn.position);
+            enemy.transform.rotation = spawn.rotation;
+        }
     }
 }

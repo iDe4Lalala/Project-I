@@ -4,10 +4,10 @@ using Random = UnityEngine.Random;
 
 public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReloadRuntime
 {
-    [field: SerializeField] public WeaponDataBase WeaponDataBase { get; private set; }
+    [SerializeField] private WeaponDataBase _weaponDataBase;
     [SerializeField] private AudioSource _shootingAudioSource;
-
     public event Action<int> AmmoCountUpdated;
+    public event Action EnemyWasHit;
     private ViewRifleAnimationManager _viewRifleAnimationManager;
     private Animator _reloadAnimator;
     private LayerMask _targetMask;
@@ -23,7 +23,7 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
         _isFiring = false;
         _hasInfiniteAmmo = false;
         _fireCooldown = 0f;
-        _currentAmmo = WeaponDataBase.MagazineCapacity;
+        _currentAmmo = _weaponDataBase.MagazineCapacity;
         AmmoCountUpdated?.Invoke(_currentAmmo);
     }
 
@@ -48,7 +48,7 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
             AmmoCountUpdated?.Invoke(_currentAmmo);
         }
 
-        _fireCooldown = 1f / WeaponDataBase.FireRate;
+        _fireCooldown = 1f / _weaponDataBase.FireRate;
         return Shoot(position, direction);
     }
 
@@ -66,17 +66,18 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
 
     private Vector2 Shoot(Vector3 position, Vector3 direction)
     {
-        float recoilX = Random.Range(WeaponDataBase.RecoilMinX, WeaponDataBase.RecoilMaxX);
-        float recoilY = Random.Range(WeaponDataBase.RecoilMinY, WeaponDataBase.RecoilMaxY);
+        float recoilX = Random.Range(_weaponDataBase.RecoilMinX, _weaponDataBase.RecoilMaxX);
+        float recoilY = Random.Range(_weaponDataBase.RecoilMinY, _weaponDataBase.RecoilMaxY);
         var recoil = new Vector2(recoilX, recoilY);
 
-        _shootingAudioSource.PlayOneShot(WeaponDataBase.ShootingAudioClip);
+        _shootingAudioSource.PlayOneShot(_weaponDataBase.ShootingAudioClip);
 
         if (Physics.Raycast(position, direction.normalized, 
-            out RaycastHit hit, WeaponDataBase.MaximumBallisticDistance, _targetMask))
+            out RaycastHit hit, _weaponDataBase.MaximumBallisticDistance, _targetMask))
         {
             var damageable = hit.collider.GetComponentInParent<IDamageable>();
-            damageable?.TakeDamage(WeaponDataBase.Damage);
+            damageable?.TakeDamage(_weaponDataBase.Damage);
+            EnemyWasHit?.Invoke();
         }
 
         return recoil;
@@ -94,11 +95,10 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
     public void Reload()
     {
         if(_isReloading) return;
-        if(_currentAmmo >= WeaponDataBase.MagazineCapacity) return;
+        if(_currentAmmo >= _weaponDataBase.MagazineCapacity) return;
 
         _isReloading = true;
-        Debug.Log("Start Reloading");
-        _reloadTimer = WeaponDataBase.ReloadTime;
+        _reloadTimer = _weaponDataBase.ReloadTime;
         _viewRifleAnimationManager.SetReload();
     }
 
@@ -110,7 +110,7 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
         if (_reloadTimer > 0f) return;
 
         _isReloading = false;
-        _currentAmmo = WeaponDataBase.MagazineCapacity;
+        _currentAmmo = _weaponDataBase.MagazineCapacity;
         AmmoCountUpdated?.Invoke(_currentAmmo);
     }
 }

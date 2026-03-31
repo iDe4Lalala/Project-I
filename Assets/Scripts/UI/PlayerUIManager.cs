@@ -4,12 +4,10 @@ using System.Collections;
 
 public class PlayerUIManager : MonoBehaviour, IPlayerUIService
 {
-    // HPとAmmo表示用Textはそれぞれ1つに
-    [field: SerializeField] public float HitCrossHairDisplayTime { get; private set; }
     [SerializeField] private TMP_Text _playerHPText;
     [SerializeField] private TMP_Text _playerAmmoText;
     [SerializeField] private GameObject _hitCrossHair;
-
+    [SerializeField] private float _hitCrossHairDisplayTime;
     private PlayerComponents _playerComponents;
     private float _hitCrossHairTimer;
     private bool _isHitCrossHairTimerRunning;
@@ -61,6 +59,8 @@ public class PlayerUIManager : MonoBehaviour, IPlayerUIService
         if (_playerComponents == null) return;
         _playerComponents.PlayerManager.OnDied += OnPlayerDead;
         _playerComponents.RifleManager.AmmoCountUpdated += ShowLeftAmmoCount;
+        _playerComponents.RifleManager.EnemyWasHit += () => 
+            StartCoroutine(ShowHitCrossHairForSeconds(_hitCrossHairDisplayTime));
         _playerComponents.PlayerManager.PlayerHPUpdated += ShowPlayerHP;
     }
 
@@ -69,6 +69,8 @@ public class PlayerUIManager : MonoBehaviour, IPlayerUIService
         if (_playerComponents == null) return;
         _playerComponents.PlayerManager.OnDied -= OnPlayerDead;
         _playerComponents.RifleManager.AmmoCountUpdated -= ShowLeftAmmoCount;
+        _playerComponents.RifleManager.EnemyWasHit -= () => 
+            StartCoroutine(ShowHitCrossHairForSeconds(_hitCrossHairDisplayTime));
         _playerComponents.PlayerManager.PlayerHPUpdated -= ShowPlayerHP;
     }
 

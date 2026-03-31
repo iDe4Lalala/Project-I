@@ -18,10 +18,11 @@ public class BattleSceneManager : MonoBehaviour
     [SerializeField] private string _nextSceneName;
     [SerializeField] private float _battleTimer;
     [SerializeField] private Camera _diedCamera;
-
+    [SerializeField] private InGameDataBase _inGameDataBase;
     public event Action<float> TimerUpdated;
     public event Action PlayerLifePointBecameZero;
     public event Action TimeExpired;
+    public event Action PlayerRespawning;
     private float _currentTimer;
     private GameObject _player;
     private PlayerComponents _playerComponents;
@@ -87,7 +88,6 @@ public class BattleSceneManager : MonoBehaviour
     {
         if (!_isTimerRunning) return;
 
-        // バトル前はタイマー動かさないように
         if (_currentTimer < 0)
         {
             TimeExpired?.Invoke();
@@ -140,16 +140,18 @@ public class BattleSceneManager : MonoBehaviour
         {
             _playerUIService.DisplayOrHideCursor(true);
             PlayerLifePointBecameZero?.Invoke();
-            LoadOtherScene();
             yield break;
         }
-
         _currentLifePoint--;
+
         yield return _battleUIService.PlayCountdown(3f);
+
         _battleStateMachine.GeneratePlayer();
         yield return null;
         _battleStateMachine.EnterAliveState();
         _isTimerRunning = true;
+
+        PlayerRespawning?.Invoke();
     }
 
     private void OnBattleStarted()
@@ -159,10 +161,7 @@ public class BattleSceneManager : MonoBehaviour
 
     public void OnBattleEnded(BattleResultType result)
     {
-        if (result == BattleResultType.GameClear)
-        {
-            // 結果を保持しつつシーン遷移
-        }
+        _inGameDataBase.SetBattleResult(result);
 
         _playerUIService.DisplayOrHideCursor(true);
         LoadOtherScene();
