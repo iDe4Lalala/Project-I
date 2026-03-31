@@ -16,7 +16,7 @@ MonoBehaviour:
   <HumanType>k__BackingField: 0
   <HumanHP>k__BackingField: 100
   <MovementSpeed>k__BackingField: 3
-  <RotationSpeed>k__BackingField: 2.3
+  <RotationSpeed>k__BackingField: 0.8
   <TurningMaxAngle>k__BackingField: 90
   <TurningMinAngle>k__BackingField: -90
   <JumpForce>k__BackingField: 5

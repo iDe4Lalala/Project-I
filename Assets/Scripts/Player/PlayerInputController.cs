@@ -16,6 +16,7 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
     private Vector2 _pendingRecoil;
     private Quaternion _cameraRotation;
     private Quaternion _characterRotation;
+    private int _groundContactCount;
 
     public void Initialize(PlayerComponents playerComponents)
     {
@@ -84,15 +85,18 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(((1 << collision.gameObject.layer) & _groundLayer) == 0) return;
+        if (((1 << collision.gameObject.layer) & _groundLayer) == 0) return;
 
         for (int i = 0; i < collision.contactCount; i++)
         {
             if (collision.GetContact(i).normal.y >= _minWorkableNormalY)
             {
-                if (IsGround) return;
-                IsGround = true;
-                LandedGround?.Invoke();
+                _groundContactCount++;
+                if (!IsGround)
+                {
+                    IsGround = true;
+                    LandedGround?.Invoke();
+                }
                 return;
             }
         }
@@ -100,8 +104,13 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
 
     public void OnCollisionExit(Collision collision)
     {
-        if(((1 << collision.gameObject.layer) & _groundLayer) == 0) return;
-        IsGround = false;
+        if (((1 << collision.gameObject.layer) & _groundLayer) == 0) return;
+
+        _groundContactCount = Mathf.Max(0, _groundContactCount - 1);
+        if (_groundContactCount == 0)
+        {
+            IsGround = false;
+        }
     }
 
     private Quaternion ClampRotation(Quaternion quaternion)
