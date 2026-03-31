@@ -6,20 +6,20 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MapSelectScene.unity
-    guid: d2a1f3870fb3140928fa8030c466a2bc
-  - enabled: 1
     path: Assets/Scenes/StartScene.unity
     guid: 4b664b261d27a409aa0b8872c0d3d521
   - enabled: 1
-    path: Assets/Scenes/ResultScene.unity
-    guid: bc4a9a9f9a8ee4966b7fda61f7c6b247
+    path: Assets/Scenes/MapSelectScene.unity
+    guid: d2a1f3870fb3140928fa8030c466a2bc
+  - enabled: 1
+    path: Assets/Scenes/WeaponSelectScene.unity
+    guid: a7e3d1810c13645de9c5740aa07e6f83
   - enabled: 1
     path: Assets/Scenes/BattleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
-    path: Assets/Scenes/WeaponSelectScene.unity
-    guid: a7e3d1810c13645de9c5740aa07e6f83
+    path: Assets/Scenes/ResultScene.unity
+    guid: bc4a9a9f9a8ee4966b7fda61f7c6b247
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: c704133b8c77c44009af83ec6d9a157b, type: 3}
   m_UseUCBPForAssetBundles: 0
