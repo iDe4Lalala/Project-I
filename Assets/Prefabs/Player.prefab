@@ -73,7 +73,6 @@ GameObject:
   - component: {fileID: 5603421663079228806}
   - component: {fileID: 5603421663079228801}
   - component: {fileID: 5603421663079228800}
-  - component: {fileID: 5603421663079228807}
   m_Layer: 6
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -126,8 +125,8 @@ Camera:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1
-    height: 1
+    width: 1920
+    height: 1080
   near clip plane: 0.01
   far clip plane: 1000
   field of view: 60
@@ -156,20 +155,6 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5603421663079228803}
   m_Enabled: 1
---- !u!114 &5603421663079228807
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5603421663079228803}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d5ce973e63ae442f8a7c57e5528ce1a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _xAspect: 2208
-  _yAspect: 1242
 --- !u!1 &5603421663110265236
 GameObject:
   m_ObjectHideFlags: 0
@@ -354,7 +339,7 @@ MonoBehaviour:
   <PlayerManager>k__BackingField: {fileID: 5603421663110265246}
   <CapsuleCollider>k__BackingField: {fileID: 5603421663110265237}
   <Rigidbody>k__BackingField: {fileID: 5603421663110265241}
-  <AspectRatioManager>k__BackingField: {fileID: 5603421663079228807}
+  <AspectRatioManager>k__BackingField: {fileID: 0}
   <Animator>k__BackingField: {fileID: 2065410575650548757}
   <HumanDataBase>k__BackingField: {fileID: 11400000, guid: 104521dfa131f472d968cee9d77cbb86, type: 2}
   <WeaponSocket>k__BackingField: {fileID: 4176937832793301188}

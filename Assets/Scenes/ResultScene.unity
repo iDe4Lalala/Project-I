@@ -238,7 +238,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 2208, y: 1242}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -719,7 +719,6 @@ GameObject:
   - component: {fileID: 1854140887}
   - component: {fileID: 1854140886}
   - component: {fileID: 1854140885}
-  - component: {fileID: 1854140888}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -764,8 +763,8 @@ Camera:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1
-    height: 1
+    width: 1920
+    height: 1080
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -801,20 +800,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1854140888
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1854140884}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d5ce973e63ae442f8a7c57e5528ce1a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _xAspect: 2208
-  _yAspect: 1242
 --- !u!1 &1905646072
 GameObject:
   m_ObjectHideFlags: 0
