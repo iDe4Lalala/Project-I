@@ -12,13 +12,13 @@ public class PlayerAudioController : MonoBehaviour
 
     public void UpdateFootstep(bool isGround, float moveMagnitude)
     {
-        if(!isGround || moveMagnitude <= _footSoundThreshold)
+        if (!isGround || moveMagnitude <= _footSoundThreshold)
         {
             _playerComponents.FootstepAudioSource.Stop();
             return;
         }
 
-        if(_playerComponents.FootstepAudioSource.isPlaying) return;
+        if (_playerComponents.FootstepAudioSource.isPlaying) return;
         _playerComponents.FootstepAudioSource.PlayOneShot(_playerComponents.FootstepAudioClip);
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 
 public class BattleEndState : IBattleState
 {
+    private const float _waitTimeAfterBattleEnd = 2f;
     public event Action<BattleStateType> ChangingState;
     public event Action BattleEnded;
     private IBattleUIService _battleUIService;
@@ -28,7 +29,7 @@ public class BattleEndState : IBattleState
                 break;
         }
 
-        yield return _battleStateMachine.WaitForSeconds(2f);
+        yield return _battleStateMachine.WaitForSeconds(_waitTimeAfterBattleEnd);
 
         BattleEnded?.Invoke();
     }

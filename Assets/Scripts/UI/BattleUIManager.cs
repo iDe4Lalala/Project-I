@@ -15,6 +15,11 @@ public class BattleUIManager : MonoBehaviour, IBattleUIService
     [SerializeField] private float _progressTextDisplayTime;
     private BattleSceneManager _battleSceneManager;
 
+    private void OnDisable()
+    {
+        _battleSceneManager.TimerUpdated -= UpdateTimer;
+    }
+
     public void Initialize(BattleSceneManager battleSceneManager)
     {
         _battleSceneManager = battleSceneManager;
@@ -23,11 +28,6 @@ public class BattleUIManager : MonoBehaviour, IBattleUIService
         _killText.gameObject.SetActive(false);
         _battleProgressText.gameObject.SetActive(false);
         _beforeBattleTimerText.gameObject.SetActive(true);
-    }
-
-    private void OnDisable()
-    {
-        _battleSceneManager.TimerUpdated -= UpdateTimer;
     }
 
     public void UpdateTimer(float time)

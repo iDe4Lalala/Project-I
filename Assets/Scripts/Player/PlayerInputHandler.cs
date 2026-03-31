@@ -26,6 +26,15 @@ public class PlayerInputHandler
         DisposeEvents();
     }
 
+    public void ConsumePerFrameInput()
+    {
+        _playerManager.RequestMove(MoveInput);
+        _playerManager.RequestLook(LookDelta);
+        
+        if (LookDelta == Vector2.zero) return;
+        LookDelta = Vector2.zero;
+    }
+
     private void InitializeEvents()
     {
         _inputSystemActions.Player.Move.performed += OnMovePerformed;
@@ -94,14 +103,5 @@ public class PlayerInputHandler
     private void OnReloadPerformed(InputAction.CallbackContext context)
     {
         _playerManager.RequestReload();
-    }
-
-    public void ConsumePerFrameInput()
-    {
-        _playerManager.RequestMove(MoveInput);
-        _playerManager.RequestLook(LookDelta);
-        
-        if(LookDelta == Vector2.zero) return;
-        LookDelta = Vector2.zero;
     }
 }

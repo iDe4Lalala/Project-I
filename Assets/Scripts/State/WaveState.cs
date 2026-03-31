@@ -9,12 +9,12 @@ public class WaveState : IBattleState
 {
     public event Action<BattleStateType> ChangingState;
     public event Action<BattleResultType> SettingBattleResult;
+    private BattleStateMachine _battleStateMachine;
     private IGenerator _enemyGenerator;
     private ISpawnPointProvider _enemySpawnPointProvider;
     private IBattleUIService _battleUIService;
-    private BattleStateMachine _battleStateMachine;
-    private EnemyWaveDataBase _currentWaveDataBase;
     private List<GameObject> _enemyList;
+    private EnemyWaveDataBase _currentWaveDataBase;
 
     public WaveState(IGenerator enemyGenerator, ISpawnPointProvider enemySpawnPointProvider, 
         IBattleUIService battleUIManager , BattleStateMachine battleStateMachine)
@@ -34,6 +34,33 @@ public class WaveState : IBattleState
             _battleUIService.OnNextWaveStarted(_currentWaveDataBase.WaveText);
 
         GenerateEnemies(_currentWaveDataBase.MaxEnemyAppearanceCount, _currentWaveDataBase.EnemyTotalCount);
+    }
+
+    public void OnEnemyDied(EnemyComponents enemyComponents)
+    {
+        var enemy = enemyComponents.gameObject;
+        enemyComponents.EnemyManager.OnDied -= OnEnemyDied;
+        _enemyList.Remove(enemyComponents.gameObject);
+        Object.Destroy(enemy);
+
+        _battleUIService.OnEnemyKilled();
+
+        if (_enemyList.Count > 0) return;
+        OnAllEnemiesDead();        
+    }
+
+    public void OnPlayerRespawning()
+    {
+        foreach (var enemy in _enemyList)
+        {
+            if (enemy == null) continue;
+            var agent = enemy.GetComponent<NavMeshAgent>();
+            var spawn = _enemySpawnPointProvider.GetSpawnPoint();
+
+            agent.ResetPath();
+            agent.Warp(spawn.position);
+            enemy.transform.rotation = spawn.rotation;
+        }
     }
 
     public void OnPlayerLifePointBecameZero()
@@ -70,33 +97,6 @@ public class WaveState : IBattleState
             }
 
             remainingSpawnCount -= currentBatchSize;
-        }
-    }
-
-    public void OnEnemyDied(EnemyComponents enemyComponents)
-    {
-        var enemy = enemyComponents.gameObject;
-        enemyComponents.EnemyManager.OnDied -= OnEnemyDied;
-        _enemyList.Remove(enemyComponents.gameObject);
-        Object.Destroy(enemy);
-
-        _battleUIService.OnEnemyKilled();
-
-        if(_enemyList.Count > 0) return;
-        OnAllEnemiesDead();        
-    }
-
-    public void OnPlayerRespawning()
-    {
-        foreach (var enemy in _enemyList)
-        {
-            if (enemy == null) continue;
-            var agent = enemy.GetComponent<NavMeshAgent>();
-            var spawn = _enemySpawnPointProvider.GetSpawnPoint();
-
-            agent.ResetPath();
-            agent.Warp(spawn.position);
-            enemy.transform.rotation = spawn.rotation;
         }
     }
 }

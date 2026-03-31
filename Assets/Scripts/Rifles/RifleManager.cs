@@ -9,14 +9,14 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
     public event Action<int> AmmoCountUpdated;
     public event Action EnemyWasHit;
     private ViewRifleAnimationManager _viewRifleAnimationManager;
-    private Animator _reloadAnimator;
     private LayerMask _targetMask;
+    private int _currentAmmo;
+    private bool _hasInfiniteAmmo;
     private bool _isFiring;
     private float _fireCooldown;
-    private int _currentAmmo;
     private bool _isReloading;
     private float _reloadTimer;
-    private bool _hasInfiniteAmmo;
+    private Animator _reloadAnimator;
 
     private void Start()
     {
@@ -42,7 +42,7 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
     {
         if (!CanFireNow(deltaTime)) return Vector2.zero;
 
-        if(!_hasInfiniteAmmo)
+        if (!_hasInfiniteAmmo)
         {
             _currentAmmo--;
             AmmoCountUpdated?.Invoke(_currentAmmo);
@@ -52,13 +52,44 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
         return Shoot(position, direction);
     }
 
+    public void SetInfiniteAmmo()
+    {
+        _hasInfiniteAmmo = true;
+    }
+    
+    public void StartFire() => _isFiring = true;
+
+    public void StopFire()  => _isFiring = false;
+
+    public void Reload()
+    {
+        if (_isReloading) return;
+        if (_currentAmmo >= _weaponDataBase.MagazineCapacity) return;
+
+        _isReloading = true;
+        _reloadTimer = _weaponDataBase.ReloadTime;
+        _viewRifleAnimationManager.SetReload();
+    }
+
+    public void UpdateReload(float deltaTime)
+    {
+        if (!_isReloading) return;
+
+        _reloadTimer -= deltaTime;
+        if (_reloadTimer > 0f) return;
+
+        _isReloading = false;
+        _currentAmmo = _weaponDataBase.MagazineCapacity;
+        AmmoCountUpdated?.Invoke(_currentAmmo);
+    }
+
     private bool CanFireNow(float deltaTime)
     {
-        if(_isReloading) return false;
-        if(!_isFiring) return false;
-        if(!_hasInfiniteAmmo)
+        if (_isReloading) return false;
+        if (!_isFiring) return false;
+        if (!_hasInfiniteAmmo)
         {
-            if(_currentAmmo <= 0) return false;
+            if (_currentAmmo <= 0) return false;
         }
 
         _fireCooldown -= deltaTime;
@@ -84,36 +115,5 @@ public class RifleManager : MonoBehaviour, IWeaponCommand, IFireRuntime, IReload
         }
 
         return recoil;
-    }
-
-    public void SetInfiniteAmmo()
-    {
-        _hasInfiniteAmmo = true;
-    }
-    
-    public void StartFire() => _isFiring = true;
-
-    public void StopFire()  => _isFiring = false;
-
-    public void Reload()
-    {
-        if(_isReloading) return;
-        if(_currentAmmo >= _weaponDataBase.MagazineCapacity) return;
-
-        _isReloading = true;
-        _reloadTimer = _weaponDataBase.ReloadTime;
-        _viewRifleAnimationManager.SetReload();
-    }
-
-    public void UpdateReload(float deltaTime)
-    {
-        if (!_isReloading) return;
-
-        _reloadTimer -= deltaTime;
-        if (_reloadTimer > 0f) return;
-
-        _isReloading = false;
-        _currentAmmo = _weaponDataBase.MagazineCapacity;
-        AmmoCountUpdated?.Invoke(_currentAmmo);
     }
 }

@@ -20,20 +20,20 @@ public enum BattleResultType
 public class BattleStateMachine : MonoBehaviour
 {
     public BattleResultType BattleResult { get; private set; }
+    public EnemyWaveDataBase CurrentWaveDataBase { get; private set; }
     public int CurrentWave { get; private set; }
     public int TotalWaves { get; private set; }
-    public EnemyWaveDataBase CurrentWaveDataBase { get; private set; }
     public event Action<BattleResultType> ChangingScene;
     public event Action<GameObject> PlayerGenerated;
     public event Action BattleStarted;
     private Dictionary<BattleStateType, IBattleState> _battleStates;
     private IBattleState _currentState;
-    private PlayerComponents _playerComponents;
-    private BattleContext _battleContext;
     private BattleCountdownState _battleCountdownState;
     private WaveState _waveState;
     private WaveClearState _waveClearState;
     private BattleEndState _battleEndState;
+    private BattleContext _battleContext;
+    private PlayerComponents _playerComponents;
 
     private void OnDisable()
     {
@@ -44,9 +44,24 @@ public class BattleStateMachine : MonoBehaviour
      {
         TotalWaves = battleContext.EnemyWaveDataBaseList.Count;
         _battleContext = battleContext;
+
         InitializeStates();
         InitializeEvents();
         OnChangeState(BattleStateType.Countdown);
+    }
+
+    public void GeneratePlayer()
+    {
+        Transform playerSpawnPoint = _battleContext.PlayerSpawnPointProvider.GetSpawnPoint();
+        GameObject player = _battleContext.PlayerGenerator.Generate(playerSpawnPoint);
+        _playerComponents = player.GetComponent<PlayerComponents>();
+        _battleContext.PlayerUIService.Initialize(_playerComponents);
+        PlayerGenerated?.Invoke(player);
+    }
+
+    public void EnterAliveState()
+    {
+        _playerComponents.PlayerManager.SetAliveState();
     }
 
     public IEnumerator WaitForSeconds(float seconds)
@@ -62,7 +77,6 @@ public class BattleStateMachine : MonoBehaviour
         _waveClearState = new WaveClearState(_battleContext.BattleUIService, this);
         _battleEndState = new BattleEndState(_battleContext.BattleUIService, this);
 
-        // Stateの生成をinterfaceにするのを検討
         _battleStates = new Dictionary<BattleStateType, IBattleState>()
         {
             { BattleStateType.Countdown, _battleCountdownState },
@@ -106,36 +120,18 @@ public class BattleStateMachine : MonoBehaviour
         _battleEndState.BattleEnded -= OnBattleEnded;
     }
 
-    public void GeneratePlayer()
+    private void OnStartingBattle()
     {
-        Transform playerSpawnPoint = _battleContext.PlayerSpawnPointProvider.GetSpawnPoint();
-        GameObject player = _battleContext.PlayerGenerator.Generate(playerSpawnPoint);
-        _playerComponents = player.GetComponent<PlayerComponents>();
-        _battleContext.PlayerUIService.Initialize(_playerComponents);
-        PlayerGenerated?.Invoke(player);
-    }
-
-    public void EnterAliveState()
-    {
-        _playerComponents.PlayerManager.SetAliveState();
+        CurrentWave = 0;
+        OnAdvancingWaveCount();
+        BattleStarted?.Invoke();
     }
 
     private void OnChangeState(BattleStateType newStateType)
     {
-        // すでにこのコルーチンが動いている時の処理を書く(Coroutine型の変数追加)
         _currentState = _battleStates[newStateType];
         Debug.Log($"current state: {_currentState}");
         StartCoroutine(_currentState.Enter());
-    }
-
-    private void OnBattleEnded()
-    {
-        ChangingScene?.Invoke(BattleResult);
-    }
-
-    private void OnSettingBattleResult(BattleResultType result)
-    {
-        BattleResult = result;
     }
 
     private void OnAdvancingWaveCount()
@@ -144,10 +140,13 @@ public class BattleStateMachine : MonoBehaviour
         CurrentWave++;
     }
 
-    private void OnStartingBattle()
+    private void OnSettingBattleResult(BattleResultType result)
     {
-        CurrentWave = 0;
-        OnAdvancingWaveCount();
-        BattleStarted?.Invoke();
+        BattleResult = result;
+    }
+
+    private void OnBattleEnded()
+    {
+        ChangingScene?.Invoke(BattleResult);
     }
 }

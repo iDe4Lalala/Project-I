@@ -11,14 +11,14 @@ public class EnemyAudioController : MonoBehaviour
 
     public void UpdateFootstep(bool isMoving)
     {
-        if(_enemyComponents == null) return;
-        if(!isMoving)
+        if (_enemyComponents == null) return;
+        if (!isMoving)
         {
             _enemyComponents.FootstepAudioSource.Stop();
             return;
         }
 
-        if(_enemyComponents.FootstepAudioSource.isPlaying) return;
+        if (_enemyComponents.FootstepAudioSource.isPlaying) return;
         _enemyComponents.FootstepAudioSource.PlayOneShot(_enemyComponents.FootstepAudioClip);
     }    
 }

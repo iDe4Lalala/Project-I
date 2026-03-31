@@ -7,23 +7,24 @@ using System.Collections;
 public class BattleSceneManager : MonoBehaviour
 {
     [field: SerializeField] public WeaponDataBase WeaponDataBase { get; private set; }
+    [field: SerializeField] public List<EnemyWaveDataBase> EnemyWaveDataBaseList { get; private set; }
     [field: SerializeField] public PlayerUIManager PlayerUIManager { get; private set; }
     [field: SerializeField] public BattleUIManager BattleUIManager { get; private set; }
-    [field: SerializeField] public List<EnemyWaveDataBase> EnemyWaveDataBaseList { get; private set; }
     [SerializeField] private BattleStateMachine _battleStateMachine;
     [SerializeField] private Transform _playerSpawnPoint;
     [SerializeField] private Transform[] _enemySpawnPoints;
     [SerializeField] private HumanDataBase _playerDataBase;
     [SerializeField] private HumanDataBase _enemyDataBase;
-    [SerializeField] private string _nextSceneName;
     [SerializeField] private float _battleTimer;
     [SerializeField] private Camera _diedCamera;
     [SerializeField] private InGameDataBase _inGameDataBase;
+    [SerializeField] private string _nextSceneName;
     public event Action<float> TimerUpdated;
     public event Action PlayerLifePointBecameZero;
     public event Action TimeExpired;
     public event Action PlayerRespawning;
     private float _currentTimer;
+    private bool _isTimerRunning;
     private GameObject _player;
     private PlayerComponents _playerComponents;
     private int _currentLifePoint;
@@ -38,7 +39,6 @@ public class BattleSceneManager : MonoBehaviour
     private IBattleUIService _battleUIService;
     private IPlayerUIService _playerUIService;
     private AudioListener _diedCameraAudioListener;
-    private bool _isTimerRunning;
 
     private void Awake()
     {
@@ -54,7 +54,8 @@ public class BattleSceneManager : MonoBehaviour
         _playerGenerator = new PlayerGenerator(_playerDataBase, _weaponGenerator, _playerInputHandler);
         _enemyGenerator = new EnemyGenerator(_enemyDataBase, _weaponGenerator);
 
-        _battleContext = new BattleContext(
+        _battleContext = new BattleContext
+        (
             _battleStateMachine, this, _playerGenerator, _enemyGenerator, _weaponGenerator,
             _battleUIService, _playerUIService, _playerSpawnPointProvider, _enemySpawnPointProvider, _playerDataBase,
             _enemyDataBase, WeaponDataBase, _playerSpawnPoint, _enemySpawnPoints, EnemyWaveDataBaseList
@@ -101,14 +102,27 @@ public class BattleSceneManager : MonoBehaviour
         TimerUpdated?.Invoke(_currentTimer);
     }
 
+    public void OnBattleEnded(BattleResultType result)
+    {
+        _inGameDataBase.SetBattleResult(result);
+
+        _playerUIService.DisplayOrHideCursor(true);
+        LoadOtherScene();
+    }
+
     public void LoadOtherScene()
     {
         SceneManager.LoadScene(_nextSceneName);
     }
 
+    private void OnBattleStarted()
+    {
+        _isTimerRunning = true;
+    }
+
     private void OnPlayerGenerated(GameObject player)
     {
-        if(_player != null || _playerComponents != null) return;
+        if (_player != null || _playerComponents != null) return;
         _player = player;
         _playerComponents = _player.GetComponent<PlayerComponents>();
         _playerComponents.PlayerManager.OnDied += OnPlayerDied;
@@ -156,18 +170,5 @@ public class BattleSceneManager : MonoBehaviour
         _isTimerRunning = true;
 
         PlayerRespawning?.Invoke();
-    }
-
-    private void OnBattleStarted()
-    {
-        _isTimerRunning = true;
-    }
-
-    public void OnBattleEnded(BattleResultType result)
-    {
-        _inGameDataBase.SetBattleResult(result);
-
-        _playerUIService.DisplayOrHideCursor(true);
-        LoadOtherScene();
     }
 }

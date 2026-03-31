@@ -17,11 +17,11 @@ public class EnemyManager : MonoBehaviour, IDamageable
     [SerializeField] private EnemyComponents _enemyComponents;
     [SerializeField] private EnemyAudioController _enemyAudioController;
     [SerializeField] private EnemyAnimationContoller _enemyAnimationController;
-    [SerializeField] private float _searchRange;
-    [SerializeField] private float _attackRange;
     [SerializeField] private LayerMask _targetLayer;
-    [SerializeField] private float _searchInterval;
     [SerializeField] private float _fireThreshold;
+    [SerializeField] private float _searchRange;
+    [SerializeField] private float _searchInterval;
+    [SerializeField] private float _attackRange;
     [SerializeField] private float _attackShotInterval;
     [SerializeField] private float _wanderRadius;
     [SerializeField] private float _wanderArrivalDistance;
@@ -69,7 +69,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
 
     public void Initialize(RifleManager rifleManager)
     {
-        if(rifleManager == null) return;
+        if (rifleManager == null) return;
         _fireRuntime = rifleManager;
         _weaponCommand = rifleManager;
 
@@ -83,7 +83,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
 
     public void TakeDamage(int damage)
     {
-        if(_currentState == EnemyState.Dead) return;
+        if (_currentState == EnemyState.Dead) return;
         _enemyHP -= damage;
         OnDamaged?.Invoke();
 
@@ -106,7 +106,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
         for (int i = 0; i < hitCount; i++)
         {
             var collider = _targetColliders[i];
-            if(collider == null) continue;
+            if (collider == null) continue;
 
             float sqr = (collider.transform.position - transform.position).sqrMagnitude;
             if (sqr < nearestTargetMagnitude)
@@ -221,7 +221,7 @@ public class EnemyManager : MonoBehaviour, IDamageable
 
     private void SetState(EnemyState nextState)
     {
-        if(_currentState == nextState) return;
+        if (_currentState == nextState) return;
         _currentState = nextState;
     }
 }

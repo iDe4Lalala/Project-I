@@ -39,6 +39,19 @@ public class PlayerManager : MonoBehaviour, IDamageable
         PlayerHPUpdated?.Invoke(_playerHP);
     }
 
+    private void Update()
+    {
+        if (!CanControl()) return;
+        if (_playerInputHandler == null || _fireRuntime == null || _reloadRuntime == null) return;
+        _playerInputHandler.ConsumePerFrameInput();
+
+        Vector2 recoil = _fireRuntime.TryFire(Time.deltaTime, 
+            _playerComponents.Camera.transform.position, _playerComponents.Camera.transform.forward);
+        _playerInputController.AddRecoil(recoil);
+
+        _reloadRuntime.UpdateReload(Time.deltaTime);
+    }
+
     private void OnDestroy()
     {
         _playerInputController.LandedGround -= OnLandedGround;
@@ -46,7 +59,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void Initialize(PlayerInputHandler playerInputHandler)
     {
-        if(playerInputHandler == null) return;
+        if (playerInputHandler == null) return;
         _playerInput = _playerInputController;
         _playerInputHandler = playerInputHandler;
         _weaponCommand = _playerComponents.RifleManager;
@@ -72,26 +85,10 @@ public class PlayerManager : MonoBehaviour, IDamageable
         OnDied?.Invoke();
     }
 
-    private void Update()
-    {
-        if(!CanControl()) return;
-        if(_playerInputHandler == null || _fireRuntime == null || _reloadRuntime == null) return;
-        _playerInputHandler.ConsumePerFrameInput();
-        Vector2 recoil = _fireRuntime.TryFire(Time.deltaTime, 
-            _playerComponents.Camera.transform.position, _playerComponents.Camera.transform.forward);
-        _playerInputController.AddRecoil(recoil);
-        _reloadRuntime.UpdateReload(Time.deltaTime);
-    }
-
-    private bool CanControl()
-    {
-        return _playerState == PlayerState.Alive;
-    }
-
     public void RequestMove(Vector2 move)
     {
-        if(!CanControl()) return;
-        if(_playerInput == null) return;
+        if (!CanControl()) return;
+        if (_playerInput == null) return;
         _playerInput.SetMove(move);
         _playerAnimationController.SetMove(_playerInputController.IsMoving);
         _playerAudioController.UpdateFootstep(_playerInputController.IsGround, move.magnitude);
@@ -100,16 +97,16 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void RequestLook(Vector2 delta)
     {
-        if(!CanControl()) return;
-        if(_playerInput == null) return;
+        if (!CanControl()) return;
+        if (_playerInput == null) return;
         _playerInput.SetLookDelta(delta);
     }
 
     public void RequestJump()
     {
-        if(!CanControl()) return;
-        if(!CanJump()) return;
-        if(_playerInput == null) return;
+        if (!CanControl()) return;
+        if (!CanJump()) return;
+        if (_playerInput == null) return;
 
         _jumpCount++;
         _playerInput.Jump();
@@ -118,8 +115,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void RequestStartSprint()
     {
-        if(!CanControl()) return;
-        if(_playerInput == null) return;
+        if (!CanControl()) return;
+        if (_playerInput == null) return;
         _playerInput.StartSprint();
     }
 
@@ -131,23 +128,28 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void RequestStartFire()
     {
-        if(!CanControl()) return;
-        if(_playerInput == null) return;
+        if (!CanControl()) return;
+        if (_playerInput == null) return;
         _weaponCommand.StartFire();
     }
 
     public void RequestStopFire()
     {
-        if(!CanControl()) return;
-        if(_playerInput == null) return;
+        if (!CanControl()) return;
+        if (_playerInput == null) return;
         _weaponCommand.StopFire();
     }
 
     public void RequestReload()
     {
-        if(!CanControl()) return;
-        if(_playerInput == null) return;
+        if (!CanControl()) return;
+        if (_playerInput == null) return;
         _weaponCommand.Reload();
+    }
+
+    private bool CanControl()
+    {
+        return _playerState == PlayerState.Alive;
     }
 
     private bool CanJump()

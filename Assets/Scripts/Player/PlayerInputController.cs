@@ -14,8 +14,6 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
     private HumanDataBase _playerData;
     private float _sprintSpeed;
     private Vector2 _pendingRecoil;
-    private Quaternion _cameraRotation;
-    private Quaternion _characterRotation;
     private int _groundContactCount;
 
     public void Initialize(PlayerComponents playerComponents)
@@ -26,8 +24,6 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
         _playerComponents = playerComponents;
         _playerData = playerComponents.HumanDataBase;
         _rigidbody = _playerComponents.Rigidbody;
-        _cameraRotation = _playerComponents.Camera.transform.localRotation;
-        _characterRotation = gameObject.transform.localRotation;
     }
 
     public void AddRecoil(Vector2 recoil)
@@ -56,7 +52,7 @@ public class PlayerInputController : MonoBehaviour, IPlayerInput
     {
         Vector2 total = delta + _pendingRecoil;
         
-        if(total == Vector2.zero) return;
+        if (total == Vector2.zero) return;
 
         float verticalInput = total.x * _playerData.RotationSpeed;
         float horizontalInput = -total.y * _playerData.RotationSpeed;

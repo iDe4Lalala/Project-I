@@ -4,7 +4,6 @@ using UnityEngine.AI;
 public class EnemyComponents : MonoBehaviour
 {
     [field: SerializeField] public EnemyManager EnemyManager { get; private set; }
-    [field: SerializeField] public CapsuleCollider CapsuleCollider { get; private set; }
     [field: SerializeField] public Animator Animator { get; private set; }
     [field: SerializeField] public NavMeshAgent NavMeshAgent { get; private set; }
     [field: SerializeField] public GameObject WeaponSocket { get; private set; }
